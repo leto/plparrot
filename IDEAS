@@ -1,0 +1,6 @@
+
+Ways to get Parrot in your Postgres database:
+
+* Embedd One VM per backend
+* RPC with a daemon
+* pure NCI
