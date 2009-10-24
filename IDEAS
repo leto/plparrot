@@ -4,6 +4,10 @@ Ways to get Parrot in your Postgres database:
 * Embedd One VM per backend
 * pure NCI
 
-Steps to follow:
+Steps to follow from the PostgreSQL side:
 
 * PL/LOLCODE http://pgfoundry.org/projects/pllolcode/
+
+Steps to follow from the Parrot side:
+
+* mod_parrot http://www.parrot.org/mod_parrot
