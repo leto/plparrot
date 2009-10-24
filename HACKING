@@ -1,0 +1,4 @@
+
+Please set rebase to your default pull method, so we don't see lots of unnecessary merge commits:
+
+   $ git config branch.master.rebase true
