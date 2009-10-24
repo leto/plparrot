@@ -5,3 +5,11 @@ Ways to get Parrot in your Postgres database:
 * pure NCI
 
 Parrot Core Embedding Docs: http://docs.parrot.org/parrot/latest/html/docs/pdds/draft/pdd10_embedding.pod.html
+
+Steps to follow from the PostgreSQL side:
+
+* PL/LOLCODE http://pgfoundry.org/projects/pllolcode/
+
+Steps to follow from the Parrot side:
+
+* mod_parrot http://www.parrot.org/mod_parrot
