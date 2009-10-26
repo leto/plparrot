@@ -1,0 +1,68 @@
+# Copyright (C) 2009, Parrot Foundation.
+
+# Command aliases and portability fixes
+PERL        = @perl@
+RM_F        = @rm_f@
+CP          = @cp@
+CHMOD       = @chmod@
+
+O           = @o@
+EXE         = @exe@
+
+PARROT_BIN  = @bindir@
+PARROT_LIB  = @libdir@@versiondir@
+
+PARROT      = $(PARROT_BIN)/parrot
+PBC_TO_EXE  = $(PARROT_BIN)/pbc_to_exe
+PARROT_NQP  = $(PARROT_BIN)/parrot_nqp
+
+# The default target
+all: plparrot
+
+# List all user-visible targest
+help:
+	@echo ""
+	@echo "The following targets are available:"
+	@echo ""
+	@echo "  all:         Generate plparrot executable (default target)"
+	@echo "  clean:       Clean generated files"
+	@echo "  help:        Print this help message"
+	@echo ""
+
+plparrot$(EXE): src/plparrot$(EXE)
+	$(CP) src/plparrot$(EXE) plparrot$(EXE)
+	$(CHMOD) 0755 plparrot$(EXE)
+
+src/plparrot$(EXE): src/plparrot.pbc src/lib/Util.pbc src/lib/Glue.pbc
+	$(PBC_TO_EXE) src/plparrot.pbc
+
+src/plparrot.pbc: src/plparrot.pir src/lib/Util.pbc
+	$(PARROT) -o src/plparrot.pbc src/plparrot.pir
+
+src/plparrot.pir: src/plparrot.nqp
+	$(PARROT_NQP) --target=pir -o src/plparrot.pir src/plparrot.nqp
+
+src/lib/Glue.pbc: src/lib/Glue.pir
+	$(PARROT) -o src/lib/Glue.pbc src/lib/Glue.pir
+
+src/lib/Util.pbc: src/lib/Util.pir
+	$(PARROT) -o src/lib/Util.pbc src/lib/Util.pir
+
+src/lib/Util.pir: src/lib/Util.nqp
+	$(PARROT_NQP) --target=pir -o src/lib/Util.pir src/lib/Util.nqp
+
+# Convenience
+realclean: clean
+
+clean:
+	$(RM_F) "*~" "src/lib/*.pbc" "src/*.pbc" "src/*$(O)" "src/*.c" \
+	        src/lib/Util.pir src/plparrot.pir src/plparrot$(EXE) \
+	        plparrot$(EXE) Makefile
+
+test:
+	$(PARROT_NQP) t/harness t/*.t
+
+# Local variables:
+#   mode: makefile
+# End:
+# vim: ft=make:
