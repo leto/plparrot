@@ -39,3 +39,12 @@ The first step in all this is to get the handler function working, so you can
 run Parrot routines that don't access the database, you can pass them data, and
 they can return data. Second will be to make the database interaction module
 work.
+
+Update:
+01:54   eggyknap  : So presumably we can write, in nqp-rx, something that can export some functions and be loaded by any function written in a 
+                    language parrot understands... and presumably those exported functions can actually wrap C code we'll write in the C bits 
+                    of pl/parrot?
+01:54   dukeleto  : eggyknap: that sounds about right
+01:55   dukeleto  : eggyknap: please write that down somewhere :)
+01:55   eggyknap  : Sweet... 'cuz that's how it's gotta work, AFAICS.
+
