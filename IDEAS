@@ -5,8 +5,7 @@ Ways to get Parrot in your Postgres database:
     ** load via a shared library (.so or .dylib)
 * pure NCI
 
-
-Steps to follow from the PostgreSQL side:
+Notes for the PostgreSQL side:
 
 * PL/LOLCODE http://pgfoundry.org/projects/pllolcode/
 
@@ -14,11 +13,23 @@ Steps to follow from the PostgreSQL side:
 
 * http://www.postgresql.org/docs/8.4/static/plhandler.html
 
-Steps to follow from the Parrot side:
+* http://developer.postgresql.org/pgdocs/postgres/parser-stage.html
+
+* http://www.postgresonline.com/journal/index.php?/archives/6-Language-Architecture-in-PostgreSQL.html
+
+Notes for the Parrot side:
 
 * mod_parrot http://www.parrot.org/mod_parrot
 
 * Parrot Core Embedding Docs: http://docs.parrot.org/parrot/latest/html/docs/pdds/draft/pdd10_embedding.pod.html
+
+Other random semi-related stuff
+
+* PL/R http://www.joeconway.com/plr/
+
+* PL/Scheme http://plscheme.projects.postgresql.org/
+
+* R in Postgres: http://www.omegahat.org/RSPostgres/
 
 Things we'll need to build:
 1) A C-based shared object containing at minimum a "language handler" function.
