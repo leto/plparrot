@@ -1,5 +1,3 @@
-# pllolcode Makefile $Id: Makefile,v 1.9 2009/05/04 15:04:55 eggyknap Exp $
-
 MODULE_big = plparrot
 OBJS= plparrot.o
 

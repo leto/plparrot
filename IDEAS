@@ -20,6 +20,10 @@ Steps to follow from the Parrot side:
 
 * Parrot Core Embedding Docs: http://docs.parrot.org/parrot/latest/html/docs/pdds/draft/pdd10_embedding.pod.html
 
+Other random semi-related stuff
+
+* R in Postgres: http://www.omegahat.org/RSPostgres/
+
 Things we'll need to build:
 1) A C-based shared object containing at minimum a "language handler" function.
 This is what PostgreSQL calls when trying to execute a PL/Parrot function, and
