@@ -4,11 +4,9 @@
 *.o
 core*
 plparrot
-Makefile
 .*/*.pbc
 src/lib/*.pbc
 src/lib/Glue.pir
 src/lib/Util.pir
 src/*.o
 src/lib/*.o
-src/plparrot.c
