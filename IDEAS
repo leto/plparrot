@@ -1,15 +1,18 @@
 
 Ways to get Parrot in your Postgres database:
 
-* Embedd One VM per backend
+* Embedd One VM per postgres backend
+    ** load via a shared library (.so or .dylib)
 * pure NCI
 
-Parrot Core Embedding Docs: http://docs.parrot.org/parrot/latest/html/docs/pdds/draft/pdd10_embedding.pod.html
 
 Steps to follow from the PostgreSQL side:
 
 * PL/LOLCODE http://pgfoundry.org/projects/pllolcode/
 
+http://www.postgresql.org/docs/8.4/static/xfunc-c.html
+
 Steps to follow from the Parrot side:
 
 * mod_parrot http://www.parrot.org/mod_parrot
+* Parrot Core Embedding Docs: http://docs.parrot.org/parrot/latest/html/docs/pdds/draft/pdd10_embedding.pod.html
