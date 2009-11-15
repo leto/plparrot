@@ -1,0 +1,10 @@
+
+
+First, symlink a directory called 'plparrot' in the postgres source to ~/git/plparrot/src/handler :
+
+    cd ~/git/postgresql/contrib
+    ln -sf ~/git/plparrot/src/handler plparrot
+    cd plparrot
+    make
+    cd ~/git/plparrot
+    psql testdb < t/test.sql
