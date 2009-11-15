@@ -17,10 +17,10 @@ sub MAIN () {
     say("Hello, I'm Configure. My job is to poke and prod\nyour system to figure out how to build PL/Parrot.\n");
 
     # Load Parrot config and glue functions
-    load_bytecode('src/lib/Glue.pir');
+    pir::load_bytecode('src/nqp/lib/Glue.pir');
 
     # Slurp in the unconfigured Makefile text
-    my $unconfigured := slurp(@ARGS[0] || 'src/Makefile.in');
+    my $unconfigured := slurp(@ARGS[0] || 'src/nqp/Makefile.in');
 
     # Replace all of the @foo@ markers
     my $replaced := subst($unconfigured, rx('\@<ident>\@'), replacement);
