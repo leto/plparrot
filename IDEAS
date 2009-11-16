@@ -59,3 +59,17 @@ Update:
 01:55   dukeleto  : eggyknap: please write that down somewhere :)
 01:55   eggyknap  : Sweet... 'cuz that's how it's gotta work, AFAICS.
 
+
+David Wheeler suggests shelling out directly to psql from the test harness instead of using pg_prove. Fewer dependencies!
+
+This is how the pgTAP plugin for Test::Harness does it:
+http://github.com/AndyA/Test-Harness/blob/master/lib/TAP/Parser/SourceHandler/pgTAP.pm
+
+psql
+ --no-psqlrc
+ --no-align
+ --quiet
+ --pset pager=
+ --pset tuples_only=true
+ --set ON_ERROR_ROLLBACK=1
+ --set ON_ERROR_STOP=1
