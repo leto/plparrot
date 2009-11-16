@@ -10,3 +10,6 @@ src/lib/Glue.pir
 src/lib/Util.pir
 src/*.o
 src/lib/*.o
+*.so
+*.a
+*.dylib
