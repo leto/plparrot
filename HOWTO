@@ -6,5 +6,11 @@ First, symlink a directory called 'plparrot' in the postgres source to ~/git/plp
     ln -sf ~/git/plparrot/src/handler plparrot
     cd plparrot
     make
+
+    cd ~/postgresql
+    initdb test
+    createlang plpgsql test
+
     cd ~/git/plparrot
     psql testdb < t/test.sql
+

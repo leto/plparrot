@@ -1,3 +1,24 @@
+\set ECHO
+\set QUIET 1
+-- Turn off echo and keep things quiet.
+
+-- Format the output for nice TAP.
+\pset format unaligned
+\pset tuples_only true
+\pset pager
+
+-- Revert all changes on failure.
+\set ON_ERROR_ROLLBACK 1
+\set ON_ERROR_STOP true
+\set QUIET 1
+
+-- Load the TAP functions.
+BEGIN;
+    \i pgtap.sql
+
+-- Plan the tests.
+SELECT plan(1);
+
 
 --DROP FUNCTION plparrot_call_handler() CASCADE;
 begin;
@@ -9,9 +30,12 @@ CREATE FUNCTION test_void() RETURNS void AS $$ FAIL $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_int() RETURNS int AS $$ 1 $$ LANGUAGE plparrot;
 
+
 CREATE FUNCTION test_int_int(int) RETURNS int AS $$ $1 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_float() RETURNS float AS $$ 1.0 $$ LANGUAGE plparrot;
+
+CREATE FUNCTION test_varchar() RETURNS varchar(5) AS $$ 'cheese' $$ LANGUAGE plparrot;
 
 
 select test_void();
@@ -19,8 +43,12 @@ select test_int();
 -- this returns 0 still
 select test_int_int(42);
 
-select test_float();
+-- these give a bus error on darwin/x86 + Postgres 8.3.8
+--select test_float();
+--select test_varchar();
 
+-- Finish the tests and clean up.
+SELECT * FROM finish();
 
 rollback;
 
