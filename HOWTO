@@ -1,10 +1,13 @@
 
+You will need to have a Postgres database instance running (8.x) with the plpgsql PL language installed:
 
-First, symlink a directory called 'plparrot' in the postgres source to ~/git/plparrot/src/handler :
+    cd ~/postgresql
+    initdb test
+    createlang plpgsql test
 
-    cd ~/git/postgresql/contrib
-    ln -sf ~/git/plparrot/src/handler plparrot
-    cd plparrot
-    make
     cd ~/git/plparrot
+    cd src/handler
+    make USE_PGXS=1
+    cd ../..
     psql testdb < t/test.sql
+
