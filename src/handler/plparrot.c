@@ -27,6 +27,7 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
 {
     Datum retval;
 
+    retval = PG_GETARG_DATUM(0);
     PG_TRY();
     {
     }
