@@ -20,7 +20,7 @@ PGVER_MINOR = $(shell echo $(VERSION) | awk -F. '{ print ($$2 + 0) }')
 PGVER_PATCH = $(shell echo $(VERSION) | awk -F. '{ print ($$3 + 0) }')
 
 # this is not quite working yet
-PARROT_CCFLAGS=$(shell ~/svn/parrot/parrot_config ccflags)
-PARROT_CCFLAGS2=$(shell ~/svn/parrot/parrot_config ccflags_provisional)
-override CPPFLAGS :=-I$(PARROT_CCFLAGS) -I$(PARROT_CCFLAGS2) -I$(includedir_server) -I$(includedir_internal) $(CPPFLAGS)
+#PARROT_CCFLAGS=$(shell ~/svn/parrot/parrot_config ccflags)
+#PARROT_CCFLAGS2=$(shell ~/svn/parrot/parrot_config ccflags_provisional)
+#override CPPFLAGS :=-I$(PARROT_CCFLAGS) -I$(PARROT_CCFLAGS2) -I$(includedir_server) -I$(includedir_internal) $(CPPFLAGS)
 
