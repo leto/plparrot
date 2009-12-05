@@ -7,6 +7,13 @@
 #include "catalog/pg_proc.h"
 #include "catalog/pg_type.h"
 
+/*
+Figure out how to include these properly
+#include "parrot/embed.h"
+#include "parrot/debugger.h"
+#include "parrot/runcore_api.h"
+*/
+
 
 PG_MODULE_MAGIC;
 
