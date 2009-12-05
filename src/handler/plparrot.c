@@ -25,7 +25,17 @@ PG_FUNCTION_INFO_V1(plparrot_call_handler);
 Datum
 plparrot_call_handler(PG_FUNCTION_ARGS)
 {
-    PG_RETURN_VOID();
+    Datum retval;
+
+    PG_TRY();
+    {
+    }
+    PG_CATCH();
+    {
+    }
+    PG_END_TRY();
+
+    return retval;
 }
 
 void
