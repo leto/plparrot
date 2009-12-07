@@ -1,13 +1,12 @@
 
-You will need to have a Postgres database instance running (8.x) with the plpgsql PL language installed:
+You will need to have a Postgres database instance running (8.2x, 8.3x, 8.4x, 8.5x) with the plpgsql PL language installed:
 
     cd ~/postgresql
     initdb test
     createlang plpgsql test
 
-    cd ~/git/plparrot
-    cd src/handler
-    make USE_PGXS=1
+    cd ~/git/plparrot/src/handler
+    make
     cd ../..
     psql testdb < t/test.sql
 
