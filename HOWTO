@@ -1,12 +1,17 @@
 
 You will need to have a Postgres database instance running (8.2x, 8.3x, 8.4x, 8.5x) with the plpgsql PL language installed:
 
+If you will be creating a new database:
     cd ~/postgresql
     initdb test
-    createlang plpgsql test
+    createlang plpgsql test         # currently required by pgTAP
 
-    cd ~/git/plparrot/src/handler
+Now to build PL/Parrot:
+
+    cd ~/git/plparrot
     make
-    cd ../..
-    psql testdb < t/test.sql
+
+To test PL/Parrot (uses pgTAP)
+
+    psql test < t/test.sql
 
