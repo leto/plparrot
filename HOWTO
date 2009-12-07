@@ -13,5 +13,5 @@ Now to build PL/Parrot:
 
 To test PL/Parrot (uses pgTAP)
 
-    psql test < t/test.sql
+    psql test -f t/test.sql
 
