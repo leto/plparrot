@@ -8,6 +8,10 @@ functional/complete, support for NQP and other HLL's will be added
 
 * Datatype marshalling is the next big step. Eggyknap knows about this stuff.
 
+* Should be able to grab this from PL/LOLCODE: Get the function OID from the
+parameters passed to the handler, use that to get a Form_pg_proc struct, which
+contains a char *prosrc, which is the function's text.
+
 * Make installation and configuration easier
 
     In general, there should be a "Parrot way" to install PL/Parrot (via
