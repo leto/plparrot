@@ -3,6 +3,11 @@
 
 This document describes the roadmap for PL/Parrot. Please be as specific as possible.
 
+* Only PIR will be supported initially. When PIR support is
+functional/complete, support for NQP and other HLL's will be added
+
+* Datatype marshalling is the next big step. Eggyknap knows about this stuff.
+
 * Make installation and configuration easier
 
     In general, there should be a "Parrot way" to install PL/Parrot (via
