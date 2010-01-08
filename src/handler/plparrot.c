@@ -29,11 +29,8 @@ execq(text *sql, int cnt)
     int proc;
     int ret;
 
-    ret = SPI_connect();
-    if ( ret == SPI_ERROR_CONNECT ) {
-        printf("SPI connect error!\n");
-        return 1;
-    }
+    if (SPI_connect() != SPI_OK_CONNECT)
+        ereport(ERROR, (errcode(ERRCODE_CONNECTION_EXCEPTION), errmsg("Couldn't connect to SPI")));
 
     SPI_finish();
     //pfree(command);
