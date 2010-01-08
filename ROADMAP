@@ -12,3 +12,16 @@ This document describes the roadmap for PL/Parrot. Please be as specific as poss
 * Implement spi_exec_query() for PIR
 
     This involves many intermediate steps that should be listed in detail here.
+
+
+06:51:52 < eggyknap> I think we need to decide how parrot is going to get the code it wants to execute. In psql, you say CREATE FUNCTION ... AS $$ <function text>$$ ...
+06:51:58 < eggyknap> ... and we need to know what that function text will be.
+06:52:25 < eggyknap> For C language functions, it's a filename, which contains the compiled function. We could do something like that, but it means people can't edit their 
+                     pl/parrot functions with some of psql's nice built-in features
+06:52:47 < eggyknap> It also means we don't have to figure out how to get pl/parrot to compile things automatically, and thus might be the best way to go, at least at first.
+06:53:06 < eggyknap> The alternative is to let people put parrot code in that "function text" spot, and have pl/parrot figure out what language it is and how to compile it.
+06:53:19 < eggyknap> Given a decision on that front, we can start doing really interesting things in the handler.
+06:56:29 < eggyknap> The handler, though, needs to be able to translate function arguments into data types parrot can both access and understand, needs to translate return 
+                     types to something pgsql can understand, and needs to load and execute parrot code. Plus the NQP thingy needs to provide an interface to some of the SPI 
+                     functions described in the link I pasted above.
+
