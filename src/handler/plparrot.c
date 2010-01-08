@@ -4,11 +4,15 @@
 #include "fmgr.h"
 #include "access/heapam.h"
 #include "utils/syscache.h"
+#include "utils/builtins.h"
 #include "catalog/pg_proc.h"
 #include "catalog/pg_type.h"
 
 /*
 Figure out how to include these properly
+
+We need to use "parrot_config includedir"
+
 #include "parrot/embed.h"
 #include "parrot/debugger.h"
 #include "parrot/runcore_api.h"
@@ -16,6 +20,22 @@ Figure out how to include these properly
 
 
 PG_MODULE_MAGIC;
+int execq(text *sql, int cnt);
+
+int
+execq(text *sql, int cnt)
+{
+    char *command;
+    int ret;
+    int proc;
+
+    SPI_connect();
+
+    SPI_finish();
+    //pfree(command);
+
+    return (proc);
+}
 
 Datum plparrot_call_handler(PG_FUNCTION_ARGS);
 void plparrot_elog(int level, char *message);
