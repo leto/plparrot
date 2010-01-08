@@ -1,0 +1,14 @@
+
+=head1 PL/Parrot ROADMAP
+
+This document describes the roadmap for PL/Parrot. Please be as specific as possible.
+
+* Make installation and configuration easier
+
+    In general, there should be a "Parrot way" to install PL/Parrot (via
+    Plumage) and a "Postgres way" (whatever that is) to keep people in both
+    camps happy.
+
+* Implement spi_exec_query() for PIR
+
+    This involves many intermediate steps that should be listed in detail here.
