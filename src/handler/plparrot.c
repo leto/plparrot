@@ -25,18 +25,29 @@ int execq(text *sql, int cnt);
 int
 execq(text *sql, int cnt)
 {
-    //char *command;
+    char *command;
     int proc;
     int ret;
 
     if (SPI_connect() != SPI_OK_CONNECT)
         ereport(ERROR, (errcode(ERRCODE_CONNECTION_EXCEPTION), errmsg("Couldn't connect to SPI")));
 
+    /* Convert given text object to a C string */
+    command = DatumGetCString(DirectFunctionCall1(textout,
+                                                  PointerGetDatum(sql)));
+
+    ret = SPI_exec(command, cnt);
+
+    proc = SPI_processed;
+
+    /* do stuff */
+
     SPI_finish();
-    //pfree(command);
+    pfree(command);
 
     return (proc);
 }
+
 
 Datum plparrot_call_handler(PG_FUNCTION_ARGS);
 void plparrot_elog(int level, char *message);
