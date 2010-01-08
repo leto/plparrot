@@ -3,14 +3,24 @@
 
 This document describes the roadmap for PL/Parrot. Please be as specific as possible.
 
-* Only PIR will be supported initially. When PIR support is
-functional/complete, support for NQP and other HLL's will be added
+* One major question is how we'll define PL/Parrot functions. In most language,
+  users pass the actual function code in the CREATE FUNCTION call, but for C
+  functions, the text of the function is actually the path to a shared object
+  containing the compiled function. In reality we can have the function source
+  whatever we want (say, a JSON hash containing keys that describe a file path,
+  the source language, the author's name and favorite color, etc.). The easiest
+  thing to do is simply to support only PIR initially. When PIR support is
+  functional/complete, support for NQP and other HLL's will be added
 
-* Datatype marshalling is the next big step. Eggyknap knows about this stuff.
+** Should be able to grab this from PL/LOLCODE: Get the function OID from the
+    parameters passed to the handler, use that to get a Form_pg_proc struct, which
+    contains a char *prosrc, which is the function's text.
 
-* Should be able to grab this from PL/LOLCODE: Get the function OID from the
-parameters passed to the handler, use that to get a Form_pg_proc struct, which
-contains a char *prosrc, which is the function's text.
+
+* Datatype marshalling is another big step -- eggyknap knows about this stuff.
+  Function parameters need to be converted from pgsql Datum types to something
+  Parrot can both understand and have access to. The function's return value(s)
+  then need to be converted back to Datums.
 
 * Make installation and configuration easier
 
@@ -21,6 +31,15 @@ contains a char *prosrc, which is the function's text.
 * Implement spi_exec_query() for PIR
 
     This involves many intermediate steps that should be listed in detail here.
+    eggyknap's version:
+        * In PL/Perl, there's some XS code to allow PL/Perl functions access to
+          spi_exec_query and several other SPI functions (the complete list of
+          which is here:
+          http://www.postgresql.org/docs/current/static/spi.html). PL/Python
+          creates some Python function objects and registers them with the
+          Python interpreter. Presumably for Parrot, we'll create a compiled
+          module Parrot code can load, containing those functions. I've no idea
+          how to build such a thing.
 
 
 06:51:52 < eggyknap> I think we need to decide how parrot is going to get the code it wants to execute. In psql, you say CREATE FUNCTION ... AS $$ <function text>$$ ...
