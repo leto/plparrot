@@ -25,11 +25,15 @@ int execq(text *sql, int cnt);
 int
 execq(text *sql, int cnt)
 {
-    char *command;
-    int ret;
+    //char *command;
     int proc;
+    int ret;
 
-    SPI_connect();
+    ret = SPI_connect();
+    if ( ret == SPI_ERROR_CONNECT ) {
+        printf("SPI connect error!\n");
+        return 1;
+    }
 
     SPI_finish();
     //pfree(command);
