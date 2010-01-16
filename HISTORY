@@ -1,0 +1,14 @@
+David Fetter recounts:
+
+As has long been my wont, in about May of 2006, I was looking around for
+something cool to do in PostgreSQL that no one had done before.  I figured
+perl6 would make a great PL, but there was no implementation at the time, or at
+least nothing that looked like it might become embeddable Parrot, despite its
+long ride on the fail whale, looked like the most promising way for the long
+term, So i came up with a couple of designs inspired by the PL/Java and PL/J
+projects.  PL/Java produced working code, although to this day I'm not sure
+that it's production quality.  It did this by instantiating a jvm in each
+connection.  PL/J's design was in some sense more elegant, but it never got
+anywhere.  In PL/J, there was to be some kind of IPC to a java "server." The
+problem is that IPC and little servers are extremely difficult to get right, so
+for now, I'm thinking that the PL/Java model has more JFDI.
