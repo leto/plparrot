@@ -13,7 +13,7 @@
 BEGIN;
     \i pgtap.sql
 -- Plan the tests.
-SELECT plan(2);
+SELECT plan(3);
 
 --DROP FUNCTION plparrot_call_handler() CASCADE;
 -- TODO: Make this configurable
