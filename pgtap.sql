@@ -5660,7 +5660,7 @@ DECLARE
     teardown ALIAS FOR $4;
     tests    ALIAS FOR $5;
     tap      text;
-    is_verbose  boolean := _is_verbose();
+    verbos   boolean := _is_verbose();
     num_faild INTEGER := 0;
 BEGIN
     BEGIN
@@ -5678,7 +5678,7 @@ BEGIN
         FOR i IN 1..array_upper(tests, 1) LOOP
             BEGIN
                 -- What test are we running?
-                IF is_verbose THEN RETURN NEXT diag(tests[i] || '()'); END IF;
+                IF verbos THEN RETURN NEXT diag(tests[i] || '()'); END IF;
 
                 -- Run the setup functions.
                 FOR tap IN SELECT * FROM _runem(setup, false) LOOP RETURN NEXT tap; END LOOP;
