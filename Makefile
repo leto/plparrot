@@ -3,7 +3,7 @@ all:
 	cd src/handler; make
 
 test: all
-	psql test <t/test.sql
+	psql test -f t/test.sql
 
 clean:
 	cd src/handler; make clean

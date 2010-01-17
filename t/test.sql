@@ -17,8 +17,21 @@ SELECT plan(2);
 
 --DROP FUNCTION plparrot_call_handler() CASCADE;
 -- TODO: Make this configurable
-CREATE FUNCTION plparrot_call_handler() RETURNS LANGUAGE_HANDLER AS '/Users/leto/git/postgresql/contrib/plparrot/libplparrot.so' LANGUAGE C;
-CREATE LANGUAGE plparrot HANDLER plparrot_call_handler;
+INSERT INTO pg_catalog.pg_pltemplate(
+    tmplname,
+    tmpltrusted,
+    tmpldbacreate,
+    tmplhandler,
+    tmpllibrary
+)
+VALUES (
+    'plparrot',
+    true,
+    true,
+    'plparrot_call_handler',
+    '$libdir/plparrot'
+);
+CREATE LANGUAGE plparrot;
 
 -- These functions should be written in PIR
 
