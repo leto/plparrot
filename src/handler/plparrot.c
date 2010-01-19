@@ -58,7 +58,25 @@ Datum
 plparrot_call_handler(PG_FUNCTION_ARGS)
 {
     Datum retval;
+    Form_pg_proc procstruct;
+    HeapTuple proctup;
+    Oid returntype;
 
+    proctup = SearchSysCache(PROCOID, ObjectIdGetDatum(fcinfo->flinfo->fn_oid), 0, 0, 0);
+    if (!HeapTupleIsValid(proctup))
+        elog(ERROR, "Failed to look up procedure with OID %u", fcinfo->flinfo->fn_oid);
+    procstruct = (Form_pg_proc) GETSTRUCT(proctup); 
+    returntype = procstruct->prorettype;
+    /* procstruct probably isn't valid after this ReleaseSysCache call, so don't use it */
+    ReleaseSysCache(proctup);
+
+    if (returntype == VOIDOID)
+        PG_RETURN_VOID();
+
+    if (fcinfo->nargs == 0) 
+        PG_RETURN_NULL();
+
+    /* Assume from here on out that the first argument type is the same as the return type */
     retval = PG_GETARG_DATUM(0);
     PG_TRY();
     {
