@@ -1,4 +1,4 @@
-You will need to have a Postgres database instance running (8.2x, 8.3x, 8.4x, 8.5x) with the plpgsql PL language installed:
+You will need to have a GNU make, and a Postgres database instance running (8.2x, 8.3x, 8.4x, 8.5x) with the plpgsql PL language installed:
 
 If you will be creating a new database:
     cd ~/postgresql
