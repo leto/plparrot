@@ -1,7 +1,7 @@
 PL/Parrot was reported to compile and run tests on the following platforms:
 
 os;arch;psql;parrot;user;date
-OpenBSD 4.6;i383;8.4.2;2.0.0-devel;darbelo;20100126
+OpenBSD 4.6;x86;8.4.2;2.0.0-devel;darbelo;20100126
 Ubuntu 9.04;x86;8.3.9;1.9.0-devel;eggyknap;20100126
 OS X 10.5;x86;8.3.8;2.0.0-devel;dukeleto;20100127
 Fedora 12;x86;git head c46f3447f1efbc9fbc30ce5d5b9c65bd75e10b89;davidfetter;20100127
