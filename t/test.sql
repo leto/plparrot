@@ -15,8 +15,11 @@ BEGIN;
 -- Plan the tests.
 SELECT plan(5);
 
---DROP FUNCTION plparrot_call_handler() CASCADE;
 -- TODO: Make this configurable
+CREATE OR REPLACE FUNCTION setup_plparrot()
+RETURNS BOOLEAN
+LANGUAGE SQL
+AS $$
 INSERT INTO pg_catalog.pg_pltemplate(
     tmplname,
     tmpltrusted,
@@ -31,9 +34,37 @@ VALUES (
     'plparrot_call_handler',
     '$libdir/plparrot'
 );
-CREATE LANGUAGE plparrot;
+SELECT true;
+$$;
 
+CREATE OR REPLACE FUNCTION create_plparrot()
+RETURNS BOOLEAN
+LANGUAGE SQL
+AS $$
+CREATE LANGUAGE plparrot;
+SELECT true;
+$$;
 -- These functions should be written in PIR
+
+SELECT
+    CASE WHEN EXISTS(
+        SELECT 1 FROM pg_catalog.pg_pltemplate WHERE tmplname='plparrot'
+    )
+    THEN
+        true
+    ELSE
+        setup_plparrot()
+    END;
+
+SELECT
+    CASE WHEN EXISTS(
+        SELECT 1 FROM pg_catalog.pg_language WHERE lanname='plparrot'
+    )
+    THEN
+        true
+    ELSE
+        create_plparrot()
+    END;
 
 CREATE FUNCTION test_void() RETURNS void AS $$ FAIL $$ LANGUAGE plparrot;
 
