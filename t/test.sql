@@ -13,7 +13,7 @@
 BEGIN;
     \i pgtap.sql
 -- Plan the tests.
-SELECT plan(3);
+SELECT plan(5);
 
 --DROP FUNCTION plparrot_call_handler() CASCADE;
 -- TODO: Make this configurable
@@ -41,17 +41,15 @@ CREATE FUNCTION test_int() RETURNS int AS $$ select 1 as result $$ LANGUAGE plpa
 
 CREATE FUNCTION test_int_int(int) RETURNS int AS $$ select $1 as result $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_float() RETURNS float AS $$ select 1.0 as result $$ LANGUAGE plparrot;
+CREATE FUNCTION test_float() RETURNS float AS $$ select 1.0::float as result $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_varchar() RETURNS varchar(5) AS $$ select 'cheese' as result $$ LANGUAGE plparrot;
 
-select test_void();
-select is(test_int(),1);
-select is(test_int_int(42),42);
-
--- There does not seem to be any floating point comparison functions in pgTAP
---select like(test_float(), 1.0,1e-6);
-select is(test_varchar(), 'cheese');
+select is(test_void()::text,''::text,'We can return void');
+select is(test_int(),1,'We can return an int');
+select is(test_int_int(42),42,'We can return an int that was passed as an arg');
+select is(test_float(), 1.0::float ,'We can return a float');
+select is(test_varchar(), 'cheese', 'We can return a varchar');
 
 -- Finish the tests and clean up.
 SELECT * FROM finish();
