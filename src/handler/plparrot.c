@@ -1,3 +1,8 @@
+/* Parrot header files */
+#include "parrot/embed.h"
+#include "parrot/extend.h"
+
+/* Postgres header files */
 #include "postgres.h"
 #include "executor/spi.h"
 #include "commands/trigger.h"
@@ -7,17 +12,6 @@
 #include "utils/builtins.h"
 #include "catalog/pg_proc.h"
 #include "catalog/pg_type.h"
-
-/*
-Figure out how to include these properly
-
-We need to use "parrot_config includedir"
-
-#include "parrot/embed.h"
-#include "parrot/debugger.h"
-#include "parrot/runcore_api.h"
-*/
-
 
 PG_MODULE_MAGIC;
 int execq(text *sql, int cnt);
@@ -33,8 +27,7 @@ execq(text *sql, int cnt)
         ereport(ERROR, (errcode(ERRCODE_CONNECTION_EXCEPTION), errmsg("Couldn't connect to SPI")));
 
     /* Convert given text object to a C string */
-    command = DatumGetCString(DirectFunctionCall1(textout,
-                                                  PointerGetDatum(sql)));
+    command = DatumGetCString(DirectFunctionCall1(textout, PointerGetDatum(sql)));
 
     ret = SPI_exec(command, cnt);
 
@@ -48,7 +41,6 @@ execq(text *sql, int cnt)
     return (proc);
 }
 
-
 Datum plparrot_call_handler(PG_FUNCTION_ARGS);
 void plparrot_elog(int level, char *message);
 
@@ -61,23 +53,32 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     Form_pg_proc procstruct;
     HeapTuple proctup;
     Oid returntype;
+    Parrot_Interp interp;
+
+    interp = Parrot_new(NULL);
+    if (!interp) {
+        elog(ERROR,"Could not create a Parrot interpreter!\n");
+        return 1;
+    }
 
     proctup = SearchSysCache(PROCOID, ObjectIdGetDatum(fcinfo->flinfo->fn_oid), 0, 0, 0);
     if (!HeapTupleIsValid(proctup))
         elog(ERROR, "Failed to look up procedure with OID %u", fcinfo->flinfo->fn_oid);
-    procstruct = (Form_pg_proc) GETSTRUCT(proctup); 
+    procstruct = (Form_pg_proc) GETSTRUCT(proctup);
     returntype = procstruct->prorettype;
+
     /* procstruct probably isn't valid after this ReleaseSysCache call, so don't use it */
     ReleaseSysCache(proctup);
 
     if (returntype == VOIDOID)
         PG_RETURN_VOID();
 
-    if (fcinfo->nargs == 0) 
+    if (fcinfo->nargs == 0)
         PG_RETURN_NULL();
 
     /* Assume from here on out that the first argument type is the same as the return type */
     retval = PG_GETARG_DATUM(0);
+
     PG_TRY();
     {
     }
