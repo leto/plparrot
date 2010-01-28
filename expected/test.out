@@ -1,0 +1,7 @@
+\unset ECHO
+1..5
+ok 1 - We can return void
+ok 2 - We can return an int
+ok 3 - We can return an int that was passed as an arg
+ok 4 - We can return a float
+ok 5 - We can return a varchar

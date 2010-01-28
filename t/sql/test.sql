@@ -1,4 +1,4 @@
-\set ECHO
+\unset ECHO
 \set QUIET 1
 -- Turn off echo and keep things quiet.
 -- Format the output for nice TAP.
@@ -8,34 +8,14 @@
 -- Revert all changes on failure.
 \set ON_ERROR_ROLLBACK 1
 \set ON_ERROR_STOP true
-\set QUIET 1
+
 -- Load the TAP functions.
 BEGIN;
-    \i pgtap.sql
+\i pgtap.sql
+\i plparrot.sql
+
 -- Plan the tests.
 SELECT plan(5);
-
--- TODO: Make this configurable
-CREATE OR REPLACE FUNCTION setup_plparrot()
-RETURNS BOOLEAN
-LANGUAGE SQL
-AS $$
-INSERT INTO pg_catalog.pg_pltemplate(
-    tmplname,
-    tmpltrusted,
-    tmpldbacreate,
-    tmplhandler,
-    tmpllibrary
-)
-VALUES (
-    'plparrot',
-    true,
-    true,
-    'plparrot_call_handler',
-    '$libdir/plparrot'
-);
-SELECT true;
-$$;
 
 CREATE OR REPLACE FUNCTION create_plparrot()
 RETURNS BOOLEAN
@@ -45,26 +25,6 @@ CREATE LANGUAGE plparrot;
 SELECT true;
 $$;
 -- These functions should be written in PIR
-
-SELECT
-    CASE WHEN EXISTS(
-        SELECT 1 FROM pg_catalog.pg_pltemplate WHERE tmplname='plparrot'
-    )
-    THEN
-        true
-    ELSE
-        setup_plparrot()
-    END;
-
-SELECT
-    CASE WHEN EXISTS(
-        SELECT 1 FROM pg_catalog.pg_language WHERE lanname='plparrot'
-    )
-    THEN
-        true
-    ELSE
-        create_plparrot()
-    END;
 
 CREATE FUNCTION test_void() RETURNS void AS $$ FAIL $$ LANGUAGE plparrot;
 

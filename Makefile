@@ -1,17 +1,40 @@
+NAME = plparrot
+MODULE_big = src/handler/plparrot
+OBJS= src/handler/plparrot.o
+DATA_built = plparrot.sql
+REGRESS_OPTS = --dbname=$(PL_TESTDB) --load-language=plpgsql
+TESTS = $(wildcard t/sql/*.sql)
+REGRESS = $(patsubst t/sql/%.sql,%,$(TESTS))
 
-all:
-	cd src/handler; make
+EXTRA_CLEAN = 
 
-test: all
-	psql test --no-psqlrc --no-align --quiet --pset pager= --pset tuples_only=true \
-	--set ON_ERROR_ROLLBACK=1 --set ON_ERROR_STOP=1 -f t/test.sql
+ifndef NO_PGXS
+PGXS := $(shell pg_config --pgxs)
+include $(PGXS)
+else
+subdir = contrib/plparrot
+top_builddir = ../..
+include $(top_builddir)/src/Makefile.global
+include $(top_srcdir)/contrib/contrib-global.mk
+endif
 
-clean:
-	cd src/handler; make clean
+PARROTINCLUDEDIR = $(shell parrot_config includedir)
+PARROTVERSION    = $(shell parrot_config versiondir)
+PARROTINC        = "$(PARROTINCLUDEDIR)$(PARROTVERSION)"
+PARROTLDFLAGS    = $(shell parrot_config ldflags)
+PARROTLINKFLAGS  = $(shell parrot_config inst_libparrot_linkflags)
 
-redo: clean all
+# We need to do various things with various versions of PostgreSQL.
+# VERSION     = $(shell $(PG_CONFIG) --version | awk '{print $$2}')
+# PGVER_MAJOR = $(shell echo $(VERSION) | awk -F. '{ print ($$1 + 0) }')
+# PGVER_MINOR = $(shell echo $(VERSION) | awk -F. '{ print ($$2 + 0) }')
+# PGVER_PATCH = $(shell echo $(VERSION) | awk -F. '{ print ($$3 + 0) }')
 
-redotest: clean test
+# this is not quite working yet
+#PARROT_CCFLAGS=$(shell ~/svn/parrot/parrot_config ccflags)
+#PARROT_CCFLAGS2=$(shell ~/svn/parrot/parrot_config ccflags_provisional)
+override CPPFLAGS := -I$(PARROTINC) -I$(srcdir) $(CPPFLAGS)
+override CFLAGS := $(PARROTLDFLAGS) $(PARROTLINKFLAGS) $(CFLAGS)
 
-install: all
-	cd src/handler; make install
+test:
+	pg_prove --pset tuples_only=1 $(TESTS)

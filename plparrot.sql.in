@@ -1,0 +1,6 @@
+-- handler function
+CREATE FUNCTION plparrot_call_handler ()
+RETURNS language_handler AS 'MODULE_PATHNAME' LANGUAGE C;
+
+-- language
+CREATE LANGUAGE plparrot HANDLER plparrot_call_handler;
