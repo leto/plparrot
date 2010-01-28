@@ -1,0 +1,70 @@
+=head1 Recommended Git Workflow for Working on PL/Parrot
+
+You should be using Git >= 1.6.x . Make sure you do before doing anything in this file.
+
+=head1 Workflow #1 (used by dukeleto)
+
+    git remote update        # this updates your index and the symbolic ref origin/master
+
+The benefit of this way is that "git remote update" only updates your index and doesn't care
+about changes in your working copy i.e. you can have a messy, uncommited pig sty in your local
+copy and remote update just doesn't care.
+
+    git diff ..origin/master # look at the difference between local master and origin/master
+
+This shows commits which are in origin/master but not in master.
+
+If you want an colored ASCII representation of your history (also known as VCS porn):
+
+    git log --pretty=format:'%C(yellow)%h%Creset %s %Cred%an%Creset %Cblue%d%Creset %Cgreen%cr%Creset %cd' --graph --all
+
+I have this aliased to both "git lg" for "log --graph" and "git plog" for "pretty log". For other useful aliases, see
+
+http://github.com/leto/Util/blob/master/config/.gitconfig
+
+If you want to merge the changes from origin/master into your local master:
+
+    git rebase origin/master
+
+Why not just a merge? That would leave a "merged branch 'master'" commit, which
+gets old real quick. We also spam the #parrot channel with our commits, so it
+is best to not have all those (mostly useless) merge commits.
+
+=head1 Workflow #2 (pretty much equivalent, but less flexible)
+
+Something equivalent to the above can be accomplished with:
+
+    git pull --rebase   # same as git rebase
+
+but this command *does* care about having a clean working copy, so if you have uncommitted changes, you
+will have to stash them:
+
+    git stash "this is a work in progress"
+
+This command will leave you with a clean working copy, so that after you type "git pull --rebase" you can type:
+
+    git stash pop # apply the latest commit on the stash and pop it off
+
+You could have used "git stash apply" if you wanted to apply it but leave it on
+the stash. You might want to do this if you want to apply something to multiple
+branches.
+
+If you want to type "git pull" and you always want it to use --rebase then you can do:
+
+    git config branch.master.rebase true
+
+I think it is better to just use "git rebase", so if you type "git pull" it
+does what you expect, but that is up to personal taste.
+
+=head1 How to Write a Commit Message
+
+Commit messages should look like this:
+
+This is the first line, which is roughly 50 columns, no more than 80
+
+Previous line intentionally left blank! That line separates the short commit
+message from the long commit message. Utils that need to print things on one
+line will use the short commit messages, others that don't care will show the
+long commit message.
+
+=cut
