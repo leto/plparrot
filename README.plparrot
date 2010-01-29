@@ -12,6 +12,13 @@ For the impatient, to install PL/Parrot into a PostgreSQL database, just do this
     make install
     make installcheck
 
+
+To run the tests with pg_prove you should create the plpgsql language in your database.
+The default database name is your current username, so this should work:
+
+    createlang plpgsql $USER
+    make test
+
 If you encounter an error such as:
 
     "Makefile", line 8: Need an operator
