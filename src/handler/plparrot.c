@@ -13,7 +13,11 @@
 #include "catalog/pg_proc.h"
 #include "catalog/pg_type.h"
 
+
+#ifdef PG_MODULE_MAGIC
 PG_MODULE_MAGIC;
+#endif
+
 int execq(text *sql, int cnt);
 
 void
