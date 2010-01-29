@@ -16,6 +16,18 @@
 PG_MODULE_MAGIC;
 int execq(text *sql, int cnt);
 
+void
+_PG_init(void)
+{
+    /* Be sure we do initialization only once */
+    static bool inited = false;
+
+    if (inited)
+        return;
+
+    inited = true;
+}
+
 int
 execq(text *sql, int cnt)
 {
