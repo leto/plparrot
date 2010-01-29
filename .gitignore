@@ -13,3 +13,6 @@ src/lib/*.o
 *.so
 *.a
 *.dylib
+regression.diffs
+regression.out
+
