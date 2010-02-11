@@ -4,14 +4,23 @@
 
 /* Postgres header files */
 #include "postgres.h"
-#include "executor/spi.h"
-#include "commands/trigger.h"
-#include "fmgr.h"
 #include "access/heapam.h"
-#include "utils/syscache.h"
-#include "utils/builtins.h"
 #include "catalog/pg_proc.h"
 #include "catalog/pg_type.h"
+#include "executor/spi.h"
+#include "commands/trigger.h"
+#include "funcapi.h"
+#include "fmgr.h"
+#include "mb/pg_wchar.h"
+#include "miscadmin.h"
+#include "nodes/makefuncs.h"
+#include "parser/parse_type.h"
+#include "tcop/tcopprot.h"
+#include "utils/builtins.h"
+#include "utils/lsyscache.h"
+#include "utils/memutils.h"
+#include "utils/syscache.h"
+#include "utils/typcache.h"
 
 
 #ifdef PG_MODULE_MAGIC
@@ -97,6 +106,9 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
 
     PG_TRY();
     {
+        if (CALLED_AS_TRIGGER(fcinfo)) {
+                TriggerData *tdata = (TriggerData *) fcinfo->context;
+        }
     }
     PG_CATCH();
     {
