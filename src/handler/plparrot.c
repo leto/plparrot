@@ -27,6 +27,42 @@
 PG_MODULE_MAGIC;
 #endif
 
+/**********************************************************************
+ * The information we cache about loaded procedures
+ **********************************************************************/
+typedef struct plparrot_proc_desc
+{
+    char    *proname;       /* user name of procedure */
+    TransactionId fn_xmin;
+    ItemPointerData fn_tid;
+    bool    fn_readonly;
+    bool    lanpltrusted;
+    bool    fn_retistuple;  /* true, if function returns tuple */
+    bool    fn_retisset;    /* true, if function returns set */
+    bool    fn_retisarray;  /* true if function returns array */
+    Oid     result_oid;     /* Oid of result type */
+    FmgrInfo    result_in_func; /* I/O function and arg for result type */
+    Oid         result_typioparam;
+    int         nargs;
+    FmgrInfo    arg_out_func[FUNC_MAX_ARGS];
+    bool        arg_is_rowtype[FUNC_MAX_ARGS];
+   /* SV          *reference; */
+} plparrot_proc_desc;
+
+/*
+ * The information we cache for the duration of a single call to a
+ * function.
+ */
+typedef struct plparrot_call_data
+{
+    plparrot_proc_desc *prodesc;
+    FunctionCallInfo fcinfo;
+    Tuplestorestate *tuple_store;
+    TupleDesc   ret_tdesc;
+    AttInMetadata *attinmeta;
+    MemoryContext tmp_cxt;
+} plparrot_call_data;
+
 int execq(text *sql, int cnt);
 
 void
@@ -67,7 +103,16 @@ execq(text *sql, int cnt)
 }
 
 Datum plparrot_call_handler(PG_FUNCTION_ARGS);
+Datum plparrot_func_handler(PG_FUNCTION_ARGS);
+
 void plparrot_elog(int level, char *message);
+
+/* this is saved and restored by plparrot_call_handler */
+static plparrot_call_data *current_call_data = NULL;
+
+
+ /* The PostgreSQL function+trigger managers call this function for execution
+    of PL/Parrot procedures. */
 
 PG_FUNCTION_INFO_V1(plparrot_call_handler);
 
@@ -79,6 +124,7 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     HeapTuple proctup;
     Oid returntype;
     Parrot_Interp interp;
+	plparrot_call_data *save_call_data = current_call_data;
 
     interp = Parrot_new(NULL);
     if (!interp) {
@@ -108,13 +154,34 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     {
         if (CALLED_AS_TRIGGER(fcinfo)) {
                 TriggerData *tdata = (TriggerData *) fcinfo->context;
+                /* we need a trigger handler */
+        } else {
+            retval = plparrot_func_handler(fcinfo);
         }
     }
     PG_CATCH();
     {
+        current_call_data = save_call_data;
+        PG_RE_THROW();
     }
     PG_END_TRY();
 
+    current_call_data = save_call_data;
+
+    return retval;
+}
+
+Datum
+plparrot_func_handler(PG_FUNCTION_ARGS)
+{
+    plparrot_proc_desc *prodesc;
+    Datum   retval;
+    ReturnSetInfo *rsi;
+    ErrorContextCallback pl_error_context;
+    /* what is the parrot equivalent of these?
+    SV  *array_ret = NULL;
+    SV  *perlret;
+    */
     return retval;
 }
 
