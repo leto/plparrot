@@ -124,9 +124,11 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     HeapTuple proctup;
     Oid returntype;
     Parrot_Interp interp;
-	plparrot_call_data *save_call_data = current_call_data;
+    plparrot_call_data *save_call_data = current_call_data;
 
     interp = Parrot_new(NULL);
+    imcc_initialize(interp);
+
     if (!interp) {
         elog(ERROR,"Could not create a Parrot interpreter!\n");
         return 1;
@@ -167,6 +169,9 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     PG_END_TRY();
 
     current_call_data = save_call_data;
+
+    /* Free our intrepreter */
+    Parrot_destroy(interp);
 
     return retval;
 }
