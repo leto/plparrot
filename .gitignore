@@ -15,4 +15,5 @@ src/lib/*.o
 *.dylib
 regression.diffs
 regression.out
-
+results/
+plparrot.sql
