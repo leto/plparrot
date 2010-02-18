@@ -15,6 +15,9 @@ This document describes the roadmap for PL/Parrot. Please be as specific as poss
 ** Should be able to grab this from PL/LOLCODE: Get the function OID from the
     parameters passed to the handler, use that to get a Form_pg_proc struct, which
     contains a char *prosrc, which is the function's text.
+** (JWT) The above is all true, but misses the point, namely, given a bunch of
+    function text, how does the VM know what language it's written in, in order to
+    compile it to bytecode?
 
 
 * Datatype marshalling is another big step -- eggyknap knows about this stuff.
