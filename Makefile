@@ -2,7 +2,11 @@ NAME = plparrot
 MODULE_big = src/plparrot
 OBJS= src/plparrot.o
 DATA_built = plparrot.sql
-REGRESS_OPTS = --dbname=$(PL_TESTDB) --load-language=plpgsql
+REGRESS_OPTS = --dbname=$(PL_TESTDB)
+NEEDS_PLPGSQL = $(shell psql -Atc "SELECT setting::int < 90000 FROM pg_catalog.pg_settings WHERE name='server_version_num'")
+ifeq ($(NEEDS_PLPGSQL), "t")
+REGRESS_OPTS += $(if $PG_VERSION < 90000," --load-language=plpgsql", "")
+endif
 TESTS = $(wildcard t/sql/*.sql)
 REGRESS = $(patsubst t/sql/%.sql,%,$(TESTS))
 
