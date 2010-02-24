@@ -1,6 +1,7 @@
 /* Parrot header files */
 #include "parrot/embed.h"
 #include "parrot/extend.h"
+#include "parrot/imcc.h"
 
 /* Postgres header files */
 #include "postgres.h"
@@ -66,12 +67,22 @@ typedef struct plparrot_call_data
 int execq(text *sql, int cnt);
 Parrot_Interp interp;
 
+void plparrot_elog(int level, char *message);
+
+/* this is saved and restored by plparrot_call_handler */
+static plparrot_call_data *current_call_data = NULL;
+
+/* Be sure we do initialization only once */
+static bool inited = false;
+
+PG_FUNCTION_INFO_V1(plparrot_call_handler);
+Datum plparrot_call_handler(PG_FUNCTION_ARGS);
+void _PG_init(void);
+void _PG_fini(void);
+
 void
 _PG_init(void)
 {
-    /* Be sure we do initialization only once */
-    static bool inited = false;
-
     if (inited)
         return;
 
@@ -80,10 +91,22 @@ _PG_init(void)
 
     if (!interp) {
         elog(ERROR,"Could not create a Parrot interpreter!\n");
-        return 1;
+        return;
     }
 
     inited = true;
+}
+
+/*
+ *  Per PostgreSQL 9.0 documentation, _PG_fini only gets called when a module
+ *  is un-loaded, which isn't yet supported. But I'm putting this here for good
+ *  measure, anyway
+ */
+void
+_PG_fini(void)
+{
+    Parrot_destroy(interp);
+    inited = false;
 }
 
 int
@@ -111,36 +134,35 @@ execq(text *sql, int cnt)
     return (proc);
 }
 
-Datum plparrot_call_handler(PG_FUNCTION_ARGS);
-Datum plparrot_func_handler(PG_FUNCTION_ARGS);
-
-void plparrot_elog(int level, char *message);
-
-/* this is saved and restored by plparrot_call_handler */
-static plparrot_call_data *current_call_data = NULL;
-
-
- /* The PostgreSQL function+trigger managers call this function for execution
-    of PL/Parrot procedures. */
-
-PG_FUNCTION_INFO_V1(plparrot_call_handler);
+/*
+ * The PostgreSQL function+trigger managers call this function for execution of
+ * PL/Parrot procedures.
+ */
 
 Datum
 plparrot_call_handler(PG_FUNCTION_ARGS)
 {
-    Datum retval;
+    Datum retval, procsrc_datum;
     Form_pg_proc procstruct;
     HeapTuple proctup;
     Oid returntype;
     plparrot_call_data *save_call_data = current_call_data;
+    char *proc_src, *errmsg, *tmp;
+    bool isnull;
+    Parrot_PMC func_pmc;
+    Parrot_String err;
 
     proctup = SearchSysCache(PROCOID, ObjectIdGetDatum(fcinfo->flinfo->fn_oid), 0, 0, 0);
     if (!HeapTupleIsValid(proctup))
         elog(ERROR, "Failed to look up procedure with OID %u", fcinfo->flinfo->fn_oid);
     procstruct = (Form_pg_proc) GETSTRUCT(proctup);
     returntype = procstruct->prorettype;
+    procsrc_datum = SysCacheGetAttr(PROCOID, proctup, Anum_pg_proc_prosrc, &isnull);
+    if (isnull)
+        elog(ERROR, "Couldn't load function source for function with OID %u", fcinfo->flinfo->fn_oid);
+    proc_src = pstrdup(TextDatumGetCString(procsrc_datum));
 
-    /* procstruct probably isn't valid after this ReleaseSysCache call, so don't use it */
+    /* procstruct probably isn't valid after this ReleaseSysCache call, so don't use it anymore */
     ReleaseSysCache(proctup);
 
     if (returntype == VOIDOID)
@@ -158,7 +180,22 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
                 TriggerData *tdata = (TriggerData *) fcinfo->context;
                 /* we need a trigger handler */
         } else {
-            retval = plparrot_func_handler(fcinfo);
+            /*
+             * Note: the procedure source should contain simply a file name,
+             * because AFAICS the only way to get embedded parrot to load and
+             * run bytecode is through Parrot_pbc_read, which requires a
+             * filename. We can change this if someone can find a Parrot method
+             * to load PIR, or something else runnable, from a string
+             */
+            func_pmc = Parrot_compile_string(interp, Parrot_new_string(interp, "PIR", 3, (const char *) NULL, 0), proc_src, &err);
+            if (err != NULL) {
+/*                tmp = Parrot_str_to_cstring(err);
+                errmsg = pstrdup(tmp);
+                Parrot_str_free_cstring(tmp); */
+                elog(ERROR, "Error compiling function");
+            }
+            /* See Parrot's src/extend.c for interpretations of the third argument */
+            Parrot_call_sub(interp, func_pmc, "v");
         }
     }
     PG_CATCH();
@@ -170,23 +207,6 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
 
     current_call_data = save_call_data;
 
-    /* Free our intrepreter */
-    Parrot_destroy(interp);
-
-    return retval;
-}
-
-Datum
-plparrot_func_handler(PG_FUNCTION_ARGS)
-{
-    plparrot_proc_desc *prodesc;
-    Datum   retval;
-    ReturnSetInfo *rsi;
-    ErrorContextCallback pl_error_context;
-    /* what is the parrot equivalent of these?
-    SV  *array_ret = NULL;
-    SV  *perlret;
-    */
     return retval;
 }
 
