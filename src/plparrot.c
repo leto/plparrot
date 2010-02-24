@@ -64,6 +64,7 @@ typedef struct plparrot_call_data
 } plparrot_call_data;
 
 int execq(text *sql, int cnt);
+Parrot_Interp interp;
 
 void
 _PG_init(void)
@@ -73,6 +74,14 @@ _PG_init(void)
 
     if (inited)
         return;
+
+    interp = Parrot_new(NULL);
+    imcc_initialize(interp);
+
+    if (!interp) {
+        elog(ERROR,"Could not create a Parrot interpreter!\n");
+        return 1;
+    }
 
     inited = true;
 }
@@ -123,16 +132,7 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     Form_pg_proc procstruct;
     HeapTuple proctup;
     Oid returntype;
-    Parrot_Interp interp;
     plparrot_call_data *save_call_data = current_call_data;
-
-    interp = Parrot_new(NULL);
-    imcc_initialize(interp);
-
-    if (!interp) {
-        elog(ERROR,"Could not create a Parrot interpreter!\n");
-        return 1;
-    }
 
     proctup = SearchSysCache(PROCOID, ObjectIdGetDatum(fcinfo->flinfo->fn_oid), 0, 0, 0);
     if (!HeapTupleIsValid(proctup))
