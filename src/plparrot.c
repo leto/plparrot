@@ -188,7 +188,7 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
              * to load PIR, or something else runnable, from a string
              */
             func_pmc = Parrot_compile_string(interp, Parrot_new_string(interp, "PIR", 3, (const char *) NULL, 0), proc_src, &err);
-            if (err != NULL) {
+            if (!STRING_is_null(interp, err)) {
 /*                tmp = Parrot_str_to_cstring(err);
                 errmsg = pstrdup(tmp);
                 Parrot_str_free_cstring(tmp); */
