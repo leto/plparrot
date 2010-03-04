@@ -37,4 +37,4 @@ override CPPFLAGS := -I$(PARROTINC) -I$(srcdir) $(CPPFLAGS)
 override CFLAGS := $(PARROTLDFLAGS) $(PARROTLINKFLAGS) $(CFLAGS)
 
 test: all
-	pg_prove --pset tuples_only=1 $(TESTS)
+	psql -f $(TESTS)
