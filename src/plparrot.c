@@ -187,12 +187,13 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
              * filename. We can change this if someone can find a Parrot method
              * to load PIR, or something else runnable, from a string
              */
+            elog(NOTICE,"about to compile a PIR string");
             func_pmc = Parrot_compile_string(interp, Parrot_new_string(interp, "PIR", 3, (const char *) NULL, 0), proc_src, &err);
             if (!STRING_is_null(interp, err)) {
 /*                tmp = Parrot_str_to_cstring(err);
                 errmsg = pstrdup(tmp);
                 Parrot_str_free_cstring(tmp); */
-                elog(ERROR, "Error compiling function");
+                elog(ERROR, "Error compiling PIR function");
             }
             /* See Parrot's src/extend.c for interpretations of the third argument */
             Parrot_call_sub(interp, func_pmc, "v");
