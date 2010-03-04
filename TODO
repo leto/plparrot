@@ -3,4 +3,3 @@
 
 * use distutils.pir
 
-* Embed pg_prove into PL/Parrot so that users don't have to install it

@@ -1,3 +1,6 @@
+-- This could be called pgTAP Lite, it is a subset of pgTAP proper,
+-- with all schema-related functions removed
+
 -- This file defines pgTAP, a collection of functions for TAP-based unit
 -- testing. It is distributed under the revised FreeBSD license. You can
 -- find the original here:
