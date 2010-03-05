@@ -193,10 +193,10 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
 /*                tmp = Parrot_str_to_cstring(err);
                 errmsg = pstrdup(tmp);
                 Parrot_str_free_cstring(tmp); */
-                elog(ERROR, "Error compiling PIR function");
+                elog(NOTICE, "Error compiling PIR function");
             }
             /* See Parrot's src/extend.c for interpretations of the third argument */
-            Parrot_call_sub(interp, func_pmc, "v");
+            Parrot_ext_call(interp, func_pmc, "->");
         }
     }
     PG_CATCH();
