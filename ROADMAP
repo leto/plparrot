@@ -44,6 +44,12 @@ This document describes the roadmap for PL/Parrot. Please be as specific as poss
           module Parrot code can load, containing those functions. I've no idea
           how to build such a thing.
 
+    eggyknap idea:
+        Originally I'd thought we'd provide some module or something users
+        would load, and then use for database access. Perhaps it makes more
+        sense to build a PMC that provides db access functions, and make it
+        available in the default namespace
+
 
 06:51:52 < eggyknap> I think we need to decide how parrot is going to get the code it wants to execute. In psql, you say CREATE FUNCTION ... AS $$ <function text>$$ ...
 06:51:58 < eggyknap> ... and we need to know what that function text will be.
