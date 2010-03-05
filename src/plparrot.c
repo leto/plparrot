@@ -160,7 +160,12 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     procsrc_datum = SysCacheGetAttr(PROCOID, proctup, Anum_pg_proc_prosrc, &isnull);
     if (isnull)
         elog(ERROR, "Couldn't load function source for function with OID %u", fcinfo->flinfo->fn_oid);
+#ifdef TextDatumGetCString
     proc_src = pstrdup(TextDatumGetCString(procsrc_datum));
+#else
+    /* For PostgreSQL versions 8.3 and prior */
+    proc_src = pstrdup(DatumGetCString(DirectFunctionCall1(textout, procsrc_datum)));
+#endif
 
     /* procstruct probably isn't valid after this ReleaseSysCache call, so don't use it anymore */
     ReleaseSysCache(proctup);
