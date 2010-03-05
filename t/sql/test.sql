@@ -24,17 +24,35 @@ AS $$
 CREATE LANGUAGE plparrot;
 SELECT true;
 $$;
--- These functions should be written in PIR
 
 CREATE FUNCTION test_void() RETURNS void AS $$ FAIL $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_int() RETURNS int AS $$ select 1 as result $$ LANGUAGE plparrot;
+CREATE FUNCTION test_int() RETURNS int AS $$
+.sub foo
+    .return(1)
+.end
+$$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_int_int(int) RETURNS int AS $$ select $1 as result $$ LANGUAGE plparrot;
+CREATE FUNCTION test_int_int(int) RETURNS int AS $$
+.sub foo
+    .param int x
+    .return(x)
+.end
+$$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_float() RETURNS float AS $$ select 1.0::float as result $$ LANGUAGE plparrot;
+CREATE FUNCTION test_float() RETURNS float AS $$
+.sub foo
+    .param num x
+    .return(x)
+.end
+$$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_varchar() RETURNS varchar(5) AS $$ select 'cheese' as result $$ LANGUAGE plparrot;
+CREATE FUNCTION test_varchar() RETURNS varchar(5) AS $$
+.sub foo
+    $S0 = 'cheese'
+    .return($S0)
+.end
+$$ LANGUAGE plparrot;
 
 select is(test_void()::text,''::text,'We can return void');
 select is(test_int(),1,'We can return an int');
