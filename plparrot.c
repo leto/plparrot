@@ -145,7 +145,9 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     Datum retval, procsrc_datum;
     Form_pg_proc procstruct;
     HeapTuple proctup;
-    Oid returntype;
+    Oid returntype, *argtypes;
+    int numargs;
+    char **argnames, *argmodes;
     plparrot_call_data *save_call_data = current_call_data;
     char *proc_src, *errmsg, *tmp;
     bool isnull;
@@ -158,6 +160,7 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     procstruct = (Form_pg_proc) GETSTRUCT(proctup);
     returntype = procstruct->prorettype;
     procsrc_datum = SysCacheGetAttr(PROCOID, proctup, Anum_pg_proc_prosrc, &isnull);
+    numargs = get_func_arg_info(proctup, &argtypes, &argnames, &argmodes);
     if (isnull)
         elog(ERROR, "Couldn't load function source for function with OID %u", fcinfo->flinfo->fn_oid);
 #ifdef TextDatumGetCString
