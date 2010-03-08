@@ -45,8 +45,11 @@ BEGIN
     BEGIN
         PERFORM set_config('client_min_messages', 'warning', true);
         EXECUTE '
+            CREATE SEQUENCE  __tresults___numb_seq;
+            CREATE SEQUENCE  __tcache___numb_seq;
+
             CREATE TEMP TABLE __tcache__ (
-                id    SERIAL           PRIMARY KEY,
+                id    integer default nextval(''__tcache___numb_seq''),
                 label TEXT    NOT NULL,
                 value INTEGER NOT NULL,
                 note  TEXT    NOT NULL DEFAULT ''''
@@ -54,7 +57,7 @@ BEGIN
             GRANT ALL ON TABLE __tcache__ TO PUBLIC;
 
             CREATE TEMP TABLE __tresults__ (
-                numb   SERIAL           PRIMARY KEY,
+                numb   integer default nextval(''__tresults___numb_seq''),
                 ok     BOOLEAN NOT NULL DEFAULT TRUE,
                 aok    BOOLEAN NOT NULL DEFAULT TRUE,
                 descr  TEXT    NOT NULL DEFAULT '''',
