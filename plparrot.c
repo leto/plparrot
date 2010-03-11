@@ -2,6 +2,7 @@
 #include "parrot/embed.h"
 #include "parrot/extend.h"
 #include "parrot/imcc.h"
+#include "parrot/embed_string.h"
 
 /* Postgres header files */
 #include "postgres.h"
@@ -198,10 +199,10 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
             elog(NOTICE,"about to compile a PIR string: %s", proc_src);
             func_pmc = Parrot_compile_string(interp, Parrot_new_string(interp, "PIR", 3, (const char *) NULL, 0), proc_src, &err);
             if (!STRING_is_null(interp, err)) {
-                tmp = Parrot_str_to_cstring(err);
+                tmp = Parrot_str_to_cstring(interp, err);
                 errmsg = pstrdup(tmp);
                 Parrot_str_free_cstring(tmp);
-                elog(NOTICE, "Error compiling PIR function");
+                elog(ERROR, "Error compiling PIR function");
             }
             /* See Parrot's src/extend.c for interpretations of the third argument */
             Parrot_ext_call(interp, func_pmc, "->");
