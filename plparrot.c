@@ -2,7 +2,7 @@
 #include "parrot/embed.h"
 #include "parrot/extend.h"
 #include "parrot/imcc.h"
-#include "parrot/embed_string.h"
+#include "include/embed_string.h"
 
 /* Postgres header files */
 #include "postgres.h"
