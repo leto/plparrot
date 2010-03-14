@@ -37,4 +37,4 @@ override CPPFLAGS := -I$(PARROTINC) -I$(srcdir) $(CPPFLAGS)
 override CFLAGS := $(PARROTLDFLAGS) $(PARROTLINKFLAGS) $(CFLAGS)
 
 test: all
-	psql -f $(TESTS)
+	psql -AX -f $(TESTS)
