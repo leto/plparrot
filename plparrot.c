@@ -155,6 +155,7 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     Parrot_PMC func_pmc;
     Parrot_String err;
 
+    elog(NOTICE,"enter plparrot_call_handler");
     proctup = SearchSysCache(PROCOID, ObjectIdGetDatum(fcinfo->flinfo->fn_oid), 0, 0, 0);
     if (!HeapTupleIsValid(proctup))
         elog(ERROR, "Failed to look up procedure with OID %u", fcinfo->flinfo->fn_oid);
@@ -189,18 +190,14 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
                 TriggerData *tdata = (TriggerData *) fcinfo->context;
                 /* we need a trigger handler */
         } else {
-            /*
-             * Note: the procedure source should contain simply a file name,
-             * because AFAICS the only way to get embedded parrot to load and
-             * run bytecode is through Parrot_pbc_read, which requires a
-             * filename. We can change this if someone can find a Parrot method
-             * to load PIR, or something else runnable, from a string
-             */
             elog(NOTICE,"about to compile a PIR string: %s", proc_src);
             func_pmc = Parrot_compile_string(interp, Parrot_new_string(interp, "PIR", 3, (const char *) NULL, 0), proc_src, &err);
+            elog(NOTICE,"compiled a PIR string");
             if (!STRING_is_null(interp, err)) {
+                elog(NOTICE,"got an error compiling PIR string");
                 tmp = Parrot_str_to_cstring(interp, err);
                 errmsg = pstrdup(tmp);
+                elog(NOTICE,"about to free parrot cstring");
                 Parrot_str_free_cstring(tmp);
                 elog(ERROR, "Error compiling PIR function");
             }
