@@ -8,15 +8,9 @@ REGRESS = $(patsubst t/sql/%.sql,%,$(TESTS))
 
 EXTRA_CLEAN = 
 
-ifndef NO_PGXS
-PGXS := $(shell pg_config --pgxs)
+PG_CONFIG = pg_config
+PGXS := $(shell $(PG_CONFIG) --pgxs)
 include $(PGXS)
-else
-subdir = contrib/plparrot
-top_builddir = ../..
-include $(top_builddir)/src/Makefile.global
-include $(top_srcdir)/contrib/contrib-global.mk
-endif
 
 PARROTINCLUDEDIR = $(shell parrot_config includedir)
 PARROTVERSION    = $(shell parrot_config versiondir)
