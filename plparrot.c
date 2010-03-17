@@ -175,15 +175,21 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     /* procstruct probably isn't valid after this ReleaseSysCache call, so don't use it anymore */
     ReleaseSysCache(proctup);
 
+    // This makes the test_void test pass, but it is cheating, since it never compiles/runs the PIR
+    /*
     if (returntype == VOIDOID)
         PG_RETURN_VOID();
-
+    */
+    // Why is this ever the right thing to do?
+    /*
     if (fcinfo->nargs == 0)
         PG_RETURN_NULL();
+    */
 
     /* Assume from here on out that the first argument type is the same as the return type */
     retval = PG_GETARG_DATUM(0);
 
+    elog(NOTICE,"entering PG_TRY");
     PG_TRY();
     {
         if (CALLED_AS_TRIGGER(fcinfo)) {
@@ -202,6 +208,7 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
                 elog(ERROR, "Error compiling PIR function");
             }
             /* See Parrot's src/extend.c for interpretations of the third argument */
+            elog(NOTICE,"about to call compiled PIR string with Parrot_ext_call");
             Parrot_ext_call(interp, func_pmc, "->");
         }
     }

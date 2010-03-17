@@ -25,40 +25,43 @@ CREATE LANGUAGE plparrot;
 SELECT true;
 $$;
 
-CREATE FUNCTION test_void() RETURNS void AS $$ FAIL $$ LANGUAGE plparrot;
+CREATE FUNCTION test_void() RETURNS void AS $$
+.sub foo_void
+    .return()
+.end
+$$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_int() RETURNS int AS $$
-.sub foo
+.sub foo_int
     .return(1)
 .end
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_int_int(int) RETURNS int AS $$
-.sub foo
+.sub foo_int_int
     .param int x
     .return(x)
 .end
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_float() RETURNS float AS $$
-.sub foo
-    .param num x
-    .return(x)
+.sub foo_float
+    .return(1.0)
 .end
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_varchar() RETURNS varchar(5) AS $$
-.sub foo
+.sub foo_varchar
     $S0 = 'cheese'
     .return($S0)
 .end
 $$ LANGUAGE plparrot;
 
-select is(test_void()::text,''::text,'We can return void');
 select is(test_int(),1,'We can return an int');
-select is(test_int_int(42),42,'We can return an int that was passed as an arg');
+select is(test_void()::text,''::text,'We can return void');
 select is(test_float(), 1.0::float ,'We can return a float');
 select is(test_varchar(), 'cheese', 'We can return a varchar');
+select is(test_int_int(42),42,'We can return an int that was passed as an arg');
 
 -- Finish the tests and clean up.
 SELECT * FROM finish();
