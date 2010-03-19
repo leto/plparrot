@@ -65,7 +65,6 @@ typedef struct plparrot_call_data
     MemoryContext tmp_cxt;
 } plparrot_call_data;
 
-int execq(text *sql, int cnt);
 Parrot_Interp interp;
 
 void plparrot_elog(int level, char *message);
@@ -110,31 +109,6 @@ _PG_fini(void)
     inited = false;
 }
 
-int
-execq(text *sql, int cnt)
-{
-    char *command;
-    int proc;
-    int ret;
-
-    if (SPI_connect() != SPI_OK_CONNECT)
-        ereport(ERROR, (errcode(ERRCODE_CONNECTION_EXCEPTION), errmsg("Couldn't connect to SPI")));
-
-    /* Convert given text object to a C string */
-    command = DatumGetCString(DirectFunctionCall1(textout, PointerGetDatum(sql)));
-
-    ret = SPI_exec(command, cnt);
-
-    proc = SPI_processed;
-
-    /* do stuff */
-
-    SPI_finish();
-    pfree(command);
-
-    return (proc);
-}
-
 /*
  * The PostgreSQL function+trigger managers call this function for execution of
  * PL/Parrot procedures.
@@ -147,13 +121,16 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     Form_pg_proc procstruct;
     HeapTuple proctup;
     Oid returntype, *argtypes;
-    int numargs;
+    int numargs, rc;
     char **argnames, *argmodes;
     plparrot_call_data *save_call_data = current_call_data;
     char *proc_src, *errmsg, *tmp;
     bool isnull;
     Parrot_PMC func_pmc;
     Parrot_String err;
+
+    if ((rc = SPI_connect()) != SPI_OK_CONNECT)
+        elog(ERROR, "SPI_connect failed: %s", SPI_result_code_string(rc));
 
     elog(NOTICE,"enter plparrot_call_handler");
     proctup = SearchSysCache(PROCOID, ObjectIdGetDatum(fcinfo->flinfo->fn_oid), 0, 0, 0);
@@ -220,6 +197,9 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     PG_END_TRY();
 
     current_call_data = save_call_data;
+
+    if ((rc = SPI_finish()) != SPI_OK_FINISH)
+        elog(ERROR, "SPI_finish failed: %s", SPI_result_code_string(rc));
 
     return retval;
 }
