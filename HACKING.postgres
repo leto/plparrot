@@ -12,8 +12,18 @@ When you want to work on CVS TIP (aka git master) of PostgreSQL, you'd
 source this file first.  If you want to change to another
 PostgreSQL, do:
 
-    make distclean
+    make maintainer-clean
     . /path/to/new/.bashrc.whatever
+
+When compiling PostgreSQL, here's a handy-ish configure invocation:
+
+CC="ccache gcc" ./configure \
+    --prefix=$PG_PREFIX \
+    --with-pgport=$PGPORT \
+    --with-perl \
+    --with-libxml \
+    --enable-debug \ 
+    --enable-cassert
 
 To avoid confusion, you also might want to un-symlink plparrot from
 beneath the other source tree and symlink it under contrib/ in the
