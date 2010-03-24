@@ -1,6 +1,8 @@
 /* Parrot header files */
 #include "parrot/embed.h"
 #include "parrot/extend.h"
+#include "parrot/imcc.h"
+#include "include/embed_string.h"
 
 /* Postgres header files */
 #include "postgres.h"
@@ -63,15 +65,23 @@ typedef struct plparrot_call_data
     MemoryContext tmp_cxt;
 } plparrot_call_data;
 
-int execq(text *sql, int cnt);
 Parrot_Interp interp;
+
+void plparrot_elog(int level, char *message);
+
+Parrot_String create_string(Parrot_Interp interp, const char *name);
+/* this is saved and restored by plparrot_call_handler */
+static plparrot_call_data *current_call_data = NULL;
+
+/* Be sure we do initialization only once */
+static bool inited = false;
+
+void _PG_init(void);
+void _PG_fini(void);
 
 void
 _PG_init(void)
 {
-    /* Be sure we do initialization only once */
-    static bool inited = false;
-
     if (inited)
         return;
 
@@ -80,83 +90,106 @@ _PG_init(void)
 
     if (!interp) {
         elog(ERROR,"Could not create a Parrot interpreter!\n");
-        return 1;
+        return;
     }
 
     inited = true;
 }
 
-int
-execq(text *sql, int cnt)
+/*
+ *  Per PostgreSQL 9.0 documentation, _PG_fini only gets called when a module
+ *  is un-loaded, which isn't yet supported. But I'm putting this here for good
+ *  measure, anyway
+ */
+void
+_PG_fini(void)
 {
-    char *command;
-    int proc;
-    int ret;
-
-    if (SPI_connect() != SPI_OK_CONNECT)
-        ereport(ERROR, (errcode(ERRCODE_CONNECTION_EXCEPTION), errmsg("Couldn't connect to SPI")));
-
-    /* Convert given text object to a C string */
-    command = DatumGetCString(DirectFunctionCall1(textout, PointerGetDatum(sql)));
-
-    ret = SPI_exec(command, cnt);
-
-    proc = SPI_processed;
-
-    /* do stuff */
-
-    SPI_finish();
-    pfree(command);
-
-    return (proc);
+    Parrot_destroy(interp);
+    inited = false;
 }
 
 Datum plparrot_call_handler(PG_FUNCTION_ARGS);
 Datum plparrot_func_handler(PG_FUNCTION_ARGS);
 
-/* this is saved and restored by plparrot_call_handler */
-static plparrot_call_data *current_call_data = NULL;
-
-
  /* The PostgreSQL function+trigger managers call this function for execution
     of PL/Parrot procedures. */
 
 PG_FUNCTION_INFO_V1(plparrot_call_handler);
+/*
+ * The PostgreSQL function+trigger managers call this function for execution of
+ * PL/Parrot procedures.
+ */
 
 Datum
 plparrot_call_handler(PG_FUNCTION_ARGS)
 {
-    Datum retval;
+    Datum retval, procsrc_datum;
     Form_pg_proc procstruct;
     HeapTuple proctup;
-    Oid returntype;
+    Oid returntype, *argtypes;
+    int numargs, rc;
+    char **argnames, *argmodes;
     plparrot_call_data *save_call_data = current_call_data;
+    char *proc_src, *errmsg, *tmp;
+    bool isnull;
+    Parrot_PMC func_pmc, func_args;
+    Parrot_Int pmctype;
+    Parrot_String err;
 
+    if ((rc = SPI_connect()) != SPI_OK_CONNECT)
+        elog(ERROR, "SPI_connect failed: %s", SPI_result_code_string(rc));
+
+    //elog(NOTICE,"enter plparrot_call_handler");
     proctup = SearchSysCache(PROCOID, ObjectIdGetDatum(fcinfo->flinfo->fn_oid), 0, 0, 0);
     if (!HeapTupleIsValid(proctup))
         elog(ERROR, "Failed to look up procedure with OID %u", fcinfo->flinfo->fn_oid);
     procstruct = (Form_pg_proc) GETSTRUCT(proctup);
     returntype = procstruct->prorettype;
+    procsrc_datum = SysCacheGetAttr(PROCOID, proctup, Anum_pg_proc_prosrc, &isnull);
+    numargs = get_func_arg_info(proctup, &argtypes, &argnames, &argmodes);
+    if (isnull)
+        elog(ERROR, "Couldn't load function source for function with OID %u", fcinfo->flinfo->fn_oid);
+#ifdef TextDatumGetCString
+    proc_src = pstrdup(TextDatumGetCString(procsrc_datum));
+#else
+    /* For PostgreSQL versions 8.3 and prior */
+    proc_src = pstrdup(DatumGetCString(DirectFunctionCall1(textout, procsrc_datum)));
+#endif
 
-    /* procstruct probably isn't valid after this ReleaseSysCache call, so don't use it */
+    /* procstruct probably isn't valid after this ReleaseSysCache call, so don't use it anymore */
     ReleaseSysCache(proctup);
-
-    if (returntype == VOIDOID)
-        PG_RETURN_VOID();
-
-    if (fcinfo->nargs == 0)
-        PG_RETURN_NULL();
 
     /* Assume from here on out that the first argument type is the same as the return type */
     retval = PG_GETARG_DATUM(0);
 
+    //elog(NOTICE,"entering PG_TRY");
     PG_TRY();
     {
         if (CALLED_AS_TRIGGER(fcinfo)) {
                 TriggerData *tdata = (TriggerData *) fcinfo->context;
                 /* we need a trigger handler */
         } else {
-            retval = plparrot_func_handler(fcinfo);
+            // elog(NOTICE,"about to compile a PIR string: %s", proc_src);
+            /* Our current plan of attack is the pass along a ResizablePMCArray to all stored procedures */
+            func_pmc = Parrot_compile_string(interp, create_string(interp, "PIR"), proc_src, &err);
+            pmctype  = Parrot_PMC_typenum(interp, "ResizablePMCArray");
+            func_args = Parrot_PMC_new(interp, pmctype);
+
+            /* TODO: fill func_args with PG_FUNCTION_ARGS */
+
+            // elog(NOTICE,"compiled a PIR string");
+            if (!STRING_is_null(interp, err)) {
+                // elog(NOTICE,"got an error compiling PIR string");
+                tmp = Parrot_str_to_cstring(interp, err);
+                errmsg = pstrdup(tmp);
+                // elog(NOTICE,"about to free parrot cstring");
+                Parrot_str_free_cstring(tmp);
+                elog(ERROR, "Error compiling PIR function");
+            }
+            // elog(NOTICE,"about to call compiled PIR string with Parrot_ext_call");
+            /* See Parrot's src/extend.c for interpretations of the third argument */
+            /* Pf => PMC with :flat attribute */
+            Parrot_ext_call(interp, func_pmc, "Pf", func_args);
         }
     }
     PG_CATCH();
@@ -168,22 +201,13 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
 
     current_call_data = save_call_data;
 
-    /* Free our intrepreter */
-    Parrot_destroy(interp);
+    if ((rc = SPI_finish()) != SPI_OK_FINISH)
+        elog(ERROR, "SPI_finish failed: %s", SPI_result_code_string(rc));
 
     return retval;
 }
 
-Datum
-plparrot_func_handler(PG_FUNCTION_ARGS)
+Parrot_String create_string(Parrot_Interp interp, const char *name)
 {
-    plparrot_proc_desc *prodesc;
-    Datum   retval;
-    ReturnSetInfo *rsi;
-    ErrorContextCallback pl_error_context;
-    /* what is the parrot equivalent of these?
-    SV  *array_ret = NULL;
-    SV  *perlret;
-    */
-    return retval;
+    return Parrot_new_string(interp, name, strlen(name), (const char *) NULL, 0);
 }

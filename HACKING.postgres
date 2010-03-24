@@ -17,13 +17,17 @@ PostgreSQL, do:
 
 When compiling PostgreSQL, here's a handy-ish configure invocation:
 
-CC="ccache gcc" ./configure \
-    --prefix=$PG_PREFIX \
-    --with-pgport=$PGPORT \
-    --with-perl \
-    --with-libxml \
-    --enable-debug \ 
-    --enable-cassert
+    ./configure \
+        --prefix=$PG_PREFIX \
+        --with-pgport=$PGPORT \
+        --with-perl \
+        --with-libxml \
+        --enable-debug \
+        --enable-cassert
+
+If you have ccache installed, you may also want to do
+
+    CC="ccache gcc" ./configure ...
 
 To avoid confusion, you also might want to un-symlink plparrot from
 beneath the other source tree and symlink it under contrib/ in the
