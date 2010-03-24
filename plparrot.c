@@ -67,7 +67,10 @@ typedef struct plparrot_call_data
 
 Parrot_Interp interp;
 
+/* Helper functions */
 Parrot_String create_string(Parrot_Interp interp, const char *name);
+Parrot_PMC create_pmc(Parrot_Interp interp, const char *name);
+
 /* this is saved and restored by plparrot_call_handler */
 static plparrot_call_data *current_call_data = NULL;
 
@@ -131,7 +134,6 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     char *proc_src, *errmsg, *tmp;
     bool isnull;
     Parrot_PMC func_pmc, func_args;
-    Parrot_Int pmctype;
     Parrot_String err;
 
     if ((rc = SPI_connect()) != SPI_OK_CONNECT)
@@ -169,9 +171,8 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
         } else {
             // elog(NOTICE,"about to compile a PIR string: %s", proc_src);
             /* Our current plan of attack is the pass along a ResizablePMCArray to all stored procedures */
-            func_pmc = Parrot_compile_string(interp, create_string(interp, "PIR"), proc_src, &err);
-            pmctype  = Parrot_PMC_typenum(interp, "ResizablePMCArray");
-            func_args = Parrot_PMC_new(interp, pmctype);
+            func_pmc  = Parrot_compile_string(interp, create_string(interp, "PIR"), proc_src, &err);
+            func_args = create_pmc(interp,"ResizablePMCArray");
 
             /* TODO: fill func_args with PG_FUNCTION_ARGS */
 
@@ -205,6 +206,10 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     return retval;
 }
 
+Parrot_PMC  create_pmc(Parrot_Interp interp, const char *name)
+{
+    return Parrot_PMC_new(interp,Parrot_PMC_typenum(interp,name));
+}
 Parrot_String create_string(Parrot_Interp interp, const char *name)
 {
     return Parrot_new_string(interp, name, strlen(name), (const char *) NULL, 0);
