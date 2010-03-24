@@ -110,7 +110,7 @@ _PG_fini(void)
 }
 
 Datum plparrot_call_handler(PG_FUNCTION_ARGS);
-Datum plparrot_func_handler(PG_FUNCTION_ARGS);
+static Datum plparrot_func_handler(PG_FUNCTION_ARGS);
 
  /* The PostgreSQL function+trigger managers call this function for execution
     of PL/Parrot procedures. */
@@ -121,25 +121,25 @@ PG_FUNCTION_INFO_V1(plparrot_call_handler);
  * PL/Parrot procedures.
  */
 
-Datum
-plparrot_call_handler(PG_FUNCTION_ARGS)
+static Datum
+plparrot_func_handler(PG_FUNCTION_ARGS)
 {
+    Parrot_PMC func_pmc, func_args;
+    Parrot_String err;
     Datum retval, procsrc_datum;
     Form_pg_proc procstruct;
     HeapTuple proctup;
+    char *proc_src, *errmsg, *tmp;
     Oid returntype, *argtypes;
     int numargs, rc;
     char **argnames, *argmodes;
-    plparrot_call_data *save_call_data = current_call_data;
-    char *proc_src, *errmsg, *tmp;
     bool isnull;
-    Parrot_PMC func_pmc, func_args;
-    Parrot_String err;
 
     if ((rc = SPI_connect()) != SPI_OK_CONNECT)
         elog(ERROR, "SPI_connect failed: %s", SPI_result_code_string(rc));
 
-    //elog(NOTICE,"enter plparrot_call_handler");
+    retval = PG_GETARG_DATUM(0);
+
     proctup = SearchSysCache(PROCOID, ObjectIdGetDatum(fcinfo->flinfo->fn_oid), 0, 0, 0);
     if (!HeapTupleIsValid(proctup))
         elog(ERROR, "Failed to look up procedure with OID %u", fcinfo->flinfo->fn_oid);
@@ -149,6 +149,9 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     numargs = get_func_arg_info(proctup, &argtypes, &argnames, &argmodes);
     if (isnull)
         elog(ERROR, "Couldn't load function source for function with OID %u", fcinfo->flinfo->fn_oid);
+
+    /* procstruct probably isn't valid after this ReleaseSysCache call, so don't use it anymore */
+    ReleaseSysCache(proctup);
 #ifdef TextDatumGetCString
     proc_src = pstrdup(TextDatumGetCString(procsrc_datum));
 #else
@@ -156,39 +159,51 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     proc_src = pstrdup(DatumGetCString(DirectFunctionCall1(textout, procsrc_datum)));
 #endif
 
-    /* procstruct probably isn't valid after this ReleaseSysCache call, so don't use it anymore */
-    ReleaseSysCache(proctup);
+    // elog(NOTICE,"about to compile a PIR string: %s", proc_src);
+    /* Our current plan of attack is the pass along a ResizablePMCArray to all stored procedures */
+    func_pmc  = Parrot_compile_string(interp, create_string(interp, "PIR"), proc_src, &err);
+    func_args = create_pmc(interp,"ResizablePMCArray");
 
-    /* Assume from here on out that the first argument type is the same as the return type */
-    retval = PG_GETARG_DATUM(0);
+    /* TODO: fill func_args with PG_FUNCTION_ARGS */
+
+    // elog(NOTICE,"compiled a PIR string");
+    if (!STRING_is_null(interp, err)) {
+        // elog(NOTICE,"got an error compiling PIR string");
+        tmp = Parrot_str_to_cstring(interp, err);
+        errmsg = pstrdup(tmp);
+        // elog(NOTICE,"about to free parrot cstring");
+        Parrot_str_free_cstring(tmp);
+        elog(ERROR, "Error compiling PIR function");
+    }
+    // elog(NOTICE,"about to call compiled PIR string with Parrot_ext_call");
+    /* See Parrot's src/extend.c for interpretations of the third argument */
+    /* Pf => PMC with :flat attribute */
+    Parrot_ext_call(interp, func_pmc, "Pf", func_args);
+
+    if ((rc = SPI_finish()) != SPI_OK_FINISH)
+        elog(ERROR, "SPI_finish failed: %s", SPI_result_code_string(rc));
+
+    return retval;
+}
+
+Datum
+plparrot_call_handler(PG_FUNCTION_ARGS)
+{
+    Datum retval;
+    plparrot_call_data *save_call_data = current_call_data;
+
+    //elog(NOTICE,"enter plparrot_call_handler");
+
+    /* Assume that the first argument type is the same as the return type */
 
     //elog(NOTICE,"entering PG_TRY");
     PG_TRY();
     {
         if (CALLED_AS_TRIGGER(fcinfo)) {
-                TriggerData *tdata = (TriggerData *) fcinfo->context;
-                /* we need a trigger handler */
+            TriggerData *tdata = (TriggerData *) fcinfo->context;
+            /* we need a trigger handler */
         } else {
-            // elog(NOTICE,"about to compile a PIR string: %s", proc_src);
-            /* Our current plan of attack is the pass along a ResizablePMCArray to all stored procedures */
-            func_pmc  = Parrot_compile_string(interp, create_string(interp, "PIR"), proc_src, &err);
-            func_args = create_pmc(interp,"ResizablePMCArray");
-
-            /* TODO: fill func_args with PG_FUNCTION_ARGS */
-
-            // elog(NOTICE,"compiled a PIR string");
-            if (!STRING_is_null(interp, err)) {
-                // elog(NOTICE,"got an error compiling PIR string");
-                tmp = Parrot_str_to_cstring(interp, err);
-                errmsg = pstrdup(tmp);
-                // elog(NOTICE,"about to free parrot cstring");
-                Parrot_str_free_cstring(tmp);
-                elog(ERROR, "Error compiling PIR function");
-            }
-            // elog(NOTICE,"about to call compiled PIR string with Parrot_ext_call");
-            /* See Parrot's src/extend.c for interpretations of the third argument */
-            /* Pf => PMC with :flat attribute */
-            Parrot_ext_call(interp, func_pmc, "Pf", func_args);
+            retval = plparrot_func_handler(fcinfo);
         }
     }
     PG_CATCH();
@@ -199,9 +214,6 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     PG_END_TRY();
 
     current_call_data = save_call_data;
-
-    if ((rc = SPI_finish()) != SPI_OK_FINISH)
-        elog(ERROR, "SPI_finish failed: %s", SPI_result_code_string(rc));
 
     return retval;
 }
