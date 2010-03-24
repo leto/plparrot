@@ -127,7 +127,8 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     plparrot_call_data *save_call_data = current_call_data;
     char *proc_src, *errmsg, *tmp;
     bool isnull;
-    Parrot_PMC func_pmc;
+    Parrot_PMC func_pmc, func_args;
+    Parrot_Int pmctype;
     Parrot_String err;
 
     if ((rc = SPI_connect()) != SPI_OK_CONNECT)
@@ -175,7 +176,13 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
                 /* we need a trigger handler */
         } else {
             elog(NOTICE,"about to compile a PIR string: %s", proc_src);
+            /* Our current plan of attack is the pass along a ResizablePMCArray to all stored procedures */
             func_pmc = Parrot_compile_string(interp, create_string(interp, "PIR"), proc_src, &err);
+            pmctype  = Parrot_PMC_typenum(interp, "ResizablePMCArray");
+            func_args = Parrot_PMC_new(interp, pmctype);
+
+            /* TODO: fill func_args with PG_FUNCTION_ARGS */
+
             elog(NOTICE,"compiled a PIR string");
             if (!STRING_is_null(interp, err)) {
                 elog(NOTICE,"got an error compiling PIR string");
@@ -185,9 +192,10 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
                 Parrot_str_free_cstring(tmp);
                 elog(ERROR, "Error compiling PIR function");
             }
-            /* See Parrot's src/extend.c for interpretations of the third argument */
             elog(NOTICE,"about to call compiled PIR string with Parrot_ext_call");
-            Parrot_ext_call(interp, func_pmc, "->");
+            /* See Parrot's src/extend.c for interpretations of the third argument */
+            /* Pf => PMC with :flat attribute */
+            Parrot_ext_call(interp, func_pmc, "Pf", func_args);
         }
     }
     PG_CATCH();
