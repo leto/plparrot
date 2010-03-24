@@ -134,7 +134,7 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     if ((rc = SPI_connect()) != SPI_OK_CONNECT)
         elog(ERROR, "SPI_connect failed: %s", SPI_result_code_string(rc));
 
-    elog(NOTICE,"enter plparrot_call_handler");
+    //elog(NOTICE,"enter plparrot_call_handler");
     proctup = SearchSysCache(PROCOID, ObjectIdGetDatum(fcinfo->flinfo->fn_oid), 0, 0, 0);
     if (!HeapTupleIsValid(proctup))
         elog(ERROR, "Failed to look up procedure with OID %u", fcinfo->flinfo->fn_oid);
@@ -154,28 +154,17 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     /* procstruct probably isn't valid after this ReleaseSysCache call, so don't use it anymore */
     ReleaseSysCache(proctup);
 
-    // This makes the test_void test pass, but it is cheating, since it never compiles/runs the PIR
-    /*
-    if (returntype == VOIDOID)
-        PG_RETURN_VOID();
-    */
-    // Why is this ever the right thing to do?
-    /*
-    if (fcinfo->nargs == 0)
-        PG_RETURN_NULL();
-    */
-
     /* Assume from here on out that the first argument type is the same as the return type */
     retval = PG_GETARG_DATUM(0);
 
-    elog(NOTICE,"entering PG_TRY");
+    //elog(NOTICE,"entering PG_TRY");
     PG_TRY();
     {
         if (CALLED_AS_TRIGGER(fcinfo)) {
                 TriggerData *tdata = (TriggerData *) fcinfo->context;
                 /* we need a trigger handler */
         } else {
-            elog(NOTICE,"about to compile a PIR string: %s", proc_src);
+            // elog(NOTICE,"about to compile a PIR string: %s", proc_src);
             /* Our current plan of attack is the pass along a ResizablePMCArray to all stored procedures */
             func_pmc = Parrot_compile_string(interp, create_string(interp, "PIR"), proc_src, &err);
             pmctype  = Parrot_PMC_typenum(interp, "ResizablePMCArray");
@@ -183,16 +172,16 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
 
             /* TODO: fill func_args with PG_FUNCTION_ARGS */
 
-            elog(NOTICE,"compiled a PIR string");
+            // elog(NOTICE,"compiled a PIR string");
             if (!STRING_is_null(interp, err)) {
-                elog(NOTICE,"got an error compiling PIR string");
+                // elog(NOTICE,"got an error compiling PIR string");
                 tmp = Parrot_str_to_cstring(interp, err);
                 errmsg = pstrdup(tmp);
-                elog(NOTICE,"about to free parrot cstring");
+                // elog(NOTICE,"about to free parrot cstring");
                 Parrot_str_free_cstring(tmp);
                 elog(ERROR, "Error compiling PIR function");
             }
-            elog(NOTICE,"about to call compiled PIR string with Parrot_ext_call");
+            // elog(NOTICE,"about to call compiled PIR string with Parrot_ext_call");
             /* See Parrot's src/extend.c for interpretations of the third argument */
             /* Pf => PMC with :flat attribute */
             Parrot_ext_call(interp, func_pmc, "Pf", func_args);
