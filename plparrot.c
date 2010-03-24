@@ -67,8 +67,6 @@ typedef struct plparrot_call_data
 
 Parrot_Interp interp;
 
-void plparrot_elog(int level, char *message);
-
 Parrot_String create_string(Parrot_Interp interp, const char *name);
 /* this is saved and restored by plparrot_call_handler */
 static plparrot_call_data *current_call_data = NULL;
