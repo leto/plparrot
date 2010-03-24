@@ -69,6 +69,7 @@ Parrot_Interp interp;
 
 void plparrot_elog(int level, char *message);
 
+Parrot_String create_string(Parrot_Interp interp, const char *name);
 /* this is saved and restored by plparrot_call_handler */
 static plparrot_call_data *current_call_data = NULL;
 
@@ -174,7 +175,7 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
                 /* we need a trigger handler */
         } else {
             elog(NOTICE,"about to compile a PIR string: %s", proc_src);
-            func_pmc = Parrot_compile_string(interp, Parrot_new_string(interp, "PIR", 3, (const char *) NULL, 0), proc_src, &err);
+            func_pmc = Parrot_compile_string(interp, create_string(interp, "PIR"), proc_src, &err);
             elog(NOTICE,"compiled a PIR string");
             if (!STRING_is_null(interp, err)) {
                 elog(NOTICE,"got an error compiling PIR string");
@@ -203,6 +204,12 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
 
     return retval;
 }
+
+Parrot_String create_string(Parrot_Interp interp, const char *name)
+{
+    return Parrot_new_string(interp, name, strlen(name), (const char *) NULL, 0);
+}
+
 
 void
 plparrot_elog(int level, char *message)
