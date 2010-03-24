@@ -114,8 +114,6 @@ execq(text *sql, int cnt)
 Datum plparrot_call_handler(PG_FUNCTION_ARGS);
 Datum plparrot_func_handler(PG_FUNCTION_ARGS);
 
-void plparrot_elog(int level, char *message);
-
 /* this is saved and restored by plparrot_call_handler */
 static plparrot_call_data *current_call_data = NULL;
 
@@ -188,10 +186,4 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     SV  *perlret;
     */
     return retval;
-}
-
-void
-plparrot_elog(int level, char *message)
-{
-    elog(level, "%s", message);
 }
