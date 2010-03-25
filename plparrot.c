@@ -3,6 +3,7 @@
 #include "parrot/extend.h"
 #include "parrot/imcc.h"
 #include "include/embed_string.h"
+/* #include "pmc/pmc_resizablepmcarray.h" */
 
 /* Postgres header files */
 #include "postgres.h"
@@ -27,6 +28,13 @@
 
 #ifdef PG_MODULE_MAGIC
 PG_MODULE_MAGIC;
+#endif
+
+#ifdef TextDatumGetCString
+#define TextDatum2String(x) (pstrdup(TextDatumGetCString(x)))
+#else
+    /* For PostgreSQL versions 8.3 and prior */
+#define TextDatum2String(X) (pstrdup(DatumGetCString(DirectFunctionCall1(textout, (X)))))
 #endif
 
 /**********************************************************************
@@ -131,7 +139,7 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     HeapTuple proctup;
     char *proc_src, *errmsg, *tmp;
     Oid returntype, *argtypes;
-    int numargs, rc;
+    int numargs, rc, i;
     char **argnames, *argmodes;
     bool isnull;
 
@@ -152,12 +160,7 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
 
     /* procstruct probably isn't valid after this ReleaseSysCache call, so don't use it anymore */
     ReleaseSysCache(proctup);
-#ifdef TextDatumGetCString
-    proc_src = pstrdup(TextDatumGetCString(procsrc_datum));
-#else
-    /* For PostgreSQL versions 8.3 and prior */
-    proc_src = pstrdup(DatumGetCString(DirectFunctionCall1(textout, procsrc_datum)));
-#endif
+    proc_src = TextDatum2String(procsrc_datum);
 
     // elog(NOTICE,"about to compile a PIR string: %s", proc_src);
     /* Our current plan of attack is the pass along a ResizablePMCArray to all stored procedures */
@@ -165,6 +168,13 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     func_args = create_pmc(interp,"ResizablePMCArray");
 
     /* TODO: fill func_args with PG_FUNCTION_ARGS */
+    for (i = 0; i < numargs; i++) {
+        /* This will break if we have anything but text arguments, but it's a start */
+        tmp = PG_GETARG_TEXT_P(0);
+        Parrot_ResizablePMCArray_push_string(interp, func_args,
+            Parrot_str_new(interp, tmp, strlen(tmp))
+        );
+    }
 
     // elog(NOTICE,"compiled a PIR string");
     if (!STRING_is_null(interp, err)) {
