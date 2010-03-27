@@ -2,6 +2,7 @@
 #include "parrot/embed.h"
 #include "parrot/extend.h"
 #include "parrot/imcc.h"
+#include "parrot/extend_vtable.h"
 #include "include/embed_string.h"
 /* #include "pmc/pmc_resizablepmcarray.h" */
 
