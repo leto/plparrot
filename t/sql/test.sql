@@ -57,10 +57,10 @@ CREATE FUNCTION test_varchar() RETURNS varchar(5) AS $$
 .end
 $$ LANGUAGE plparrot;
 
+select is(test_varchar(), 'cheese', 'We can return a varchar');
 select is(test_int(),1,'We can return an int');
 select is(test_void()::text,''::text,'We can return void');
 select is(test_float(), 1.0::float ,'We can return a float');
-select is(test_varchar(), 'cheese', 'We can return a varchar');
 select is(test_int_int(42),42,'We can return an int that was passed as an arg');
 
 -- Finish the tests and clean up.

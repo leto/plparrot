@@ -172,7 +172,7 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     for (i = 0; i < numargs; i++) {
         /* This will break if we have anything but text arguments, but it's a start */
         tmp = PG_GETARG_TEXT_P(0);
-        Parrot_ResizablePMCArray_push_string(interp, func_args,
+        Parrot_PMC_push_string(interp, func_args,
             Parrot_str_new(interp, tmp, strlen(tmp))
         );
     }
