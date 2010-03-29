@@ -134,7 +134,7 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
 {
     Parrot_PMC func_pmc, func_args;
     Parrot_String err;
-    Datum retval, procsrc_datum;
+    Datum retval, procsrc_datum, element;
     Form_pg_proc procstruct;
     HeapTuple proctup;
     char *proc_src, *errmsg, *tmp;
@@ -142,9 +142,14 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     int numargs, rc, i;
     char **argnames, *argmodes;
     bool isnull;
+    int16       typlen;
+    bool        typbyval;
+    char        typalign;
+    Oid  element_type = get_fn_expr_argtype(fcinfo->flinfo, 0);
 
     if ((rc = SPI_connect()) != SPI_OK_CONNECT)
         elog(ERROR, "SPI_connect failed: %s", SPI_result_code_string(rc));
+
 
     retval = PG_GETARG_DATUM(0);
 
@@ -155,6 +160,15 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     returntype = procstruct->prorettype;
     procsrc_datum = SysCacheGetAttr(PROCOID, proctup, Anum_pg_proc_prosrc, &isnull);
     numargs = get_func_arg_info(proctup, &argtypes, &argnames, &argmodes);
+
+    if (numargs && !OidIsValid(element_type))
+                elog(ERROR, "could not determine data type of input");
+
+    if (numargs)
+        get_typlenbyvalalign(element_type, &typlen, &typbyval, &typalign);
+    // elog(NOTICE,"element_type = %u", element_type);
+
+
     if (isnull)
         elog(ERROR, "Couldn't load function source for function with OID %u", fcinfo->flinfo->fn_oid);
 
@@ -170,8 +184,12 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     /* TODO: fill func_args with PG_FUNCTION_ARGS */
     for (i = 0; i < numargs; i++) {
         /* This will break if we have anything but text arguments, but it's a start */
-        tmp = PG_GETARG_TEXT_P(0);
-        Parrot_PMC_push_string(interp, func_args, create_string(interp, tmp));
+        tmp = PG_GETARG_DATUM(i);
+        if (element_type == TEXTOID) {
+            Parrot_PMC_push_string(interp, func_args, create_string(interp, tmp));
+        } else if (element_type == INT4OID) {
+            Parrot_PMC_push_integer(interp, func_args, tmp);
+        }
     }
 
     // elog(NOTICE,"compiled a PIR string");
