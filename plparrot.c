@@ -78,6 +78,7 @@ Parrot_Interp interp;
 /* Helper functions */
 Parrot_String create_string(Parrot_Interp interp, const char *name);
 Parrot_PMC create_pmc(Parrot_Interp interp, const char *name);
+void       dump_pmc(Parrot_Interp interp, Parrot_PMC pmc);
 
 /* this is saved and restored by plparrot_call_handler */
 static plparrot_call_data *current_call_data = NULL;
@@ -132,7 +133,7 @@ PG_FUNCTION_INFO_V1(plparrot_call_handler);
 static Datum
 plparrot_func_handler(PG_FUNCTION_ARGS)
 {
-    Parrot_PMC func_pmc, func_args;
+    Parrot_PMC func_pmc, func_args, result;
     Parrot_String err;
     Datum retval, procsrc_datum, element;
     Form_pg_proc procstruct;
@@ -204,7 +205,11 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     // elog(NOTICE,"about to call compiled PIR string with Parrot_ext_call");
     /* See Parrot's src/extend.c for interpretations of the third argument */
     /* Pf => PMC with :flat attribute */
-    Parrot_ext_call(interp, func_pmc, "Pf", func_args);
+    /* Return value of the function call is stored in result */
+
+    Parrot_ext_call(interp, func_pmc, "Pf", func_args, &result);
+    // This just coredumps
+    //dump_pmc(interp,result);
 
     if ((rc = SPI_finish()) != SPI_OK_FINISH)
         elog(ERROR, "SPI_finish failed: %s", SPI_result_code_string(rc));
@@ -252,3 +257,15 @@ Parrot_String create_string(Parrot_Interp interp, const char *name)
 {
     return Parrot_new_string(interp, name, strlen(name), (const char *) NULL, 0);
 }
+
+/* It would be nice to have a function that dumps the contents of a ResizablePMCArray */
+/* TODO: Make me work */
+void
+dump_pmc(Parrot_Interp interp, Parrot_PMC pmc)
+{
+    Parrot_String str;
+    char *string;
+    string = Parrot_PMC_get_cstring(interp,pmc);
+    elog(NOTICE, "PMC = %s", string);
+}
+
