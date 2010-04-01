@@ -146,11 +146,11 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     int16       typlen;
     bool        typbyval;
     char        typalign;
+    /* we actually need an array of element types, one for each arg */
     Oid  element_type = get_fn_expr_argtype(fcinfo->flinfo, 0);
 
     if ((rc = SPI_connect()) != SPI_OK_CONNECT)
         elog(ERROR, "SPI_connect failed: %s", SPI_result_code_string(rc));
-
 
     retval = PG_GETARG_DATUM(0);
 
@@ -183,13 +183,14 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     func_args = create_pmc(interp,"ResizablePMCArray");
 
     /* TODO: fill func_args with PG_FUNCTION_ARGS */
+    /* TODO: correctly convert between various int + float types */
     for (i = 0; i < numargs; i++) {
-        /* This will break if we have anything but text arguments, but it's a start */
-        tmp = PG_GETARG_DATUM(i);
         if (element_type == TEXTOID) {
-            Parrot_PMC_push_string(interp, func_args, create_string(interp, tmp));
+            Parrot_PMC_push_string(interp, func_args, create_string(interp, PG_GETARG_DATUM(i)));
         } else if (element_type == INT4OID) {
-            Parrot_PMC_push_integer(interp, func_args, tmp);
+            Parrot_PMC_push_integer(interp, func_args, (Parrot_Int) PG_GETARG_DATUM(i));
+        } else if (element_type == FLOAT8OID) {
+            Parrot_PMC_push_float(interp, func_args, (Parrot_Float) PG_GETARG_DATUM(i));
         }
     }
 
@@ -224,9 +225,6 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     plparrot_call_data *save_call_data = current_call_data;
 
     //elog(NOTICE,"enter plparrot_call_handler");
-
-    /* Assume that the first argument type is the same as the return type */
-
     //elog(NOTICE,"entering PG_TRY");
     PG_TRY();
     {
@@ -264,8 +262,10 @@ void
 dump_pmc(Parrot_Interp interp, Parrot_PMC pmc)
 {
     Parrot_String str;
+    Parrot_PMC tmp_pmc;
     char *string;
-    string = Parrot_PMC_get_cstring(interp,pmc);
+    tmp_pmc = Parrot_PMC_get_pmc_keyed(interp,pmc,0);
+    string = Parrot_PMC_get_string(interp,tmp_pmc);
     elog(NOTICE, "PMC = %s", string);
 }
 
