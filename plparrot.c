@@ -147,7 +147,7 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     bool        typbyval;
     char        typalign;
     /* we actually need an array of element types, one for each arg */
-    Oid  element_type = get_fn_expr_argtype(fcinfo->flinfo, 0);
+    Oid  element_type;
 
     if ((rc = SPI_connect()) != SPI_OK_CONNECT)
         elog(ERROR, "SPI_connect failed: %s", SPI_result_code_string(rc));
@@ -162,11 +162,12 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     procsrc_datum = SysCacheGetAttr(PROCOID, proctup, Anum_pg_proc_prosrc, &isnull);
     numargs = get_func_arg_info(proctup, &argtypes, &argnames, &argmodes);
 
+    /*
     if (numargs && !OidIsValid(element_type))
                 elog(ERROR, "could not determine data type of input");
-
     if (numargs)
         get_typlenbyvalalign(element_type, &typlen, &typbyval, &typalign);
+    */
     // elog(NOTICE,"element_type = %u", element_type);
 
 
@@ -185,6 +186,7 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     /* TODO: fill func_args with PG_FUNCTION_ARGS */
     /* TODO: correctly convert between various int + float types */
     for (i = 0; i < numargs; i++) {
+        element_type = get_fn_expr_argtype(fcinfo->flinfo, i);
         if (element_type == TEXTOID) {
             Parrot_PMC_push_string(interp, func_args, create_string(interp, PG_GETARG_DATUM(i)));
         } else if (element_type == INT4OID) {
