@@ -163,8 +163,6 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     numargs = get_func_arg_info(proctup, &argtypes, &argnames, &argmodes);
 
     /*
-    if (numargs && !OidIsValid(element_type))
-                elog(ERROR, "could not determine data type of input");
     if (numargs)
         get_typlenbyvalalign(element_type, &typlen, &typbyval, &typalign);
     */
@@ -183,10 +181,11 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     func_pmc  = Parrot_compile_string(interp, create_string(interp, "PIR"), proc_src, &err);
     func_args = create_pmc(interp,"ResizablePMCArray");
 
-    /* TODO: fill func_args with PG_FUNCTION_ARGS */
     /* TODO: correctly convert between various int + float types */
     for (i = 0; i < numargs; i++) {
         element_type = get_fn_expr_argtype(fcinfo->flinfo, i);
+        if (!OidIsValid(element_type))
+            elog(ERROR, "could not determine data type of input");
         if (element_type == TEXTOID) {
             Parrot_PMC_push_string(interp, func_args, create_string(interp, PG_GETARG_DATUM(i)));
         } else if (element_type == INT4OID) {
