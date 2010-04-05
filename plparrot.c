@@ -188,10 +188,12 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
             elog(ERROR, "could not determine data type of input");
         if (element_type == TEXTOID) {
             Parrot_PMC_push_string(interp, func_args, create_string(interp, PG_GETARG_DATUM(i)));
-        } else if (element_type == INT4OID) {
+        } else if (element_type == INT8OID || element_type == INT4OID || element_type == INT2OID) {
             Parrot_PMC_push_integer(interp, func_args, (Parrot_Int) PG_GETARG_DATUM(i));
-        } else if (element_type == FLOAT8OID) {
+        } else if (element_type == FLOAT8OID || element_type == FLOAT4OID) {
             Parrot_PMC_push_float(interp, func_args, (Parrot_Float) PG_GETARG_DATUM(i));
+        } else {
+            elog(ERROR,"PL/Parrot does not know how to convert the %u element type", element_type);
         }
     }
 
