@@ -186,14 +186,32 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
         element_type = get_fn_expr_argtype(fcinfo->flinfo, i);
         if (!OidIsValid(element_type))
             elog(ERROR, "could not determine data type of input");
-        if (element_type == TEXTOID || element_type == CHAROID || element_type == VARCHAROID || element_type == BPCHAROID) {
-            Parrot_PMC_push_string(interp, func_args, create_string(interp, PG_GETARG_DATUM(i)));
-        } else if (element_type == INT8OID || element_type == INT4OID || element_type == INT2OID) {
-            Parrot_PMC_push_integer(interp, func_args, (Parrot_Int) PG_GETARG_DATUM(i));
-        } else if (element_type == FLOAT8OID || element_type == FLOAT4OID) {
-            Parrot_PMC_push_float(interp, func_args, (Parrot_Float) PG_GETARG_DATUM(i));
-        } else {
-            elog(ERROR,"PL/Parrot does not know how to convert the %u element type", element_type);
+        /* XXX: Need to handle null arguments. Test with PG_ARGISNULL(argument_number) */
+        switch (element_type) {
+            case TEXTOID:
+            case CHAROID:
+            case VARCHAROID:
+            case BPCHAROID:
+                Parrot_PMC_push_string(interp, func_args, create_string(interp, PG_GETARG_CSTRING(i)));
+                break;
+            case INT2OID:
+                Parrot_PMC_push_integer(interp, func_args, (Parrot_Int) PG_GETARG_INT16(i));
+                break;
+            case INT4OID:
+                Parrot_PMC_push_integer(interp, func_args, (Parrot_Int) PG_GETARG_INT32(i));
+                break;
+            case INT8OID:
+                /* XXX: Loss of precision here? */
+                Parrot_PMC_push_integer(interp, func_args, (Parrot_Int) PG_GETARG_INT64(i));
+                break;
+            case FLOAT4OID:
+                Parrot_PMC_push_float(interp, func_args, (Parrot_Int) PG_GETARG_FLOAT4(i));
+                break;
+            case FLOAT8OID:
+                Parrot_PMC_push_float(interp, func_args, (Parrot_Int) PG_GETARG_FLOAT8(i));
+                break;
+            default:
+                elog(ERROR,"PL/Parrot does not know how to convert the %u element type", element_type);
         }
     }
 
