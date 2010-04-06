@@ -166,7 +166,7 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     if (numargs)
         get_typlenbyvalalign(element_type, &typlen, &typbyval, &typalign);
     */
-    // elog(NOTICE,"element_type = %u", element_type);
+    /* elog(NOTICE,"element_type = %u", element_type); */
 
 
     if (isnull)
@@ -176,7 +176,7 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     ReleaseSysCache(proctup);
     proc_src = TextDatum2String(procsrc_datum);
 
-    // elog(NOTICE,"about to compile a PIR string: %s", proc_src);
+    /* elog(NOTICE,"about to compile a PIR string: %s", proc_src); */
     /* Our current plan of attack is the pass along a ResizablePMCArray to all stored procedures */
     func_pmc  = Parrot_compile_string(interp, create_string(interp, "PIR"), proc_src, &err);
     func_args = create_pmc(interp,"ResizablePMCArray");
@@ -197,23 +197,23 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
         }
     }
 
-    // elog(NOTICE,"compiled a PIR string");
+    /* elog(NOTICE,"compiled a PIR string"); */
     if (!STRING_is_null(interp, err)) {
-        // elog(NOTICE,"got an error compiling PIR string");
+        /* elog(NOTICE,"got an error compiling PIR string"); */
         tmp = Parrot_str_to_cstring(interp, err);
         errmsg = pstrdup(tmp);
-        // elog(NOTICE,"about to free parrot cstring");
+        /* elog(NOTICE,"about to free parrot cstring"); */
         Parrot_str_free_cstring(tmp);
         elog(ERROR, "Error compiling PIR function");
     }
-    // elog(NOTICE,"about to call compiled PIR string with Parrot_ext_call");
+    /* elog(NOTICE,"about to call compiled PIR string with Parrot_ext_call"); */
     /* See Parrot's src/extend.c for interpretations of the third argument */
     /* Pf => PMC with :flat attribute */
     /* Return value of the function call is stored in result */
 
     Parrot_ext_call(interp, func_pmc, "Pf", func_args, &result);
-    // This just coredumps
-    //dump_pmc(interp,result);
+    /* This just coredumps */
+    /* dump_pmc(interp,result); */
 
     if ((rc = SPI_finish()) != SPI_OK_FINISH)
         elog(ERROR, "SPI_finish failed: %s", SPI_result_code_string(rc));
