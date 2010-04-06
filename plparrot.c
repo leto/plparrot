@@ -186,7 +186,7 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
         element_type = get_fn_expr_argtype(fcinfo->flinfo, i);
         if (!OidIsValid(element_type))
             elog(ERROR, "could not determine data type of input");
-        if (element_type == TEXTOID) {
+        if (element_type == TEXTOID || element_type == CHAROID || element_type == VARCHAROID || element_type == BPCHAROID) {
             Parrot_PMC_push_string(interp, func_args, create_string(interp, PG_GETARG_DATUM(i)));
         } else if (element_type == INT8OID || element_type == INT4OID || element_type == INT2OID) {
             Parrot_PMC_push_integer(interp, func_args, (Parrot_Int) PG_GETARG_DATUM(i));
