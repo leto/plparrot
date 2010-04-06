@@ -15,7 +15,7 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(10);
+SELECT plan(11);
 
 CREATE OR REPLACE FUNCTION create_plparrot()
 RETURNS BOOLEAN
@@ -37,10 +37,17 @@ CREATE FUNCTION test_int() RETURNS int AS $$
 .end
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_int_int(int) RETURNS int AS $$
+CREATE FUNCTION test_int_in(int) RETURNS int AS $$
 .sub foo_int_int
     .param int x
-    .return(x)
+    .return(1)
+.end
+$$ LANGUAGE plparrot;
+
+CREATE FUNCTION test_int_out(int) RETURNS int AS $$
+.sub foo_int_int
+    .param int x
+    .return(42)
 .end
 $$ LANGUAGE plparrot;
 
@@ -102,7 +109,9 @@ select is(test_int_float(42,6.9), 1, 'We can pass an int and float as arguments'
 select is(test_char_in('cheese'::text), 'cheese', 'We can pass a char in');
 select is(test_char_out('cheese'::text), 'blue', 'We can return a char');
 
-select is(test_int_int(42),42,'We can return an int that was passed as an arg');
+select is(test_int_in(42),1,'We can pass in an int');
+select is(test_int_out(1),42,'We can return an int');
+
 select is(test_increment_int_int(42),43,'We can increment an int and return it');
 select is(test_int(),1,'We can return an int');
 select is(test_void()::text,''::text,'We can return void');
