@@ -205,10 +205,10 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
                 Parrot_PMC_push_integer(interp, func_args, (Parrot_Int) PG_GETARG_INT64(i));
                 break;
             case FLOAT4OID:
-                Parrot_PMC_push_float(interp, func_args, (Parrot_Int) PG_GETARG_FLOAT4(i));
+                Parrot_PMC_push_float(interp, func_args, (Parrot_Float) PG_GETARG_FLOAT4(i));
                 break;
             case FLOAT8OID:
-                Parrot_PMC_push_float(interp, func_args, (Parrot_Int) PG_GETARG_FLOAT8(i));
+                Parrot_PMC_push_float(interp, func_args, (Parrot_Float) PG_GETARG_FLOAT8(i));
                 break;
             default:
                 elog(ERROR,"PL/Parrot does not know how to convert the %u element type", element_type);
