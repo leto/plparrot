@@ -76,8 +76,8 @@ typedef struct plparrot_call_data
 Parrot_Interp interp;
 
 /* Helper functions */
-Parrot_String create_string(Parrot_Interp interp, const char *name);
-Parrot_PMC create_pmc(Parrot_Interp interp, const char *name);
+Parrot_String create_string(const char *name);
+Parrot_PMC create_pmc(const char *name);
 void       dump_pmc(Parrot_Interp interp, Parrot_PMC pmc);
 
 void plparrot_push_pgdatatype_pmc(Parrot_PMC, FunctionCallInfo, int);
@@ -169,7 +169,6 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     */
     /* elog(NOTICE,"element_type = %u", element_type); */
 
-
     if (isnull)
         elog(ERROR, "Couldn't load function source for function with OID %u", fcinfo->flinfo->fn_oid);
 
@@ -179,8 +178,8 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
 
     /* elog(NOTICE,"about to compile a PIR string: %s", proc_src); */
     /* Our current plan of attack is the pass along a ResizablePMCArray to all stored procedures */
-    func_pmc  = Parrot_compile_string(interp, create_string(interp, "PIR"), proc_src, &err);
-    func_args = create_pmc(interp,"ResizablePMCArray");
+    func_pmc  = Parrot_compile_string(interp, create_string("PIR"), proc_src, &err);
+    func_args = create_pmc("ResizablePMCArray");
 
     for (i = 0; i < numargs; i++) {
         plparrot_push_pgdatatype_pmc(func_args, fcinfo, i);
@@ -200,8 +199,8 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     /* Pf => PMC with :flat attribute */
     /* Return value of the function call is stored in result */
 
-    Parrot_ext_call(interp, func_pmc, "Pf", func_args, &result);
-    /* This just coredumps */
+    result = create_pmc("ResizablePMCArray");
+    Parrot_ext_call(interp, func_pmc, "Pf->P", func_args, &result);
     /* dump_pmc(interp,result); */
 
     if ((rc = SPI_finish()) != SPI_OK_FINISH)
@@ -223,7 +222,7 @@ plparrot_push_pgdatatype_pmc(Parrot_PMC func_args, FunctionCallInfo fcinfo, int 
             case CHAROID:
             case VARCHAROID:
             case BPCHAROID:
-                Parrot_PMC_push_string(interp, func_args, create_string(interp, PG_GETARG_CSTRING(i)));
+                Parrot_PMC_push_string(interp, func_args, create_string(PG_GETARG_CSTRING(i)));
                 break;
             case INT2OID:
                 Parrot_PMC_push_integer(interp, func_args, (Parrot_Int) PG_GETARG_INT16(i));
@@ -274,11 +273,11 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     return retval;
 }
 
-Parrot_PMC  create_pmc(Parrot_Interp interp, const char *name)
+Parrot_PMC  create_pmc(const char *name)
 {
     return Parrot_PMC_new(interp,Parrot_PMC_typenum(interp,name));
 }
-Parrot_String create_string(Parrot_Interp interp, const char *name)
+Parrot_String create_string(const char *name)
 {
     return Parrot_new_string(interp, name, strlen(name), (const char *) NULL, 0);
 }
@@ -292,7 +291,7 @@ dump_pmc(Parrot_Interp interp, Parrot_PMC pmc)
     Parrot_PMC tmp_pmc;
     char *string;
     tmp_pmc = Parrot_PMC_get_pmc_keyed(interp,pmc,0);
-    string = Parrot_PMC_get_string(interp,tmp_pmc);
+    string = Parrot_PMC_get_cstring(interp,tmp_pmc);
     elog(NOTICE, "PMC = %s", string);
 }
 
