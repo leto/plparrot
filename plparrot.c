@@ -80,6 +80,8 @@ Parrot_String create_string(Parrot_Interp interp, const char *name);
 Parrot_PMC create_pmc(Parrot_Interp interp, const char *name);
 void       dump_pmc(Parrot_Interp interp, Parrot_PMC pmc);
 
+void plparrot_push_pgdatatype_pmc(Parrot_PMC, FunctionCallInfo, int);
+
 /* this is saved and restored by plparrot_call_handler */
 static plparrot_call_data *current_call_data = NULL;
 
@@ -138,16 +140,15 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     Datum retval, procsrc_datum, element;
     Form_pg_proc procstruct;
     HeapTuple proctup;
-    char *proc_src, *errmsg, *tmp;
     Oid returntype, *argtypes;
+
     int numargs, rc, i;
+    int16 typlen;
+    char *proc_src, *errmsg, *tmp;
     char **argnames, *argmodes;
+    char typalign;
     bool isnull;
-    int16       typlen;
-    bool        typbyval;
-    char        typalign;
-    /* we actually need an array of element types, one for each arg */
-    Oid  element_type;
+    bool typbyval;
 
     if ((rc = SPI_connect()) != SPI_OK_CONNECT)
         elog(ERROR, "SPI_connect failed: %s", SPI_result_code_string(rc));
@@ -181,11 +182,41 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     func_pmc  = Parrot_compile_string(interp, create_string(interp, "PIR"), proc_src, &err);
     func_args = create_pmc(interp,"ResizablePMCArray");
 
-    /* TODO: correctly convert between various int + float types */
     for (i = 0; i < numargs; i++) {
-        element_type = get_fn_expr_argtype(fcinfo->flinfo, i);
+        plparrot_push_pgdatatype_pmc(func_args, fcinfo, i);
+    }
+
+    /* elog(NOTICE,"compiled a PIR string"); */
+    if (!STRING_is_null(interp, err)) {
+        /* elog(NOTICE,"got an error compiling PIR string"); */
+        tmp = Parrot_str_to_cstring(interp, err);
+        errmsg = pstrdup(tmp);
+        /* elog(NOTICE,"about to free parrot cstring"); */
+        Parrot_str_free_cstring(tmp);
+        elog(ERROR, "Error compiling PIR function");
+    }
+    /* elog(NOTICE,"about to call compiled PIR string with Parrot_ext_call"); */
+    /* See Parrot's src/extend.c for interpretations of the third argument */
+    /* Pf => PMC with :flat attribute */
+    /* Return value of the function call is stored in result */
+
+    Parrot_ext_call(interp, func_pmc, "Pf", func_args, &result);
+    /* This just coredumps */
+    /* dump_pmc(interp,result); */
+
+    if ((rc = SPI_finish()) != SPI_OK_FINISH)
+        elog(ERROR, "SPI_finish failed: %s", SPI_result_code_string(rc));
+
+    return retval;
+}
+void
+plparrot_push_pgdatatype_pmc(Parrot_PMC func_args, FunctionCallInfo fcinfo, int i)
+{
+        Oid element_type = get_fn_expr_argtype(fcinfo->flinfo, i);
+
         if (!OidIsValid(element_type))
             elog(ERROR, "could not determine data type of input");
+
         /* XXX: Need to handle null arguments. Test with PG_ARGISNULL(argument_number) */
         switch (element_type) {
             case TEXTOID:
@@ -213,32 +244,7 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
             default:
                 elog(ERROR,"PL/Parrot does not know how to convert the %u element type", element_type);
         }
-    }
-
-    /* elog(NOTICE,"compiled a PIR string"); */
-    if (!STRING_is_null(interp, err)) {
-        /* elog(NOTICE,"got an error compiling PIR string"); */
-        tmp = Parrot_str_to_cstring(interp, err);
-        errmsg = pstrdup(tmp);
-        /* elog(NOTICE,"about to free parrot cstring"); */
-        Parrot_str_free_cstring(tmp);
-        elog(ERROR, "Error compiling PIR function");
-    }
-    /* elog(NOTICE,"about to call compiled PIR string with Parrot_ext_call"); */
-    /* See Parrot's src/extend.c for interpretations of the third argument */
-    /* Pf => PMC with :flat attribute */
-    /* Return value of the function call is stored in result */
-
-    Parrot_ext_call(interp, func_pmc, "Pf", func_args, &result);
-    /* This just coredumps */
-    /* dump_pmc(interp,result); */
-
-    if ((rc = SPI_finish()) != SPI_OK_FINISH)
-        elog(ERROR, "SPI_finish failed: %s", SPI_result_code_string(rc));
-
-    return retval;
 }
-
 Datum
 plparrot_call_handler(PG_FUNCTION_ARGS)
 {
