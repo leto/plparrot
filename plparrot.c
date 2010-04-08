@@ -135,7 +135,7 @@ PG_FUNCTION_INFO_V1(plparrot_call_handler);
 static Datum
 plparrot_func_handler(PG_FUNCTION_ARGS)
 {
-    Parrot_PMC func_pmc, func_args, result;
+    Parrot_PMC func_pmc, func_args, result, tmp_pmc;
     Parrot_String err;
     Datum retval, procsrc_datum, element;
     Form_pg_proc procstruct;
@@ -200,8 +200,12 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     /* Return value of the function call is stored in result */
 
     result = create_pmc("ResizablePMCArray");
-    Parrot_ext_call(interp, func_pmc, "Pf->P", func_args, &result);
-    /* dump_pmc(interp,result); */
+    Parrot_ext_call(interp, func_pmc, "Pf->Pf", func_args, &result);
+    if (Parrot_PMC_get_bool(interp,result)) {
+        tmp_pmc = Parrot_PMC_pop_pmc(interp, result);
+        /* TODO: We need to convert Parrot datatypes into PG Datum's */
+        /* dump_pmc(interp,tmp_pmc); */
+    }
 
     if ((rc = SPI_finish()) != SPI_OK_FINISH)
         elog(ERROR, "SPI_finish failed: %s", SPI_result_code_string(rc));
@@ -282,15 +286,11 @@ Parrot_String create_string(const char *name)
     return Parrot_new_string(interp, name, strlen(name), (const char *) NULL, 0);
 }
 
-/* It would be nice to have a function that dumps the contents of a ResizablePMCArray */
-/* TODO: Make me work */
 void
 dump_pmc(Parrot_Interp interp, Parrot_PMC pmc)
 {
-    Parrot_String str;
     Parrot_PMC tmp_pmc;
     char *string;
-    tmp_pmc = Parrot_PMC_get_pmc_keyed(interp,pmc,0);
     string = Parrot_PMC_get_cstring(interp,tmp_pmc);
     elog(NOTICE, "PMC = %s", string);
 }
