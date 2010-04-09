@@ -137,18 +137,15 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
 {
     Parrot_PMC func_pmc, func_args, result, tmp_pmc;
     Parrot_String err;
-    Datum retval, procsrc_datum, element;
+    Datum retval, procsrc_datum;
     Form_pg_proc procstruct;
     HeapTuple proctup;
     Oid returntype, *argtypes;
 
     int numargs, rc, i;
-    int16 typlen;
     char *proc_src, *errmsg, *tmp;
     char **argnames, *argmodes;
-    char typalign;
     bool isnull;
-    bool typbyval;
 
     if ((rc = SPI_connect()) != SPI_OK_CONNECT)
         elog(ERROR, "SPI_connect failed: %s", SPI_result_code_string(rc));
@@ -163,11 +160,6 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     procsrc_datum = SysCacheGetAttr(PROCOID, proctup, Anum_pg_proc_prosrc, &isnull);
     numargs = get_func_arg_info(proctup, &argtypes, &argnames, &argmodes);
 
-    /*
-    if (numargs)
-        get_typlenbyvalalign(element_type, &typlen, &typbyval, &typalign);
-    */
-    /* elog(NOTICE,"element_type = %u", element_type); */
 
     if (isnull)
         elog(ERROR, "Couldn't load function source for function with OID %u", fcinfo->flinfo->fn_oid);
@@ -215,10 +207,16 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
 void
 plparrot_push_pgdatatype_pmc(Parrot_PMC func_args, FunctionCallInfo fcinfo, int i)
 {
+        int16 typlen;
+        char typalign;
+        bool typbyval;
         Oid element_type = get_fn_expr_argtype(fcinfo->flinfo, i);
 
         if (!OidIsValid(element_type))
             elog(ERROR, "could not determine data type of input");
+
+        /* This info is currently unused */
+        get_typlenbyvalalign(element_type, &typlen, &typbyval, &typalign);
 
         /* XXX: Need to handle null arguments. Test with PG_ARGISNULL(argument_number) */
         switch (element_type) {
@@ -252,6 +250,7 @@ Datum
 plparrot_call_handler(PG_FUNCTION_ARGS)
 {
     Datum retval;
+    TriggerData *tdata;
     plparrot_call_data *save_call_data = current_call_data;
 
     //elog(NOTICE,"enter plparrot_call_handler");
@@ -259,7 +258,7 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     PG_TRY();
     {
         if (CALLED_AS_TRIGGER(fcinfo)) {
-            TriggerData *tdata = (TriggerData *) fcinfo->context;
+            tdata = (TriggerData *) fcinfo->context;
             /* we need a trigger handler */
         } else {
             retval = plparrot_func_handler(fcinfo);
