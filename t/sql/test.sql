@@ -61,7 +61,8 @@ $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_float() RETURNS float AS $$
 .sub foo_float
-    .return(1.0)
+    $N0 = 1.0
+    .return($N0)
 .end
 $$ LANGUAGE plparrot;
 

@@ -78,7 +78,7 @@ Parrot_Interp interp;
 /* Helper functions */
 Parrot_String create_string(const char *name);
 Parrot_PMC create_pmc(const char *name);
-void       dump_pmc(Parrot_Interp interp, Parrot_PMC pmc);
+Datum       plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc);
 
 void plparrot_push_pgdatatype_pmc(Parrot_PMC, FunctionCallInfo, int);
 
@@ -200,8 +200,7 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
 
     if (Parrot_PMC_get_bool(interp,result)) {
         tmp_pmc = Parrot_PMC_pop_pmc(interp, result);
-        /* TODO: We need to convert Parrot datatypes into PG Datum's */
-        /* dump_pmc(interp,tmp_pmc); */
+        retval = plparrot_make_sausage(interp,tmp_pmc);
     } else {
         /* We got an empty array of return values, so we should return void */
         PG_RETURN_VOID();
@@ -254,7 +253,7 @@ plparrot_push_pgdatatype_pmc(Parrot_PMC func_args, FunctionCallInfo fcinfo, int 
 Datum
 plparrot_call_handler(PG_FUNCTION_ARGS)
 {
-    Datum retval;
+    Datum retval = 0;
     TriggerData *tdata;
     plparrot_call_data *save_call_data = current_call_data;
 
@@ -289,11 +288,20 @@ Parrot_String create_string(const char *name)
     return Parrot_new_string(interp, name, strlen(name), (const char *) NULL, 0);
 }
 
-void
-dump_pmc(Parrot_Interp interp, Parrot_PMC pmc)
+/* Convert Parrot datatypes into PG Datum's */
+Datum
+plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc)
 {
-    Parrot_PMC tmp_pmc;
-    char *string;
-    string = Parrot_PMC_get_cstring(interp,tmp_pmc);
-    elog(NOTICE, "PMC = %s", string);
+    /* elog(NOTICE, "starting sausage machine"); */
+    if (Parrot_PMC_isa(interp,pmc,create_string("Integer"))) {
+        return Int32GetDatum(Parrot_PMC_get_integer(interp,pmc));
+    } else if (Parrot_PMC_isa(interp,pmc,create_string("String"))) {
+        /* XXX: This doesn't work */
+        return PointerGetDatum(Parrot_PMC_get_string(interp,pmc));
+    } else if (Parrot_PMC_isa(interp,pmc,create_string("Numeric"))) {
+        return Float8GetDatum(Parrot_PMC_get_number(interp,pmc));
+    } else {
+        elog(NOTICE,"CANNOT MAKE SAUSAGE");
+        return (Datum) 0;
+    }
 }
