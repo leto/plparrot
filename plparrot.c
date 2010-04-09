@@ -193,14 +193,19 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
 
     result = create_pmc("ResizablePMCArray");
     Parrot_ext_call(interp, func_pmc, "Pf->Pf", func_args, &result);
+
+    /* Where is the correct place to put this? */
+    if ((rc = SPI_finish()) != SPI_OK_FINISH)
+        elog(ERROR, "SPI_finish failed: %s", SPI_result_code_string(rc));
+
     if (Parrot_PMC_get_bool(interp,result)) {
         tmp_pmc = Parrot_PMC_pop_pmc(interp, result);
         /* TODO: We need to convert Parrot datatypes into PG Datum's */
         /* dump_pmc(interp,tmp_pmc); */
+    } else {
+        /* We got an empty array of return values, so we should return void */
+        PG_RETURN_VOID();
     }
-
-    if ((rc = SPI_finish()) != SPI_OK_FINISH)
-        elog(ERROR, "SPI_finish failed: %s", SPI_result_code_string(rc));
 
     return retval;
 }
@@ -253,13 +258,11 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     TriggerData *tdata;
     plparrot_call_data *save_call_data = current_call_data;
 
-    //elog(NOTICE,"enter plparrot_call_handler");
-    //elog(NOTICE,"entering PG_TRY");
     PG_TRY();
     {
         if (CALLED_AS_TRIGGER(fcinfo)) {
             tdata = (TriggerData *) fcinfo->context;
-            /* we need a trigger handler */
+            /* TODO: we need a trigger handler */
         } else {
             retval = plparrot_func_handler(fcinfo);
         }
@@ -280,6 +283,7 @@ Parrot_PMC  create_pmc(const char *name)
 {
     return Parrot_PMC_new(interp,Parrot_PMC_typenum(interp,name));
 }
+
 Parrot_String create_string(const char *name)
 {
     return Parrot_new_string(interp, name, strlen(name), (const char *) NULL, 0);
@@ -293,4 +297,3 @@ dump_pmc(Parrot_Interp interp, Parrot_PMC pmc)
     string = Parrot_PMC_get_cstring(interp,tmp_pmc);
     elog(NOTICE, "PMC = %s", string);
 }
-

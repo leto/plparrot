@@ -65,30 +65,30 @@ CREATE FUNCTION test_float() RETURNS float AS $$
 .end
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_varchar_in(text) RETURNS varchar AS $$
+CREATE FUNCTION test_varchar_in(varchar) RETURNS varchar AS $$
 .sub foo_varchar_in
     .param string s
     .return(s)
 .end
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_varchar_out(text) RETURNS varchar AS $$
+CREATE FUNCTION test_varchar_out(varchar) RETURNS varchar AS $$
 .sub foo_varchar_out
     $S1 = 'blue'
     .return($S1)
 .end
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_char_in(text) RETURNS char AS $$
+CREATE FUNCTION test_char_in(char) RETURNS char AS $$
 .sub foo_char_in
     .param string s
     .return(s)
 .end
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_char_out(text) RETURNS char AS $$
+CREATE FUNCTION test_char_out(char) RETURNS char AS $$
 .sub foo_char_out
-    $S1 = 'blue'
+    $S1 = 'b'
     .return($S1)
 .end
 $$ LANGUAGE plparrot;
@@ -106,8 +106,8 @@ select is(test_varchar_in('cheese'::text), 'cheese', 'We can pass a varchar in')
 select is(test_varchar_out('cheese'::text), 'blue', 'We can return a varchar');
 select is(test_int_float(42,6.9), 1, 'We can pass an int and float as arguments');
 
-select is(test_char_in('cheese'::text), 'cheese', 'We can pass a char in');
-select is(test_char_out('cheese'::text), 'blue', 'We can return a char');
+select is(test_char_in('c'), 'c', 'We can pass a char in');
+select is(test_char_out('c'), 'b', 'We can return a char');
 
 select is(test_int_in(42),1,'We can pass in an int');
 select is(test_int_out(1),42,'We can return an int');
