@@ -78,7 +78,7 @@ Parrot_Interp interp;
 /* Helper functions */
 Parrot_String create_string(const char *name);
 Parrot_PMC create_pmc(const char *name);
-Datum       plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc);
+Datum       plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fcinfo);
 
 void plparrot_push_pgdatatype_pmc(Parrot_PMC, FunctionCallInfo, int);
 
@@ -200,7 +200,7 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
 
     if (Parrot_PMC_get_bool(interp,result)) {
         tmp_pmc = Parrot_PMC_pop_pmc(interp, result);
-        retval = plparrot_make_sausage(interp,tmp_pmc);
+        retval = plparrot_make_sausage(interp,tmp_pmc,fcinfo);
     } else {
         /* We got an empty array of return values, so we should return void */
         PG_RETURN_VOID();
@@ -288,28 +288,53 @@ Parrot_String create_string(const char *name)
     return Parrot_new_string(interp, name, strlen(name), (const char *) NULL, 0);
 }
 
+static void
+perm_fmgr_info(Oid functionId, FmgrInfo *finfo)
+{
+    fmgr_info_cxt(functionId, finfo, TopMemoryContext);
+}
+
+
 /* Convert Parrot datatypes into PG Datum's */
 Datum
-plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc)
+plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fcinfo)
 {
-    char *str, copy;
-    Parrot_PMC p, inspect;
+    char *str;
+    plparrot_proc_desc *prodesc;
+    Parrot_PMC inspect;
     Parrot_String s;
+    HeapTuple procTup, typeTup;
+    Form_pg_proc procStruct;
+    Form_pg_type typeStruct;
+
     /* elog(NOTICE, "starting sausage machine"); */
     if (Parrot_PMC_isa(interp,pmc,create_string("Integer"))) {
         return Int32GetDatum(Parrot_PMC_get_integer(interp,pmc));
     } else if (Parrot_PMC_isa(interp,pmc,create_string("String"))) {
-        inspect = create_pmc("ResizablePMCArray");
-        inspect = Parrot_PMC_inspect(interp,pmc);
-
-        /* XXX: This doesn't work */
+        /* XXX: This kind of works */
         s = Parrot_PMC_get_string(interp,pmc);
         str = Parrot_str_to_cstring(interp,s);
-        strcpy(copy,str);
-        Parrot_str_free_cstring(str);
+        /* elog(NOTICE,"sausage string = %s", str); */
 
-        elog(NOTICE,"sausage string = %s", copy);
-        return CStringGetDatum(copy);
+        procTup = SearchSysCache(PROCOID, ObjectIdGetDatum(fcinfo->flinfo->fn_oid), 0, 0, 0);
+        procStruct = (Form_pg_proc) GETSTRUCT(procTup);
+
+        prodesc = (plparrot_proc_desc *) malloc(sizeof(plparrot_proc_desc));
+        /* TODO: check for out of memory errors */
+        MemSet(prodesc, 0, sizeof(plparrot_proc_desc));
+        typeTup = SearchSysCache(TYPEOID, ObjectIdGetDatum(procStruct->prorettype), 0, 0, 0);
+        if (!HeapTupleIsValid(typeTup))
+        {
+            elog(ERROR, "cache lookup failed for type %u", procStruct->prorettype);
+        }
+        typeStruct = (Form_pg_type) GETSTRUCT(typeTup);
+        perm_fmgr_info(typeStruct->typinput, &(prodesc->result_in_func));
+        prodesc->result_typioparam = getTypeIOParam(typeTup);
+
+        ReleaseSysCache(typeTup);
+        ReleaseSysCache(procTup);
+
+        return InputFunctionCall(&prodesc->result_in_func, str, prodesc->result_typioparam, -1);
 
     } else if (Parrot_PMC_isa(interp,pmc,create_string("Numeric"))) {
         return Float8GetDatum(Parrot_PMC_get_number(interp,pmc));
