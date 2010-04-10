@@ -292,12 +292,25 @@ Parrot_String create_string(const char *name)
 Datum
 plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc)
 {
+    char *str, copy;
+    Parrot_PMC p, inspect;
+    Parrot_String s;
     /* elog(NOTICE, "starting sausage machine"); */
     if (Parrot_PMC_isa(interp,pmc,create_string("Integer"))) {
         return Int32GetDatum(Parrot_PMC_get_integer(interp,pmc));
     } else if (Parrot_PMC_isa(interp,pmc,create_string("String"))) {
+        inspect = create_pmc("ResizablePMCArray");
+        inspect = Parrot_PMC_inspect(interp,pmc);
+
         /* XXX: This doesn't work */
-        return PointerGetDatum(Parrot_PMC_get_string(interp,pmc));
+        s = Parrot_PMC_get_string(interp,pmc);
+        str = Parrot_str_to_cstring(interp,s);
+        strcpy(copy,str);
+        Parrot_str_free_cstring(str);
+
+        elog(NOTICE,"sausage string = %s", copy);
+        return CStringGetDatum(copy);
+
     } else if (Parrot_PMC_isa(interp,pmc,create_string("Numeric"))) {
         return Float8GetDatum(Parrot_PMC_get_number(interp,pmc));
     } else {
