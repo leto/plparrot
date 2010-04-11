@@ -335,7 +335,7 @@ plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fci
 
         return InputFunctionCall(&prodesc->result_in_func, str, prodesc->result_typioparam, -1);
 
-    } else if (Parrot_PMC_isa(interp,pmc,create_string("Numeric"))) {
+    } else if (Parrot_PMC_isa(interp,pmc,create_string("Float"))) {
         return Float8GetDatum(Parrot_PMC_get_number(interp,pmc));
     } else {
         elog(NOTICE,"CANNOT MAKE SAUSAGE");
