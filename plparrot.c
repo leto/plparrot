@@ -300,9 +300,8 @@ perm_fmgr_info(Oid functionId, FmgrInfo *finfo)
 Datum
 plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fcinfo)
 {
-    char *str;
+    char *str, *pgstr;
     plparrot_proc_desc *prodesc;
-    Parrot_String s;
     HeapTuple procTup, typeTup;
     Form_pg_proc procStruct;
     Form_pg_type typeStruct;
@@ -311,10 +310,9 @@ plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fci
     if (Parrot_PMC_isa(interp,pmc,create_string("Integer"))) {
         return Int32GetDatum(Parrot_PMC_get_integer(interp,pmc));
     } else if (Parrot_PMC_isa(interp,pmc,create_string("String"))) {
-        /* XXX: This kind of works */
-        s = Parrot_PMC_get_string(interp,pmc);
-        str = Parrot_str_to_cstring(interp,s);
-        /* elog(NOTICE,"sausage string = %s", str); */
+        str   = Parrot_str_to_cstring(interp, Parrot_PMC_get_string(interp,pmc));
+        pgstr = pstrdup(str);
+        Parrot_str_free_cstring(str);
 
         procTup = SearchSysCache(PROCOID, ObjectIdGetDatum(fcinfo->flinfo->fn_oid), 0, 0, 0);
         procStruct = (Form_pg_proc) GETSTRUCT(procTup);
@@ -334,7 +332,7 @@ plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fci
         ReleaseSysCache(typeTup);
         ReleaseSysCache(procTup);
 
-        return InputFunctionCall(&prodesc->result_in_func, str, prodesc->result_typioparam, -1);
+        return InputFunctionCall(&prodesc->result_in_func, pgstr, prodesc->result_typioparam, -1);
 
     } else if (Parrot_PMC_isa(interp,pmc,create_string("Float"))) {
         return Float8GetDatum(Parrot_PMC_get_number(interp,pmc));
