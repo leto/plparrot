@@ -285,7 +285,8 @@ Parrot_PMC  create_pmc(const char *name)
 
 Parrot_String create_string(const char *name)
 {
-    return Parrot_new_string(interp, name, strlen(name), (const char *) NULL, 0);
+    /* Sometimes, this should be Parrot_str_new_constant */
+    return Parrot_str_new(interp, name, strlen(name));
 }
 
 static void
