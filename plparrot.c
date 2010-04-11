@@ -142,8 +142,11 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     HeapTuple proctup;
     Oid returntype, *argtypes;
 
-    int numargs, rc, i;
+    int numargs, rc, i, length;
     char *proc_src, *errmsg, *tmp;
+    char *pir_src;
+    char pir_begin[13] = ".sub p :anon";
+    char pir_end[4]    = ".end";
     char **argnames, *argmodes;
     bool isnull;
 
@@ -167,10 +170,19 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     /* procstruct probably isn't valid after this ReleaseSysCache call, so don't use it anymore */
     ReleaseSysCache(proctup);
     proc_src = TextDatum2String(procsrc_datum);
+    length   = strlen(proc_src);
+    pir_src = malloc( 13 + length + 4 );
+    memcpy(pir_src, pir_begin, 13);
+    /* This should have a sane default and be configurable */
+    strncat(pir_src, proc_src, 1000);
+    strncat(pir_src, pir_end, 4);
 
-    /* elog(NOTICE,"about to compile a PIR string: %s", proc_src); */
+    /* elog(NOTICE,"about to compile a PIR string: %s", pir_src); */
     /* Our current plan of attack is the pass along a ResizablePMCArray to all stored procedures */
-    func_pmc  = Parrot_compile_string(interp, create_string("PIR"), proc_src, &err);
+    func_pmc  = Parrot_compile_string(interp, create_string("PIR"), pir_src, &err);
+
+    free(pir_src);
+
     func_args = create_pmc("ResizablePMCArray");
 
     for (i = 0; i < numargs; i++) {
