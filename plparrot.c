@@ -228,7 +228,7 @@ plparrot_push_pgdatatype_pmc(Parrot_PMC func_args, FunctionCallInfo fcinfo, int 
             case CHAROID:
             case VARCHAROID:
             case BPCHAROID:
-                Parrot_PMC_push_string(interp, func_args, create_string(PG_GETARG_CSTRING(i)));
+                Parrot_PMC_push_string(interp, func_args, create_string(TextDatum2String(PG_GETARG_DATUM(i))));
                 break;
             case INT2OID:
                 Parrot_PMC_push_integer(interp, func_args, (Parrot_Int) PG_GETARG_INT16(i));
@@ -301,7 +301,6 @@ plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fci
 {
     char *str;
     plparrot_proc_desc *prodesc;
-    Parrot_PMC inspect;
     Parrot_String s;
     HeapTuple procTup, typeTup;
     Form_pg_proc procStruct;
