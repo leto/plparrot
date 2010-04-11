@@ -15,7 +15,7 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(13);
+SELECT plan(14);
 
 CREATE OR REPLACE FUNCTION create_plparrot()
 RETURNS BOOLEAN
@@ -26,33 +26,33 @@ SELECT true;
 $$;
 
 CREATE FUNCTION test_void() RETURNS void AS $$
-.sub foo_void
+.sub main :anon
     .return()
 .end
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_int() RETURNS int AS $$
-.sub foo_int
+.sub main :anon
     .return(1)
 .end
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_int_in(int) RETURNS int AS $$
-.sub foo_int_int
+.sub main :anon
     .param int x
     .return(1)
 .end
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_int_out(int) RETURNS int AS $$
-.sub foo_int_int
+.sub main :anon
     .param int x
     .return(42)
 .end
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_increment_int_int(int) RETURNS int AS $$
-.sub foo_int_int
+.sub main :anon
     .param int x
     inc x
     .return(x)
@@ -60,56 +60,64 @@ CREATE FUNCTION test_increment_int_int(int) RETURNS int AS $$
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_float() RETURNS float AS $$
-.sub foo_float
+.sub main :anon
     $N0 = 1.0
     .return($N0)
 .end
 $$ LANGUAGE plparrot;
 
+CREATE FUNCTION test_float_add(float) RETURNS float AS $$
+.sub main :anon
+    .param num x
+    x += 5
+    .return(x)
+.end
+$$ LANGUAGE plparrot;
+
 CREATE FUNCTION test_text_in(text) RETURNS text AS $$
-.sub foo_text_in
+.sub main :anon
     .param string s
     .return(s)
 .end
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_text_out(text) RETURNS text AS $$
-.sub foo_text_out
+.sub main :anon
     $S1 = 'blue'
     .return($S1)
 .end
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_varchar_in(varchar) RETURNS varchar AS $$
-.sub foo_varchar_in
+.sub main :anon
     .param string s
     .return(s)
 .end
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_varchar_out(varchar) RETURNS varchar AS $$
-.sub foo_varchar_out
+.sub main :anon
     $S1 = 'blue'
     .return($S1)
 .end
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_char_in(char) RETURNS char AS $$
-.sub foo_char_in
+.sub main :anon
     .param string s
     .return(s)
 .end
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_char_out(char) RETURNS char AS $$
-.sub foo_char_out
+.sub main :anon
     $S1 = 'b'
     .return($S1)
 .end
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_int_float(int, float) RETURNS int AS $$
-.sub foo_int_float
+.sub main :anon
     .param int x
     .param num y
     .return(1)
@@ -135,6 +143,7 @@ select is(test_increment_int_int(42),43,'We can increment an int and return it')
 select is(test_int(),1,'We can return an int');
 select is(test_void()::text,''::text,'We can return void');
 select is(test_float(), 1.0::float ,'We can return a float');
+select is(test_float_add(42), 47.0::float ,'We can add to a float and return it');
 
 -- Finish the tests and clean up.
 SELECT * FROM finish();
