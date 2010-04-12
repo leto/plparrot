@@ -19,11 +19,17 @@ This document describes the roadmap for PL/Parrot. Please be as specific as poss
     function text, how does the VM know what language it's written in, in order to
     compile it to bytecode?
 
+** (Duke) I am of the opinion that we will have PL's built on top of PL/Parrot,
+    so the stored procedure will define what language the program source is in,
+    when it is defined.
 
 * Datatype marshalling is another big step -- eggyknap knows about this stuff.
   Function parameters need to be converted from pgsql Datum types to something
   Parrot can both understand and have access to. The function's return value(s)
   then need to be converted back to Datums.
+
+  This has been accomplished for integers, floats and string types. More code
+  needs to be written for all of the various PG datatypes.
 
 * Make installation and configuration easier
 

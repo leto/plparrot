@@ -1,5 +1,14 @@
+=head1 TODO items for PL/Parrot
 
-* documentation
+* Developer documentation
 
-* use distutils.pir
+* End-user/sysadmin/DBA documentation
+
+* use distutils.pir ?
+
+* Add support for more PG datatypes (in order of importance):
+
+** Timestmp without timezone (basically equivalent to an integer)
+
+
 
