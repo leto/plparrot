@@ -96,6 +96,11 @@ CREATE FUNCTION test_int_float(int, float) RETURNS int AS $$
     .return(1)
 $$ LANGUAGE plparrot;
 
+CREATE FUNCTION test_syntax_error() RETURNS void AS $$
+.sub main :anon
+    syntax error
+.end
+$$ LANGUAGE plparrot;
 
 select is(test_text_in('cheese'), 'cheese', 'We can pass a text in');
 select is(test_text_out('cheese'), 'blue', 'We can return a text');
@@ -116,6 +121,8 @@ select is(test_int(),1,'We can return an int');
 select is(test_void()::text,''::text,'We can return void');
 select is(test_float(), 1.0::float ,'We can return a float');
 select is(test_float_add(42), 47.0::float ,'We can add to a float and return it');
+
+select test_syntax_error();
 
 -- Finish the tests and clean up.
 SELECT * FROM finish();
