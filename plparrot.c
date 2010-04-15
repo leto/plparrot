@@ -258,6 +258,12 @@ plparrot_push_pgdatatype_pmc(Parrot_PMC func_args, FunctionCallInfo fcinfo, int 
             case FLOAT8OID:
                 Parrot_PMC_push_float(interp, func_args, (Parrot_Float) PG_GETARG_FLOAT8(i));
                 break;
+            /* We need custom PMCs for these, and each Postgres data type */
+            case TIMESTAMPOID:
+            case TIMESTAMPTZOID:
+            case TIMEOID:
+                Parrot_PMC_push_float(interp, func_args, (Parrot_Float) PG_GETARG_FLOAT8(i));
+                break;
             default:
                 elog(ERROR,"PL/Parrot does not know how to convert the %u element type", element_type);
         }
