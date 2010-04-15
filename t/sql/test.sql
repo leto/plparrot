@@ -26,102 +26,74 @@ SELECT true;
 $$;
 
 CREATE FUNCTION test_void() RETURNS void AS $$
-.sub main :anon
     .return()
-.end
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_int() RETURNS int AS $$
-.sub main :anon
     .return(1)
-.end
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_int_in(int) RETURNS int AS $$
-.sub main :anon
     .param int x
     .return(1)
-.end
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_int_out(int) RETURNS int AS $$
-.sub main :anon
     .param int x
     .return(42)
-.end
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_increment_int_int(int) RETURNS int AS $$
-.sub main :anon
     .param int x
     inc x
     .return(x)
-.end
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_float() RETURNS float AS $$
-.sub main :anon
     $N0 = 1.0
     .return($N0)
-.end
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_float_add(float) RETURNS float AS $$
-.sub main :anon
     .param num x
     x += 5
     .return(x)
-.end
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_text_in(text) RETURNS text AS $$
-.sub main :anon
     .param string s
     .return(s)
-.end
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_text_out(text) RETURNS text AS $$
-.sub main :anon
     $S1 = 'blue'
     .return($S1)
-.end
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_varchar_in(varchar) RETURNS varchar AS $$
-.sub main :anon
     .param string s
     .return(s)
-.end
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_varchar_out(varchar) RETURNS varchar AS $$
-.sub main :anon
     $S1 = 'blue'
     .return($S1)
-.end
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_char_in(char) RETURNS char AS $$
-.sub main :anon
     .param string s
     .return(s)
-.end
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_char_out(char) RETURNS char AS $$
-.sub main :anon
     $S1 = 'b'
     .return($S1)
-.end
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_int_float(int, float) RETURNS int AS $$
-.sub main :anon
     .param int x
     .param num y
     .return(1)
-.end
 $$ LANGUAGE plparrot;
 
 
