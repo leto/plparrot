@@ -97,9 +97,7 @@ CREATE FUNCTION test_int_float(int, float) RETURNS int AS $$
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_syntax_error() RETURNS void AS $$
-.sub main :anon
     syntax error
-.end
 $$ LANGUAGE plparrot;
 
 select is(test_text_in('cheese'), 'cheese', 'We can pass a text in');
