@@ -8,7 +8,10 @@
 
 * Add support for more PG datatypes (in order of importance):
 
-** Timestmp without timezone (basically equivalent to an integer)
+** Timestamp datatypes
+
+*** These can currently be passed back and forth between Postgres + Parrot, but
+there is no interface to modify them from PIR
 
 
 
