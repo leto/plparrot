@@ -12,3 +12,8 @@ connection.  PL/J's design was in some sense more elegant, but it never got
 anywhere.  In PL/J, there was to be some kind of IPC to a java "server." The
 problem is that IPC and little servers are extremely difficult to get right, so
 for now, I'm thinking that the PL/Java model has more JFDI.
+
+Jonathan "Duke" Leto adds:
+
+I started hacking on PL/Parrot in October of 2009 and it started to actually work
+in April 2010.
