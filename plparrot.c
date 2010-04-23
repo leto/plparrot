@@ -296,6 +296,17 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     return retval;
 }
 
+void plparrot_secure(Parrot_Interp interp)
+{
+    Parrot_PMC func_pmc;
+    char *pir_src = "";
+
+    /*
+    func_pmc  = Parrot_compile_string(interp, create_string("PIR"), pir_src, &err);
+    Parrot_ext_call(interp, func_pmc, "P->", interp);
+    */
+}
+
 Parrot_PMC  create_pmc(const char *name)
 {
     return Parrot_PMC_new(interp,Parrot_PMC_typenum(interp,name));
