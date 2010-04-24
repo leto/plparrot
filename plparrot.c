@@ -306,7 +306,7 @@ void plparrot_secure(Parrot_Interp interp)
     Parrot_PMC func_pmc;
     Parrot_String err;
 
-    Parrot_load_bytecode(interp,"P6object.pbc");
+    Parrot_load_bytecode(interp,create_string("P6object.pbc"));
     func_pmc  = Parrot_compile_string(interp, create_string("PIR"), PLPARROT_SECURE, &err);
     Parrot_ext_call(interp, func_pmc, "P->", interp);
 }
