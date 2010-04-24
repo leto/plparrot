@@ -18,15 +18,12 @@ PARROTINC        = "$(PARROTINCLUDEDIR)$(PARROTVERSION)"
 PARROTLDFLAGS    = $(shell parrot_config ldflags)
 PARROTLINKFLAGS  = $(shell parrot_config inst_libparrot_linkflags)
 
-# We need to do various things with various versions of PostgreSQL.
+# We may need to do various things with various versions of PostgreSQL.
 # VERSION     = $(shell $(PG_CONFIG) --version | awk '{print $$2}')
 # PGVER_MAJOR = $(shell echo $(VERSION) | awk -F. '{ print ($$1 + 0) }')
 # PGVER_MINOR = $(shell echo $(VERSION) | awk -F. '{ print ($$2 + 0) }')
 # PGVER_PATCH = $(shell echo $(VERSION) | awk -F. '{ print ($$3 + 0) }')
 
-# this is not quite working yet
-#PARROT_CCFLAGS=$(shell ~/svn/parrot/parrot_config ccflags)
-#PARROT_CCFLAGS2=$(shell ~/svn/parrot/parrot_config ccflags_provisional)
 override CPPFLAGS := -I$(PARROTINC) -I$(srcdir) $(CPPFLAGS)
 override CFLAGS := $(PARROTLDFLAGS) $(PARROTLINKFLAGS) $(CFLAGS)
 
