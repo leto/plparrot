@@ -1,4 +1,6 @@
-# This is borrowed from PostgreSQL, it is just a copy for the 
+#!/usr/bin/env perl
+
+# This is borrowed from PostgreSQL, it is just a copy for the
 # convenience of PL/Parrot developers
 
 # $PostgreSQL:$
