@@ -33,7 +33,8 @@
 "\n" \
 ".namespace []\n" \
 "\n" \
-".sub _ :load :init :anon\n" \
+".sub _ :immediate :load :init :anon\n" \
+"    load_bytecode \"P6object.pbc\"\n" \
 "    .local pmc p6meta, interp, classes, classid\n" \
 "    p6meta = get_root_global [\"parrot\"], \"P6metaclass\"\n" \
 "    p6meta.'new_class'('PLParrot')\n" \

@@ -27,7 +27,8 @@
 
 .namespace []
 
-.sub _ :load :init :anon
+.sub _ :immediate :load :init :anon
+    load_bytecode "P6object.pbc"
     .local pmc p6meta, interp, classes, classid
     p6meta = get_root_global ["parrot"], "P6metaclass"
     p6meta.'new_class'('PLParrot')
