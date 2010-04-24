@@ -12,6 +12,15 @@ For the impatient, to install PL/Parrot into a PostgreSQL database, just do this
     make install
     make installcheck
 
+If you get an error such as:
+
+Makefile:13: /usr/lib/postgresql/8.4/lib/pgxs/src/makefiles/pgxs.mk: No such file or directory
+make: *** No rule to make target `/usr/lib/postgresql/8.4/lib/pgxs/src/makefiles/pgxs.mk'.  Stop.
+
+then you probably installed postgres from a debian package. You need to install the
+postgresql-server-dev-X package, where X is your version of PostgreSQL. For example:
+
+    sudo apt-get install postgresql-server-dev-8.4
 
 To run the tests with pg_prove you should create the plpgsql language in your database.
 The default database name is your current username, so this should work:
