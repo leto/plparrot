@@ -1,3 +1,5 @@
+#include "plparrot.h"
+
 /* Parrot header files */
 #include "parrot/embed.h"
 #include "parrot/extend.h"
@@ -79,6 +81,7 @@ Parrot_Interp interp;
 Parrot_String create_string(const char *name);
 Parrot_PMC create_pmc(const char *name);
 Datum       plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fcinfo);
+void plparrot_secure(Parrot_Interp interp);
 
 void plparrot_push_pgdatatype_pmc(Parrot_PMC, FunctionCallInfo, int);
 
@@ -104,6 +107,8 @@ _PG_init(void)
         elog(ERROR,"Could not create a Parrot interpreter!\n");
         return;
     }
+
+    plparrot_secure(interp);
 
     inited = true;
 }
@@ -299,12 +304,10 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
 void plparrot_secure(Parrot_Interp interp)
 {
     Parrot_PMC func_pmc;
-    char *pir_src = "";
+    Parrot_String err;
 
-    /*
-    func_pmc  = Parrot_compile_string(interp, create_string("PIR"), pir_src, &err);
+    func_pmc  = Parrot_compile_string(interp, create_string("PIR"), PLPARROT_SECURE, &err);
     Parrot_ext_call(interp, func_pmc, "P->", interp);
-    */
 }
 
 Parrot_PMC  create_pmc(const char *name)
