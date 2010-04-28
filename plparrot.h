@@ -4,13 +4,25 @@
  * Written by ./bin/text2macro.pl from plparrot_secure.pir
  */
 #define PLPARROT_SECURE \
-".namespace [\"PLParrot\"]\n" \
+".sub _ :main\n" \
+"    .local pmc p6meta, interp, classes, classid\n" \
+"    p6meta = get_root_global [\"parrot\"], \"P6metaclass\"\n" \
+"    p6meta.'new_class'('PLParrot')\n" \
 "\n" \
+"    interp = getinterp\n" \
+"    classes = interp[0]\n" \
+"    classid = classes['PLParrot']\n" \
+"\n" \
+"    # Replace these classes with our PLParrot class\n" \
+"    set classes['FileHandle'], classid\n" \
+"    set classes['File'], classid\n" \
+".end\n" \
+"\n" \
+".namespace [\"PLParrot\"]\n" \
 ".sub open :method\n" \
 "    .param pmc args :slurpy\n" \
-"    print \"Attempt to open \"\n" \
-"    $S1 = args[0]\n" \
-"    say $S1\n" \
+"    # die \"Attempt to open \"\n" \
+"    .return(42)\n" \
 ".end\n" \
 "\n" \
 ".sub copy :method\n" \
@@ -31,20 +43,6 @@
 "    say to\n" \
 ".end\n" \
 "\n" \
-".namespace []\n" \
-"\n" \
-".sub _ :immediate :load :init :anon\n" \
-"    load_bytecode \"P6object.pbc\"\n" \
-"    .local pmc p6meta, interp, classes, classid\n" \
-"    p6meta = get_root_global [\"parrot\"], \"P6metaclass\"\n" \
-"    p6meta.'new_class'('PLParrot')\n" \
-"\n" \
-"    interp = getinterp\n" \
-"    classes = interp[0]\n" \
-"    classid = classes['PLParrot']\n" \
-"    set classes['FileHandle'], classid\n" \
-"    set classes['File'], classid\n" \
-".end\n" \
 ""
 
 /* end */

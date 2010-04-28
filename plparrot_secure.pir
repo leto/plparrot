@@ -1,10 +1,22 @@
-.namespace ["PLParrot"]
+.sub _ :main
+    .local pmc p6meta, interp, classes, classid
+    p6meta = get_root_global ["parrot"], "P6metaclass"
+    p6meta.'new_class'('PLParrot')
 
+    interp = getinterp
+    classes = interp[0]
+    classid = classes['PLParrot']
+
+    # Replace these classes with our PLParrot class
+    set classes['FileHandle'], classid
+    set classes['File'], classid
+.end
+
+.namespace ["PLParrot"]
 .sub open :method
     .param pmc args :slurpy
-    print "Attempt to open "
-    $S1 = args[0]
-    say $S1
+    # die "Attempt to open "
+    .return(42)
 .end
 
 .sub copy :method
@@ -25,17 +37,3 @@
     say to
 .end
 
-.namespace []
-
-.sub _ :immediate :load :init :anon
-    load_bytecode "P6object.pbc"
-    .local pmc p6meta, interp, classes, classid
-    p6meta = get_root_global ["parrot"], "P6metaclass"
-    p6meta.'new_class'('PLParrot')
-
-    interp = getinterp
-    classes = interp[0]
-    classid = classes['PLParrot']
-    set classes['FileHandle'], classid
-    set classes['File'], classid
-.end
