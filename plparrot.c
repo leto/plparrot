@@ -1,8 +1,11 @@
+#include "plparrot.h"
+
 /* Parrot header files */
 #include "parrot/embed.h"
 #include "parrot/extend.h"
 #include "parrot/imcc.h"
 #include "parrot/extend_vtable.h"
+#include "parrot/config.h"
 #include "include/embed_string.h"
 
 /* Postgres header files */
@@ -79,6 +82,7 @@ Parrot_Interp interp;
 Parrot_String create_string(const char *name);
 Parrot_PMC create_pmc(const char *name);
 Datum       plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fcinfo);
+void plparrot_secure(Parrot_Interp interp);
 
 void plparrot_push_pgdatatype_pmc(Parrot_PMC, FunctionCallInfo, int);
 
@@ -99,11 +103,14 @@ _PG_init(void)
 
     interp = Parrot_new(NULL);
     imcc_initialize(interp);
+    //Parrot_set_trace(interp, PARROT_ALL_TRACE_FLAGS);
 
     if (!interp) {
         elog(ERROR,"Could not create a Parrot interpreter!\n");
         return;
     }
+
+    plparrot_secure(interp);
 
     inited = true;
 }
@@ -294,6 +301,18 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     current_call_data = save_call_data;
 
     return retval;
+}
+
+void plparrot_secure(Parrot_Interp interp)
+{
+    Parrot_PMC func_pmc;
+    Parrot_String err;
+    char *p6class = PARROTP6OBJECT;
+
+    Parrot_load_bytecode(interp,Parrot_str_new_constant(interp,p6class));
+
+    func_pmc  = Parrot_compile_string(interp, create_string("PIR"), PLPARROT_SECURE, &err);
+    Parrot_ext_call(interp, func_pmc, "->");
 }
 
 Parrot_PMC  create_pmc(const char *name)

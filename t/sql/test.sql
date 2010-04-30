@@ -15,7 +15,7 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(20);
+SELECT plan(21);
 
 CREATE OR REPLACE FUNCTION create_plparrot()
 RETURNS BOOLEAN
@@ -125,6 +125,13 @@ CREATE FUNCTION test_time_out(time) RETURNS time AS $$
     .param num x
     .return(x)
 $$ LANGUAGE plparrot;
+
+CREATE FUNCTION test_open() RETURNS int AS $$
+    $P0 = open ".", 'r'
+    .return($P0)
+$$ LANGUAGE plparrot;
+
+select is(test_open(), 42, 'open opcode is mocked');
 
 select is(test_text_in('cheese'), 'cheese', 'We can pass a text in');
 select is(test_text_out('cheese'), 'blue', 'We can return a text');
