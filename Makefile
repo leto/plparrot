@@ -19,6 +19,13 @@ PARROTLDFLAGS    = $(shell parrot_config ldflags)
 PARROTLINKFLAGS  = $(shell parrot_config inst_libparrot_linkflags)
 PARROTLIBDIR     = $(shell parrot_config libdir)
 PARROTP6OBJECT   = $(PARROTLIBDIR)$(PARROTVERSIONDIR)/library/P6object.pbc
+PARROTREVISION   = $(shell parrot_config revision)
+MINPARROTREVISION= 45961
+
+# This will only work on unixy boxens
+# Which OS's does PL/Parrot want to support?
+
+PARROT_IS_INSECURE = $(shell expr $(PARROTREVISION) \< $(MINPARROTREVISION))
 
 # We may need to do various things with various versions of PostgreSQL.
 # VERSION     = $(shell $(PG_CONFIG) --version | awk '{print $$2}')
@@ -28,6 +35,19 @@ PARROTP6OBJECT   = $(PARROTLIBDIR)$(PARROTVERSIONDIR)/library/P6object.pbc
 
 override CPPFLAGS := -I$(PARROTINC) -I$(srcdir) $(CPPFLAGS)
 override CFLAGS := $(PARROTLDFLAGS) $(PARROTLINKFLAGS) $(CFLAGS) -D'PARROTP6OBJECT="$(PARROTP6OBJECT)"'
+
+# It would be nice if this ran before we compiled
+all: check_revision
+
+check_revision:
+ifeq ($(PARROT_IS_INSECURE),1)
+	@echo "***************** SECURITY WARNING ************"
+	@echo "This version of Parrot (r$(PARROTREVISION)) does not support the seucrity features that PL/Parrot needs to prevent filesystem access"
+	@echo "***********************************************"
+else
+	@echo "Found a sufficiently new version of Parrot r$(PARROTREVISION)"
+endif
+
 
 test: all
 	psql -AX -f $(TESTS)
