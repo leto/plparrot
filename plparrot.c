@@ -203,7 +203,7 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
         errmsg = pstrdup(tmp);
         /* elog(NOTICE,"about to free parrot cstring"); */
         Parrot_str_free_cstring(tmp);
-        elog(ERROR, "Error compiling PIR function");
+        elog(ERROR, "Error compiling PIR function: %s", errmsg);
     }
     /* elog(NOTICE,"about to call compiled PIR string with Parrot_ext_call"); */
     /* See Parrot's src/extend.c for interpretations of the third argument */
