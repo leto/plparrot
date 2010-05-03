@@ -80,6 +80,8 @@ Parrot_Interp interp;
 
 /* Helper functions */
 Parrot_String create_string(const char *name);
+Parrot_String create_string_const(const char *name);
+
 Parrot_PMC create_pmc(const char *name);
 Datum       plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fcinfo);
 void plparrot_secure(Parrot_Interp interp);
@@ -186,7 +188,7 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
 
     /* elog(NOTICE,"about to compile a PIR string: %s", pir_src); */
     /* Our current plan of attack is the pass along a ResizablePMCArray to all stored procedures */
-    func_pmc  = Parrot_compile_string(interp, create_string("PIR"), pir_src, &err);
+    func_pmc  = Parrot_compile_string(interp, create_string_const("PIR"), pir_src, &err);
 
     free(pir_src);
 
@@ -309,9 +311,9 @@ void plparrot_secure(Parrot_Interp interp)
     Parrot_String err;
     char *p6class = PARROTP6OBJECT;
 
-    Parrot_load_bytecode(interp,Parrot_str_new_constant(interp,p6class));
+    Parrot_load_bytecode(interp,create_string_const(p6class));
 
-    func_pmc  = Parrot_compile_string(interp, create_string("PIR"), PLPARROT_SECURE, &err);
+    func_pmc  = Parrot_compile_string(interp, create_string_const("PIR"), PLPARROT_SECURE, &err);
     Parrot_ext_call(interp, func_pmc, "->");
 }
 
@@ -322,8 +324,12 @@ Parrot_PMC  create_pmc(const char *name)
 
 Parrot_String create_string(const char *name)
 {
-    /* Sometimes, this should be Parrot_str_new_constant */
     return Parrot_str_new(interp, name, strlen(name));
+}
+
+Parrot_String create_string_const(const char *name)
+{
+    return Parrot_str_new_constant(interp, name);
 }
 
 static void
@@ -344,9 +350,9 @@ plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fci
     Form_pg_type typeStruct;
 
     /* elog(NOTICE, "starting sausage machine"); */
-    if (Parrot_PMC_isa(interp,pmc,create_string("Integer"))) {
+    if (Parrot_PMC_isa(interp,pmc,create_string_const("Integer"))) {
         return Int32GetDatum(Parrot_PMC_get_integer(interp,pmc));
-    } else if (Parrot_PMC_isa(interp,pmc,create_string("String"))) {
+    } else if (Parrot_PMC_isa(interp,pmc,create_string_const("String"))) {
         str   = Parrot_str_to_cstring(interp, Parrot_PMC_get_string(interp,pmc));
         pgstr = pstrdup(str);
         Parrot_str_free_cstring(str);
@@ -371,7 +377,7 @@ plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fci
 
         return InputFunctionCall(&prodesc->result_in_func, pgstr, prodesc->result_typioparam, -1);
 
-    } else if (Parrot_PMC_isa(interp,pmc,create_string("Float"))) {
+    } else if (Parrot_PMC_isa(interp,pmc,create_string_const("Float"))) {
         return Float8GetDatum(Parrot_PMC_get_number(interp,pmc));
     } else {
         elog(NOTICE,"CANNOT MAKE SAUSAGE");
