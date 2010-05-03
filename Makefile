@@ -42,7 +42,7 @@ all: check_revision
 check_revision:
 ifeq ($(PARROT_IS_INSECURE),1)
 	@echo "***************** SECURITY WARNING ************"
-	@echo "This version of Parrot (r$(PARROTREVISION)) does not support the seucrity features that PL/Parrot needs to prevent filesystem access"
+	@echo "This version of Parrot (r$(PARROTREVISION)) does not support the security features that PL/Parrot needs to prevent filesystem access"
 	@echo "***********************************************"
 else
 	@echo "Found a sufficiently new version of Parrot r$(PARROTREVISION)"
