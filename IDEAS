@@ -78,4 +78,6 @@ psql
 IDEAS FOR EXPOSING POSTGRES FUNCTIONS IN PL/PARROT
 * At minimum we need to expose a set of functions: elog(), and SPI stuff, and possibly even utility functions to get pieces of PostgreSQL data types that might not map cleanly to Parrot HLLs
 * One possibility is to create a PMC that people use to access PostgreSQL. This PMC would include methods corresponding to each of the functions we need to expose
+    ** Update: per dukeleto this idea won't fly -- PMCs only have some functions available, not a set of arbitrary function names. http://docs.parrot.org/parrot/devel/html/docs/pdds/pdd17_pmc.pod.html
 * Alternatively we can just make the functions available somehow. The primary advantage of PMC over this method as I (eggyknap) see it, is that it seems easier to figure out how to write a PMC than to figure out how to make functions magically available in PL/Parrot functions
+    ** Good place to look for examples: runtime/parrot/library/OpenGL.pir
