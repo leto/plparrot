@@ -15,7 +15,7 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(21);
+SELECT plan(23);
 
 CREATE OR REPLACE FUNCTION create_plparrot()
 RETURNS BOOLEAN
@@ -131,7 +131,21 @@ CREATE FUNCTION test_open() RETURNS int AS $$
     .return($P0)
 $$ LANGUAGE plparrot;
 
+CREATE FUNCTION test_filehandle_open() RETURNS int AS $$
+    $P1 = new 'FileHandle'
+    $P0 = $P1.'open'(".", 'r')
+    .return($P0)
+$$ LANGUAGE plparrot;
+
+CREATE FUNCTION test_file_open() RETURNS int AS $$
+    $P1 = new 'File'
+    $P0 = $P1.'open'(".", 'r')
+    .return($P0)
+$$ LANGUAGE plparrot;
+
 select is(test_open(), 42, 'open opcode is mocked');
+select is(test_filehandle_open(), 42, 'FileHandle.open is mocked');
+select is(test_file_open(), 42, 'File.open is mocked');
 
 select is(test_text_in('cheese'), 'cheese', 'We can pass a text in');
 select is(test_text_out('cheese'), 'blue', 'We can return a text');
