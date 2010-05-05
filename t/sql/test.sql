@@ -143,6 +143,14 @@ CREATE FUNCTION test_file_open() RETURNS int AS $$
     .return($P0)
 $$ LANGUAGE plparrot;
 
+CREATE FUNCTION test_load_pir_library() RETURNS int AS $$
+    .include 'test_more.pir'
+    .return(5)
+$$ LANGUAGE plparrot;
+
+-- This does not work yet due to a bug in Parrot
+--select is(test_load_pir_library(), 5, 'we can load PIR libraries included with Parrot');
+
 select is(test_open(), 42, 'open opcode is mocked');
 select is(test_filehandle_open(), 42, 'FileHandle.open is mocked');
 select is(test_file_open(), 42, 'File.open is mocked');
