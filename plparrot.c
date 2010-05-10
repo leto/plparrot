@@ -199,7 +199,7 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     }
 
     /* elog(NOTICE,"compiled a PIR string"); */
-    if (!STRING_is_null(interp, err)) {
+    if (!Parrot_str_is_null(interp, err)) {
         /* elog(NOTICE,"got an error compiling PIR string"); */
         tmp = Parrot_str_to_cstring(interp, err);
         errmsg = pstrdup(tmp);
