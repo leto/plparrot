@@ -6,7 +6,6 @@
 #include "parrot/imcc.h"
 #include "parrot/extend_vtable.h"
 #include "parrot/config.h"
-#include "include/embed_string.h"
 
 /* Postgres header files */
 #include "postgres.h"
