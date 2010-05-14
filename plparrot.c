@@ -1,4 +1,5 @@
 #include "plparrot.h"
+#include "config.h"
 
 /* Parrot header files */
 #include "parrot/embed.h"
@@ -182,7 +183,7 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     pir_src = malloc( 13 + length + 4 );
     memcpy(pir_src, pir_begin, 13);
     /* This should have a sane default and be configurable */
-    strncat(pir_src, proc_src, 1000);
+    strncat(pir_src, proc_src, MAX_SUBROUTINE_LENGTH);
     strncat(pir_src, pir_end, 4);
 
     /* elog(NOTICE,"about to compile a PIR string: %s", pir_src); */
