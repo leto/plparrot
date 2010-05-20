@@ -27,6 +27,10 @@
 #include "utils/memutils.h"
 #include "utils/syscache.h"
 #include "utils/typcache.h"
+#if PG_VERSION_NUM >= 80500
+#include "utils/bytea.h"
+#endif
+
 
 
 #ifdef PG_MODULE_MAGIC
