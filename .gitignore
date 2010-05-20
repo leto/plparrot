@@ -16,4 +16,5 @@ src/lib/*.o
 regression.diffs
 regression.out
 results/
+plparrotu.sql
 plparrot.sql
