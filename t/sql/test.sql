@@ -15,7 +15,7 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(23);
+SELECT plan(25);
 
 CREATE OR REPLACE FUNCTION create_plparrot()
 RETURNS BOOLEAN
@@ -38,6 +38,11 @@ CREATE FUNCTION test_int_in(int) RETURNS int AS $$
     .return(1)
 $$ LANGUAGE plparrot;
 
+CREATE FUNCTION test_immutable(int) RETURNS int AS $$
+    .param int x
+    .return(1)
+$$ LANGUAGE plparrot IMMUTABLE;
+
 CREATE FUNCTION test_int_out(int) RETURNS int AS $$
     .param int x
     .return(42)
@@ -48,6 +53,12 @@ CREATE FUNCTION test_increment_int_int(int) RETURNS int AS $$
     inc x
     .return(x)
 $$ LANGUAGE plparrot;
+
+CREATE FUNCTION test_strict(int) RETURNS int AS $$
+    .param int x
+    inc x
+    .return(x)
+$$ LANGUAGE plparrot STRICT;
 
 CREATE FUNCTION test_float() RETURNS float AS $$
     $N0 = 1.0
@@ -168,6 +179,9 @@ select is(test_char_out('c'), 'b', 'We can return a char');
 
 select is(test_int_in(42),1,'We can pass in an int');
 select is(test_int_out(1),42,'We can return an int');
+
+select is(test_immutable(42),1,'Immutable works');
+select is(test_strict(NULL), NULL, 'Strict works');
 
 select is(test_increment_int_int(42),43,'We can increment an int and return it');
 select is(test_int(),1,'We can return an int');
