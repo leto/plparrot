@@ -12,152 +12,152 @@
 -- Load the TAP functions.
 BEGIN;
 \i pgtap.sql
-\i plparrot.sql
+\i plparrotu.sql
 
 -- Plan the tests.
 SELECT plan(25);
 
-CREATE OR REPLACE FUNCTION create_plparrot()
+CREATE OR REPLACE FUNCTION create_plparrotu()
 RETURNS BOOLEAN
 LANGUAGE SQL
 AS $$
-CREATE LANGUAGE plparrot;
+CREATE LANGUAGE plparrotu;
 SELECT true;
 $$;
 
 CREATE FUNCTION test_void() RETURNS void AS $$
     .return()
-$$ LANGUAGE plparrot;
+$$ LANGUAGE plparrotu;
 
 CREATE FUNCTION test_int() RETURNS int AS $$
     .return(1)
-$$ LANGUAGE plparrot;
+$$ LANGUAGE plparrotu;
 
 CREATE FUNCTION test_int_in(int) RETURNS int AS $$
     .param int x
     .return(1)
-$$ LANGUAGE plparrot;
+$$ LANGUAGE plparrotu;
 
 CREATE FUNCTION test_immutable(int) RETURNS int AS $$
     .param int x
     .return(1)
-$$ LANGUAGE plparrot IMMUTABLE;
+$$ LANGUAGE plparrotu IMMUTABLE;
 
 CREATE FUNCTION test_int_out(int) RETURNS int AS $$
     .param int x
     .return(42)
-$$ LANGUAGE plparrot;
+$$ LANGUAGE plparrotu;
 
 CREATE FUNCTION test_increment_int_int(int) RETURNS int AS $$
     .param int x
     inc x
     .return(x)
-$$ LANGUAGE plparrot;
+$$ LANGUAGE plparrotu;
 
 CREATE FUNCTION test_strict(int) RETURNS int AS $$
     .param int x
     inc x
     .return(x)
-$$ LANGUAGE plparrot STRICT;
+$$ LANGUAGE plparrotu STRICT;
 
 CREATE FUNCTION test_float() RETURNS float AS $$
     $N0 = 1.0
     .return($N0)
-$$ LANGUAGE plparrot;
+$$ LANGUAGE plparrotu;
 
 CREATE FUNCTION test_float_add(float) RETURNS float AS $$
     .param num x
     x += 5
     .return(x)
-$$ LANGUAGE plparrot;
+$$ LANGUAGE plparrotu;
 
 CREATE FUNCTION test_text_in(text) RETURNS text AS $$
     .param string s
     .return(s)
-$$ LANGUAGE plparrot;
+$$ LANGUAGE plparrotu;
 
 CREATE FUNCTION test_text_out(text) RETURNS text AS $$
     $S1 = 'blue'
     .return($S1)
-$$ LANGUAGE plparrot;
+$$ LANGUAGE plparrotu;
 
 CREATE FUNCTION test_varchar_in(varchar) RETURNS varchar AS $$
     .param string s
     .return(s)
-$$ LANGUAGE plparrot;
+$$ LANGUAGE plparrotu;
 
 CREATE FUNCTION test_varchar_out(varchar) RETURNS varchar AS $$
     $S1 = 'blue'
     .return($S1)
-$$ LANGUAGE plparrot;
+$$ LANGUAGE plparrotu;
 
 CREATE FUNCTION test_char_in(char) RETURNS char AS $$
     .param string s
     .return(s)
-$$ LANGUAGE plparrot;
+$$ LANGUAGE plparrotu;
 
 CREATE FUNCTION test_char_out(char) RETURNS char AS $$
     $S1 = 'b'
     .return($S1)
-$$ LANGUAGE plparrot;
+$$ LANGUAGE plparrotu;
 
 CREATE FUNCTION test_int_float(int, float) RETURNS int AS $$
     .param int x
     .param num y
     .return(1)
-$$ LANGUAGE plparrot;
+$$ LANGUAGE plparrotu;
 
 CREATE FUNCTION test_timestamp_in(timestamp) RETURNS int AS $$
     .param num x
     .return(1)
-$$ LANGUAGE plparrot;
+$$ LANGUAGE plparrotu;
 
 CREATE FUNCTION test_timestamp_out(timestamp) RETURNS timestamp AS $$
     .param num x
     .return(x)
-$$ LANGUAGE plparrot;
+$$ LANGUAGE plparrotu;
 
 CREATE FUNCTION test_timestamptz_in(timestamp with time zone) RETURNS int AS $$
     .param num x
     .return(1)
-$$ LANGUAGE plparrot;
+$$ LANGUAGE plparrotu;
 
 CREATE FUNCTION test_timestamptz_out(timestamp with time zone) RETURNS timestamp with time zone AS $$
     .param num x
     .return(x)
-$$ LANGUAGE plparrot;
+$$ LANGUAGE plparrotu;
 
 CREATE FUNCTION test_time_in(time) RETURNS int AS $$
     .param num x
     .return(1)
-$$ LANGUAGE plparrot;
+$$ LANGUAGE plparrotu;
 
 CREATE FUNCTION test_time_out(time) RETURNS time AS $$
     .param num x
     .return(x)
-$$ LANGUAGE plparrot;
+$$ LANGUAGE plparrotu;
 
 CREATE FUNCTION test_open() RETURNS int AS $$
     $P0 = open ".", 'r'
     .return($P0)
-$$ LANGUAGE plparrot;
+$$ LANGUAGE plparrotu;
 
 CREATE FUNCTION test_filehandle_open() RETURNS int AS $$
     $P1 = new 'FileHandle'
     $P0 = $P1.'open'(".", 'r')
     .return($P0)
-$$ LANGUAGE plparrot;
+$$ LANGUAGE plparrotu;
 
 CREATE FUNCTION test_file_open() RETURNS int AS $$
     $P1 = new 'File'
     $P0 = $P1.'open'(".", 'r')
     .return($P0)
-$$ LANGUAGE plparrot;
+$$ LANGUAGE plparrotu;
 
 CREATE FUNCTION test_load_pir_library() RETURNS int AS $$
     .include 'test_more.pir'
     .return(5)
-$$ LANGUAGE plparrot;
+$$ LANGUAGE plparrotu;
 
 -- This does not work yet due to a bug in Parrot
 --select is(test_load_pir_library(), 5, 'we can load PIR libraries included with Parrot');
