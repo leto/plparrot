@@ -133,20 +133,20 @@ _PG_fini(void)
     inited = false;
 }
 
-Datum plparrotu_call_handler(PG_FUNCTION_ARGS);
-static Datum plparrotu_func_handler(PG_FUNCTION_ARGS);
+Datum plparrot_call_handler(PG_FUNCTION_ARGS);
+static Datum plparrot_func_handler(PG_FUNCTION_ARGS);
 
  /* The PostgreSQL function+trigger managers call this function for execution
     of PL/Parrot procedures. */
 
-PG_FUNCTION_INFO_V1(plparrotu_call_handler);
+PG_FUNCTION_INFO_V1(plparrot_call_handler);
 /*
  * The PostgreSQL function+trigger managers call this function for execution of
  * PL/Parrot procedures.
  */
 
 static Datum
-plparrotu_func_handler(PG_FUNCTION_ARGS)
+plparrot_func_handler(PG_FUNCTION_ARGS)
 {
     Parrot_PMC func_pmc, func_args, result, tmp_pmc;
     Parrot_String err;
@@ -282,7 +282,7 @@ plparrot_push_pgdatatype_pmc(Parrot_PMC func_args, FunctionCallInfo fcinfo, int 
         }
 }
 Datum
-plparrotu_call_handler(PG_FUNCTION_ARGS)
+plparrot_call_handler(PG_FUNCTION_ARGS)
 {
     Datum retval = 0;
     TriggerData *tdata;
@@ -294,7 +294,7 @@ plparrotu_call_handler(PG_FUNCTION_ARGS)
             tdata = (TriggerData *) fcinfo->context;
             /* TODO: we need a trigger handler */
         } else {
-            retval = plparrotu_func_handler(fcinfo);
+            retval = plparrot_func_handler(fcinfo);
         }
     }
     PG_CATCH();

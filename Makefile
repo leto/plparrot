@@ -1,7 +1,7 @@
-NAME = plparrotu
-MODULE_big = plparrotu
-OBJS= plparrotu.o
-DATA_built = plparrotu.sql
+NAME = plparrot
+MODULE_big = plparrot
+OBJS= plparrot.o
+DATA_built = plparrot.sql
 REGRESS_OPTS = --dbname=$(PL_TESTDB) --load-language=plpgsql
 TESTS = $(wildcard t/sql/*.sql)
 REGRESS = $(patsubst t/sql/%.sql,%,$(TESTS))
