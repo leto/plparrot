@@ -4,3 +4,6 @@ RETURNS language_handler AS 'MODULE_PATHNAME' LANGUAGE C;
 
 -- language
 CREATE LANGUAGE plparrot HANDLER plparrot_call_handler;
+
+-- plpir is an alias for plparrot
+CREATE LANGUAGE plpir HANDLER plparrot_call_handler;

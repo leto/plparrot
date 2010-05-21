@@ -15,7 +15,7 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(25);
+SELECT plan(26);
 
 CREATE OR REPLACE FUNCTION create_plparrot()
 RETURNS BOOLEAN
@@ -37,6 +37,11 @@ CREATE FUNCTION test_int_in(int) RETURNS int AS $$
     .param int x
     .return(1)
 $$ LANGUAGE plparrot;
+
+CREATE FUNCTION test_plpir(int) RETURNS int LANGUAGE plpir AS $$
+    .param int x
+    .return(1)
+$$;
 
 CREATE FUNCTION test_immutable(int) RETURNS int AS $$
     .param int x
@@ -179,6 +184,8 @@ select is(test_char_out('c'), 'b', 'We can return a char');
 
 select is(test_int_in(42),1,'We can pass in an int');
 select is(test_int_out(1),42,'We can return an int');
+
+select is(test_plpir(1),1,'plpir is an alias for plparrot');
 
 select is(test_immutable(42),1,'Immutable works');
 select is(test_strict(NULL), NULL, 'Strict works');
