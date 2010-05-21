@@ -15,7 +15,7 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(26);
+SELECT plan(29);
 
 CREATE OR REPLACE FUNCTION create_plparrot()
 RETURNS BOOLEAN
@@ -41,6 +41,16 @@ $$ LANGUAGE plparrot;
 CREATE FUNCTION test_plpir(int) RETURNS int LANGUAGE plpir AS $$
     .param int x
     .return(1)
+$$;
+
+CREATE FUNCTION test_plpiru(int) RETURNS int LANGUAGE plpiru AS $$
+    .param int x
+    .return(42)
+$$;
+
+CREATE FUNCTION test_plparrotu(int) RETURNS int LANGUAGE plparrotu AS $$
+    .param int x
+    .return(42)
 $$;
 
 CREATE FUNCTION test_immutable(int) RETURNS int AS $$
@@ -143,19 +153,28 @@ CREATE FUNCTION test_time_out(time) RETURNS time AS $$
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_open() RETURNS int AS $$
-    $P0 = open ".", 'r'
+    $P0 = open "zanzibar", 'r'
     .return($P0)
 $$ LANGUAGE plparrot;
 
+CREATE FUNCTION test_open_plparrotu() RETURNS int AS $$
+    push_eh got_error
+    $P0 = open "somejunkthatdoesntexist", 'r'
+    pop_eh
+    .return(42)
+  got_error:
+    .return(-1)
+$$ LANGUAGE plparrotu;
+
 CREATE FUNCTION test_filehandle_open() RETURNS int AS $$
     $P1 = new 'FileHandle'
-    $P0 = $P1.'open'(".", 'r')
+    $P0 = $P1.'open'("stuff", 'r')
     .return($P0)
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_file_open() RETURNS int AS $$
     $P1 = new 'File'
-    $P0 = $P1.'open'(".", 'r')
+    $P0 = $P1.'open'("blah", 'r')
     .return($P0)
 $$ LANGUAGE plparrot;
 
@@ -169,6 +188,9 @@ $$ LANGUAGE plparrot;
 
 select is(test_open(), 42, 'open opcode is mocked');
 select is(test_filehandle_open(), 42, 'FileHandle.open is mocked');
+
+select isnt(test_open_plparrotu(), 42, 'open opcode is not mocked in plperlu');
+
 select is(test_file_open(), 42, 'File.open is mocked');
 
 select is(test_text_in('cheese'), 'cheese', 'We can pass a text in');
@@ -186,6 +208,10 @@ select is(test_int_in(42),1,'We can pass in an int');
 select is(test_int_out(1),42,'We can return an int');
 
 select is(test_plpir(1),1,'plpir is an alias for plparrot');
+
+-- Why does this fail? What happens to the return value?
+select is(test_plpiru(1),42,'plpiru can return values');
+select is(test_plparrotu(1),42,'plparrotu can return values');
 
 select is(test_immutable(42),1,'Immutable works');
 select is(test_strict(NULL), NULL, 'Strict works');

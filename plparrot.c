@@ -80,7 +80,7 @@ typedef struct plparrot_call_data
     MemoryContext tmp_cxt;
 } plparrot_call_data;
 
-Parrot_Interp interp, untrusted_interp;
+Parrot_Interp interp, untrusted_interp, trusted_interp;
 
 /* Helper functions */
 Parrot_String create_string(const char *name);
@@ -112,12 +112,12 @@ _PG_init(void)
     imcc_initialize(untrusted_interp);
 
     /* Must use the first created interp as the parent of subsequently created interps */
-    interp = Parrot_new(untrusted_interp);
-    imcc_initialize(interp);
+    trusted_interp = Parrot_new(untrusted_interp);
+    imcc_initialize(trusted_interp);
 
     //Parrot_set_trace(interp, PARROT_ALL_TRACE_FLAGS);
 
-    if (!interp) {
+    if (!trusted_interp) {
         elog(ERROR,"Could not create a trusted Parrot interpreter!\n");
         return;
     }
@@ -125,7 +125,7 @@ _PG_init(void)
         elog(ERROR,"Could not create an untrusted Parrot interpreter!\n");
         return;
     }
-
+    interp = trusted_interp;
     plparrot_secure(interp);
 
     inited = true;
@@ -139,17 +139,31 @@ _PG_init(void)
 void
 _PG_fini(void)
 {
-    Parrot_destroy(interp);
+    Parrot_destroy(trusted_interp);
+    Parrot_destroy(untrusted_interp);
+
     inited = false;
 }
 
 Datum plparrot_call_handler(PG_FUNCTION_ARGS);
+Datum plparrotu_call_handler(PG_FUNCTION_ARGS);
 static Datum plparrot_func_handler(PG_FUNCTION_ARGS);
+static Datum plparrotu_func_handler(PG_FUNCTION_ARGS);
 
  /* The PostgreSQL function+trigger managers call this function for execution
     of PL/Parrot procedures. */
 
 PG_FUNCTION_INFO_V1(plparrot_call_handler);
+PG_FUNCTION_INFO_V1(plparrotu_call_handler);
+
+static Datum
+plparrotu_func_handler(PG_FUNCTION_ARGS)
+{
+    interp = untrusted_interp;
+    return plparrot_func_handler(fcinfo);
+    interp = trusted_interp;
+}
+
 /*
  * The PostgreSQL function+trigger managers call this function for execution of
  * PL/Parrot procedures.
@@ -291,6 +305,15 @@ plparrot_push_pgdatatype_pmc(Parrot_PMC func_args, FunctionCallInfo fcinfo, int 
                 elog(ERROR,"PL/Parrot does not know how to convert the %u element type", element_type);
         }
 }
+
+Datum
+plparrotu_call_handler(PG_FUNCTION_ARGS)
+{
+    interp = untrusted_interp;
+    plparrot_call_handler(fcinfo);
+    interp = trusted_interp;
+}
+
 Datum
 plparrot_call_handler(PG_FUNCTION_ARGS)
 {
