@@ -15,7 +15,7 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(29);
+SELECT plan(30);
 
 CREATE OR REPLACE FUNCTION create_plparrot()
 RETURNS BOOLEAN
@@ -104,6 +104,13 @@ $$ LANGUAGE plparrot;
 CREATE FUNCTION test_varchar_out(varchar) RETURNS varchar AS $$
     $S1 = 'blue'
     .return($S1)
+$$ LANGUAGE plparrot;
+
+CREATE FUNCTION test_varchar_out_concat(varchar) RETURNS varchar AS $$
+    $S1 = 'red'
+    $S2 = 'fish'
+    $S3 = $S1 . $S2
+    .return($S3)
 $$ LANGUAGE plparrot;
 
 CREATE FUNCTION test_char_in(char) RETURNS char AS $$
@@ -198,6 +205,8 @@ select is(test_text_out('cheese'), 'blue', 'We can return a text');
 
 select is(test_varchar_in('cheese'), 'cheese', 'We can pass a varchar in');
 select is(test_varchar_out('cheese'), 'blue', 'We can return a varchar');
+
+select is(test_varchar_out_concat('stuff'), 'redfish', 'We can concat and return a varchar');
 
 select is(test_int_float(42,6.9), 1, 'We can pass an int and float as arguments');
 
