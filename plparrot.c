@@ -80,7 +80,7 @@ typedef struct plparrot_call_data
     MemoryContext tmp_cxt;
 } plparrot_call_data;
 
-Parrot_Interp interp;
+Parrot_Interp interp, untrusted_interp;
 
 /* Helper functions */
 Parrot_String create_string(const char *name);
@@ -107,12 +107,22 @@ _PG_init(void)
     if (inited)
         return;
 
-    interp = Parrot_new(NULL);
+
+    untrusted_interp = Parrot_new(NULL);
+    imcc_initialize(untrusted_interp);
+
+    /* Must use the first created interp as the parent of subsequently created interps */
+    interp = Parrot_new(untrusted_interp);
     imcc_initialize(interp);
+
     //Parrot_set_trace(interp, PARROT_ALL_TRACE_FLAGS);
 
     if (!interp) {
-        elog(ERROR,"Could not create a Parrot interpreter!\n");
+        elog(ERROR,"Could not create a trusted Parrot interpreter!\n");
+        return;
+    }
+    if (!untrusted_interp) {
+        elog(ERROR,"Could not create an untrusted Parrot interpreter!\n");
         return;
     }
 
