@@ -15,7 +15,7 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(30);
+SELECT plan(31);
 
 CREATE OR REPLACE FUNCTION create_plparrot()
 RETURNS BOOLEAN
@@ -190,8 +190,13 @@ CREATE FUNCTION test_load_pir_library() RETURNS int AS $$
     .return(5)
 $$ LANGUAGE plparrot;
 
--- This does not work yet due to a bug in Parrot
---select is(test_load_pir_library(), 5, 'we can load PIR libraries included with Parrot');
+CREATE FUNCTION test_load_pbc_library() RETURNS int AS $$
+    load_bytecode 'config.pbc'
+    .return(5)
+$$ LANGUAGE plparrot;
+
+select is(test_load_pir_library(), 5, 'we can .include PIR libraries included with Parrot');
+select is(test_load_pbc_library(), 5, 'we can load_bytecode PBC libraries included with Parrot');
 
 select is(test_open(), 42, 'open opcode is mocked');
 select is(test_filehandle_open(), 42, 'FileHandle.open is mocked');
