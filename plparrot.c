@@ -107,7 +107,7 @@ _PG_init(void)
     if (inited)
         return;
 
-
+    Parrot_set_config_hash();
     untrusted_interp = Parrot_new(NULL);
     imcc_initialize(untrusted_interp);
 
@@ -346,9 +346,8 @@ void plparrot_secure(Parrot_Interp interp)
 {
     Parrot_PMC func_pmc;
     Parrot_String err;
-    char *p6class = PARROTP6OBJECT;
 
-    Parrot_load_bytecode(interp,create_string_const(p6class));
+    Parrot_load_bytecode(interp,create_string_const("P6object.pbc"));
 
     func_pmc  = Parrot_compile_string(interp, create_string_const("PIR"), PLPARROT_SECURE, &err);
     Parrot_ext_call(interp, func_pmc, "->");

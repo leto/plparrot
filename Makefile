@@ -6,19 +6,20 @@ REGRESS_OPTS = --dbname=$(PL_TESTDB) --load-language=plpgsql
 TESTS = $(wildcard t/sql/*.sql)
 REGRESS = $(patsubst t/sql/%.sql,%,$(TESTS))
 
-EXTRA_CLEAN = 
+EXTRA_CLEAN =
 
 PG_CONFIG = pg_config
 PGXS := $(shell $(PG_CONFIG) --pgxs)
 include $(PGXS)
 
+O 				 = $(shell parrot_config o)
 PARROTINCLUDEDIR = $(shell parrot_config includedir)
 PARROTVERSIONDIR = $(shell parrot_config versiondir)
-PARROTINC        = "$(PARROTINCLUDEDIR)$(PARROTVERSIONDIR)"
-PARROTLDFLAGS    = $(shell parrot_config ldflags)
-PARROTLINKFLAGS  = $(shell parrot_config inst_libparrot_linkflags)
 PARROTLIBDIR     = $(shell parrot_config libdir)
-PARROTP6OBJECT   = $(PARROTLIBDIR)$(PARROTVERSIONDIR)/library/P6object.pbc
+PARROTINC        = "$(PARROTINCLUDEDIR)$(PARROTVERSIONDIR)"
+PARROTCONFIG     = $(PARROTLIBDIR)/$(PARROTVERSIONDIR)/parrot_config
+PARROTLDFLAGS    = $(shell parrot_config ldflags)
+PARROTLINKFLAGS  = $(shell parrot_config inst_libparrot_linkflags) $(PARROTCONFIG)$O
 PARROTREVISION   = $(shell parrot_config revision)
 MINPARROTREVISION= 45961
 
@@ -34,7 +35,7 @@ PARROT_IS_INSECURE = $(shell expr $(PARROTREVISION) \< $(MINPARROTREVISION))
 # PGVER_PATCH = $(shell echo $(VERSION) | awk -F. '{ print ($$3 + 0) }')
 
 override CPPFLAGS := -I$(PARROTINC) -I$(srcdir) $(CPPFLAGS)
-override CFLAGS := $(PARROTLDFLAGS) $(PARROTLINKFLAGS) $(CFLAGS) -D'PARROTP6OBJECT="$(PARROTP6OBJECT)"'
+override CFLAGS   := $(PARROTLDFLAGS) $(PARROTLINKFLAGS) $(CFLAGS)
 
 # It would be nice if this ran before we compiled
 all: check_revision
