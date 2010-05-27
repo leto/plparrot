@@ -159,9 +159,11 @@ PG_FUNCTION_INFO_V1(plparrotu_call_handler);
 static Datum
 plparrotu_func_handler(PG_FUNCTION_ARGS)
 {
+    Datum retval;
     interp = untrusted_interp;
-    return plparrot_func_handler(fcinfo);
+    retval = plparrot_func_handler(fcinfo);
     interp = trusted_interp;
+    return retval;
 }
 
 /*
@@ -309,9 +311,11 @@ plparrot_push_pgdatatype_pmc(Parrot_PMC func_args, FunctionCallInfo fcinfo, int 
 Datum
 plparrotu_call_handler(PG_FUNCTION_ARGS)
 {
+    Datum retval;
     interp = untrusted_interp;
-    plparrot_call_handler(fcinfo);
+    retval = plparrot_call_handler(fcinfo);
     interp = trusted_interp;
+    return retval;
 }
 
 Datum

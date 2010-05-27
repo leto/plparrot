@@ -15,7 +15,7 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(31);
+SELECT plan(32);
 
 CREATE OR REPLACE FUNCTION create_plparrot()
 RETURNS BOOLEAN
