@@ -3,33 +3,14 @@
 
 This document describes the roadmap for PL/Parrot. Please be as specific as possible.
 
-* One major question is how we'll define PL/Parrot functions. In most language,
-  users pass the actual function code in the CREATE FUNCTION call, but for C
-  functions, the text of the function is actually the path to a shared object
-  containing the compiled function. In reality we can have the function source
-  whatever we want (say, a JSON hash containing keys that describe a file path,
-  the source language, the author's name and favorite color, etc.). The easiest
-  thing to do is simply to support only PIR initially. When PIR support is
-  functional/complete, support for NQP and other HLL's will be added
-
-** Should be able to grab this from PL/LOLCODE: Get the function OID from the
-    parameters passed to the handler, use that to get a Form_pg_proc struct, which
-    contains a char *prosrc, which is the function's text.
-** (JWT) The above is all true, but misses the point, namely, given a bunch of
-    function text, how does the VM know what language it's written in, in order to
-    compile it to bytecode?
-
-** (Duke) I am of the opinion that we will have PL's built on top of PL/Parrot,
-    so the stored procedure will define what language the program source is in,
-    when it is defined.
-
 * Datatype marshalling is another big step -- eggyknap knows about this stuff.
   Function parameters need to be converted from pgsql Datum types to something
   Parrot can both understand and have access to. The function's return value(s)
   then need to be converted back to Datums.
 
   This has been accomplished for integers, floats and string types. More code
-  needs to be written for all of the various PG datatypes.
+  needs to be written for all of the various PG datatypes. It also needs
+  to be thought out how HLL's deal with datatype conversion.
 
 * Make installation and configuration easier
 
@@ -55,16 +36,4 @@ This document describes the roadmap for PL/Parrot. Please be as specific as poss
         would load, and then use for database access. Perhaps it makes more
         sense to build a PMC that provides db access functions, and make it
         available in the default namespace
-
-
-06:51:52 < eggyknap> I think we need to decide how parrot is going to get the code it wants to execute. In psql, you say CREATE FUNCTION ... AS $$ <function text>$$ ...
-06:51:58 < eggyknap> ... and we need to know what that function text will be.
-06:52:25 < eggyknap> For C language functions, it's a filename, which contains the compiled function. We could do something like that, but it means people can't edit their 
-                     pl/parrot functions with some of psql's nice built-in features
-06:52:47 < eggyknap> It also means we don't have to figure out how to get pl/parrot to compile things automatically, and thus might be the best way to go, at least at first.
-06:53:06 < eggyknap> The alternative is to let people put parrot code in that "function text" spot, and have pl/parrot figure out what language it is and how to compile it.
-06:53:19 < eggyknap> Given a decision on that front, we can start doing really interesting things in the handler.
-06:56:29 < eggyknap> The handler, though, needs to be able to translate function arguments into data types parrot can both access and understand, needs to translate return 
-                     types to something pgsql can understand, and needs to load and execute parrot code. Plus the NQP thingy needs to provide an interface to some of the SPI 
-                     functions described in the link I pasted above.
 
