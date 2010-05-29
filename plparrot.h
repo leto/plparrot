@@ -5,6 +5,7 @@
  */
 #define PLPARROT_SECURE \
 ".sub _ :main\n" \
+"    .loadlib \"io_ops\"\n" \
 "    .local pmc p6meta, interp, classes, classid\n" \
 "    p6meta = get_root_global [\"parrot\"], \"P6metaclass\"\n" \
 "    p6meta.'new_class'('PLParrot')\n" \
