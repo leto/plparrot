@@ -39,6 +39,7 @@ override CFLAGS   := $(PARROTLDFLAGS) $(PARROTLINKFLAGS) $(CFLAGS)
 
 # It would be nice if this ran before we compiled
 all: check_revision
+	./bin/text2macro.pl plparrot_secure.pir > plparrot.h
 
 check_revision:
 ifeq ($(PARROT_IS_INSECURE),1)
