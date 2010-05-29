@@ -35,7 +35,7 @@ PARROT_IS_INSECURE = $(shell expr $(PARROTREVISION) \< $(MINPARROTREVISION))
 # PGVER_PATCH = $(shell echo $(VERSION) | awk -F. '{ print ($$3 + 0) }')
 
 override CPPFLAGS := -I$(PARROTINC) -I$(srcdir) $(CPPFLAGS)
-override CFLAGS   := $(PARROTLDFLAGS) $(PARROTLINKFLAGS) $(CFLAGS)
+override CFLAGS   := $(PARROTLDFLAGS) $(PARROTLINKFLAGS) $(CFLAGS) -D'PERL6PBC="$(PERL6PBC)"'
 
 # It would be nice if this ran before we compiled
 all: check_revision

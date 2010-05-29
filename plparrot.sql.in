@@ -17,3 +17,7 @@ CREATE LANGUAGE plpir HANDLER plparrot_call_handler;
 
 -- plpiru is an alias for plparrotu
 CREATE LANGUAGE plpiru HANDLER plparrotu_call_handler;
+
+CREATE LANGUAGE plperl6 HANDLER plperl6_call_handler;
+
+CREATE LANGUAGE plperl6u HANDLER plperl6u_call_handler;

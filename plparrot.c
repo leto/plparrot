@@ -80,7 +80,7 @@ typedef struct plparrot_call_data
     MemoryContext tmp_cxt;
 } plparrot_call_data;
 
-Parrot_Interp interp, untrusted_interp, trusted_interp;
+Parrot_Interp interp, untrusted_interp, trusted_interp, p6_interp;
 
 /* Helper functions */
 Parrot_String create_string(const char *name);
@@ -116,6 +116,10 @@ _PG_init(void)
     //imcc_initialize(trusted_interp);
 
     //Parrot_set_trace(interp, PARROT_ALL_TRACE_FLAGS);
+#ifdef PERL6PBC
+    p6_interp = Parrot_new(trusted_interp);
+    Parrot_load_bytecode(p6_interp,create_string_const(PERL6PBC));
+#endif
 
     if (!trusted_interp) {
         elog(ERROR,"Could not create a trusted Parrot interpreter!\n");
