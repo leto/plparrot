@@ -38,7 +38,11 @@ override CPPFLAGS := -I$(PARROTINC) -I$(srcdir) $(CPPFLAGS)
 override CFLAGS   := $(PARROTLDFLAGS) $(PARROTLINKFLAGS) $(CFLAGS) -D'PERL6PBC="$(PERL6PBC)"'
 
 # It would be nice if this ran before we compiled
-all: check_revision
+all: check_revision headers
+	@echo "\n\n\tHappy Hacking with PL/Parrot!\n\n"
+
+headers:
+	./bin/text2macro.pl plparrot_secure.pir > plparrot.h
 
 check_revision:
 ifeq ($(PARROT_IS_INSECURE),1)
@@ -48,7 +52,6 @@ ifeq ($(PARROT_IS_INSECURE),1)
 else
 	@echo "Found a sufficiently new version of Parrot r$(PARROTREVISION)"
 endif
-
 
 test: all
 	psql -AX -f $(TESTS)
