@@ -15,8 +15,15 @@
 .end
 
 .namespace ["PLParrot"]
+.sub open
+    .param pmc stuff :slurpy
+    # die "Attempt to open "
+    .return(42)
+.end
+
 .sub open :method
-    .param pmc args :slurpy
+    .param string file
+    .param string mode
     # die "Attempt to open "
     .return(42)
 .end

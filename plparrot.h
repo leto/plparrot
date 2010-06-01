@@ -21,8 +21,15 @@
 ".end\n" \
 "\n" \
 ".namespace [\"PLParrot\"]\n" \
+".sub open\n" \
+"    .param pmc stuff :slurpy\n" \
+"    # die \"Attempt to open \"\n" \
+"    .return(42)\n" \
+".end\n" \
+"\n" \
 ".sub open :method\n" \
-"    .param pmc args :slurpy\n" \
+"    .param string file\n" \
+"    .param string mode\n" \
 "    # die \"Attempt to open \"\n" \
 "    .return(42)\n" \
 ".end\n" \
