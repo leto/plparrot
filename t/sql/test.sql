@@ -15,7 +15,7 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(32);
+SELECT plan(33);
 
 CREATE OR REPLACE FUNCTION create_plparrot()
 RETURNS BOOLEAN
@@ -179,6 +179,16 @@ CREATE FUNCTION test_filehandle_open() RETURNS int AS $$
     .return($P0)
 $$ LANGUAGE plparrot;
 
+CREATE FUNCTION test_filehandle_open_plpiru() RETURNS int AS $$
+    $P1 = new 'FileHandle'
+    push_eh throws_error
+    $P0 = $P1.'open'("thisstuffisnthere", 'r')
+    pop_eh
+    .return($P0)
+ throws_error:
+    .return(1)
+$$ LANGUAGE plpiru;
+
 CREATE FUNCTION test_file_open() RETURNS int AS $$
     $P1 = new 'File'
     $P0 = $P1.'open'("blah", 'r')
@@ -199,7 +209,8 @@ select is(test_load_pir_library(), 5, 'we can .include PIR libraries included wi
 select is(test_load_pbc_library(), 5, 'we can load_bytecode PBC libraries included with Parrot');
 
 select is(test_open(), 42, 'open opcode is mocked');
-select is(test_filehandle_open(), 42, 'FileHandle.open is mocked');
+select is(test_filehandle_open(), 42, 'FileHandle.open is mocked in PL/PIR');
+select is(test_filehandle_open_plpiru(), 1, 'FileHandle.open is not mocked in PL/PIRU');
 
 
 select is(test_file_open(), 42, 'File.open is mocked');
