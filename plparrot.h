@@ -5,10 +5,6 @@
  */
 #define PLPARROT_SECURE \
 ".loadlib \"io_ops\"\n" \
-".loadlib 'perl6_group'\n" \
-".loadlib 'perl6_ops'\n" \
-".loadlib 'math_ops'\n" \
-"\n" \
 "\n" \
 ".sub _ :main\n" \
 "    .local pmc p6meta, interp, classes, classid\n" \

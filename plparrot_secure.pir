@@ -1,8 +1,4 @@
 .loadlib "io_ops"
-.loadlib 'perl6_group'
-.loadlib 'perl6_ops'
-.loadlib 'math_ops'
-
 
 .sub _ :main
     .local pmc p6meta, interp, classes, classid
