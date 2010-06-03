@@ -125,6 +125,8 @@ _PG_init(void)
 #ifdef PERL6PBC
     p6_interp = Parrot_new(trusted_interp);
     interp    = p6_interp;
+    Parrot_load_bytecode(interp,create_string_const("P6object.pbc"));
+    Parrot_load_bytecode(interp,create_string_const("P6Regex.pbc"));
     if (!p6_interp) {
         elog(ERROR,"Could not create a Perl 6 interpreter!\n");
         return;
@@ -133,6 +135,7 @@ _PG_init(void)
 #endif
 
     interp = trusted_interp;
+    Parrot_load_bytecode(interp,create_string_const("P6object.pbc"));
     plparrot_secure(interp);
 
     inited = true;
@@ -357,8 +360,6 @@ void plparrot_secure(Parrot_Interp interp)
 {
     Parrot_PMC func_pmc;
     Parrot_String err;
-
-    Parrot_load_bytecode(interp,create_string_const("P6object.pbc"));
 
     func_pmc  = Parrot_compile_string(interp, create_string_const("PIR"), PLPARROT_SECURE, &err);
     Parrot_ext_call(interp, func_pmc, "->");
