@@ -109,17 +109,9 @@ _PG_init(void)
 
     Parrot_set_config_hash();
     untrusted_interp = Parrot_new(NULL);
-    //imcc_initialize(untrusted_interp);
 
     /* Must use the first created interp as the parent of subsequently created interps */
     trusted_interp = Parrot_new(untrusted_interp);
-    //imcc_initialize(trusted_interp);
-
-    //Parrot_set_trace(interp, PARROT_ALL_TRACE_FLAGS);
-#ifdef PERL6PBC
-    p6_interp = Parrot_new(trusted_interp);
-    Parrot_load_bytecode(p6_interp,create_string_const(PERL6PBC));
-#endif
 
     if (!trusted_interp) {
         elog(ERROR,"Could not create a trusted Parrot interpreter!\n");
@@ -129,6 +121,17 @@ _PG_init(void)
         elog(ERROR,"Could not create an untrusted Parrot interpreter!\n");
         return;
     }
+
+#ifdef PERL6PBC
+    p6_interp = Parrot_new(trusted_interp);
+    interp    = p6_interp;
+    if (!p6_interp) {
+        elog(ERROR,"Could not create a Perl 6 interpreter!\n");
+        return;
+    }
+    Parrot_load_bytecode(interp,create_string("/Users/leto/git/rakudo/perl6.pbc"));
+#endif
+
     interp = trusted_interp;
     plparrot_secure(interp);
 
