@@ -118,7 +118,12 @@ _PG_init(void)
     //Parrot_set_trace(interp, PARROT_ALL_TRACE_FLAGS);
 #ifdef PERL6PBC
     p6_interp = Parrot_new(trusted_interp);
-    Parrot_load_bytecode(p6_interp,create_string_const(PERL6PBC));
+    interp = p6_interp;
+    if (!interp) {
+        elog(ERROR,"Could not create a PL/Perl6 interpreter!\n");
+        return;
+    }
+    Parrot_load_bytecode(interp,create_string_const(PERL6PBC));
 #endif
 
     if (!trusted_interp) {
