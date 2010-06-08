@@ -4,7 +4,6 @@
 /* Parrot header files */
 #include "parrot/embed.h"
 #include "parrot/extend.h"
-#include "parrot/imcc.h"
 #include "parrot/extend_vtable.h"
 #include "parrot/config.h"
 
@@ -109,11 +108,9 @@ _PG_init(void)
 
     Parrot_set_config_hash();
     untrusted_interp = Parrot_new(NULL);
-    //imcc_initialize(untrusted_interp);
 
     /* Must use the first created interp as the parent of subsequently created interps */
     trusted_interp = Parrot_new(untrusted_interp);
-    //imcc_initialize(trusted_interp);
 
     //Parrot_set_trace(interp, PARROT_ALL_TRACE_FLAGS);
 #ifdef PERL6PBC
