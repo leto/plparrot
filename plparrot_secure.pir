@@ -1,4 +1,6 @@
-.sub _ :main
+.loadlib "io_ops"
+
+.sub _ :main :load :anon
     .local pmc p6meta, interp, classes, classid
     p6meta = get_root_global ["parrot"], "P6metaclass"
     p6meta.'new_class'('PLParrot')
@@ -13,8 +15,15 @@
 .end
 
 .namespace ["PLParrot"]
+.sub open
+    .param pmc stuff :slurpy
+    # die "Attempt to open "
+    .return(42)
+.end
+
 .sub open :method
-    .param pmc args :slurpy
+    .param string file
+    .param string mode
     # die "Attempt to open "
     .return(42)
 .end
