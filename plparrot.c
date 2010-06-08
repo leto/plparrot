@@ -79,7 +79,9 @@ typedef struct plparrot_call_data
     MemoryContext tmp_cxt;
 } plparrot_call_data;
 
-Parrot_Interp interp, untrusted_interp, trusted_interp, p6_interp;
+/* TODO: Refactor into struct */
+Parrot_Interp interp, untrusted_interp, trusted_interp,
+              p6_interp, p6u_interp;
 
 /* Helper functions */
 Parrot_String create_string(const char *name);
@@ -115,11 +117,16 @@ _PG_init(void)
     //Parrot_set_trace(interp, PARROT_ALL_TRACE_FLAGS);
 #ifdef PERL6PBC
     p6_interp = Parrot_new(trusted_interp);
-    interp = p6_interp;
-    if (!interp) {
+    p6u_interp = Parrot_new(untrusted_interp);
+    if (!p6_interp) {
         elog(ERROR,"Could not create a PL/Perl6 interpreter!\n");
         return;
     }
+    if (!p6u_interp) {
+        elog(ERROR,"Could not create a PL/Perl6U interpreter!\n");
+        return;
+    }
+    interp = p6_interp;
     Parrot_load_bytecode(interp,create_string_const(PERL6PBC));
 #endif
 
@@ -151,8 +158,12 @@ _PG_fini(void)
     inited = false;
 }
 
+/* Call handlers */
 Datum plparrot_call_handler(PG_FUNCTION_ARGS);
 Datum plparrotu_call_handler(PG_FUNCTION_ARGS);
+Datum plperl6_call_handler(PG_FUNCTION_ARGS);
+Datum plperl6u_call_handler(PG_FUNCTION_ARGS);
+
 static Datum plparrot_func_handler(PG_FUNCTION_ARGS);
 static Datum plparrotu_func_handler(PG_FUNCTION_ARGS);
 
@@ -161,6 +172,8 @@ static Datum plparrotu_func_handler(PG_FUNCTION_ARGS);
 
 PG_FUNCTION_INFO_V1(plparrot_call_handler);
 PG_FUNCTION_INFO_V1(plparrotu_call_handler);
+PG_FUNCTION_INFO_V1(plperl6_call_handler);
+PG_FUNCTION_INFO_V1(plperl6u_call_handler);
 
 static Datum
 plparrotu_func_handler(PG_FUNCTION_ARGS)
@@ -321,6 +334,23 @@ plparrotu_call_handler(PG_FUNCTION_ARGS)
     interp = untrusted_interp;
     retval = plparrot_call_handler(fcinfo);
     interp = trusted_interp;
+    return retval;
+}
+
+Datum
+plperl6u_call_handler(PG_FUNCTION_ARGS)
+{
+    Datum retval;
+    interp = p6_interp;
+    retval = plperl6_call_handler(fcinfo);
+    interp = trusted_interp;
+    return retval;
+}
+
+Datum
+plperl6_call_handler(PG_FUNCTION_ARGS)
+{
+    Datum retval = 0;
     return retval;
 }
 
