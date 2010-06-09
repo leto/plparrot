@@ -4,8 +4,6 @@
  * Written by ./bin/text2macro.pl from plparrot_secure.pir
  */
 #define PLPARROT_SECURE \
-".loadlib \"io_ops\"\n" \
-"\n" \
 ".sub _ :main :load :anon\n" \
 "    .local pmc p6meta, interp, classes, classid\n" \
 "    p6meta = get_root_global [\"parrot\"], \"P6metaclass\"\n" \
