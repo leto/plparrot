@@ -165,6 +165,7 @@ Datum plperl6_call_handler(PG_FUNCTION_ARGS);
 Datum plperl6u_call_handler(PG_FUNCTION_ARGS);
 
 static Datum plparrot_func_handler(PG_FUNCTION_ARGS);
+static Datum plperl6_func_handler(PG_FUNCTION_ARGS);
 static Datum plparrotu_func_handler(PG_FUNCTION_ARGS);
 
  /* The PostgreSQL function+trigger managers call this function for execution
@@ -175,6 +176,13 @@ PG_FUNCTION_INFO_V1(plparrotu_call_handler);
 PG_FUNCTION_INFO_V1(plperl6_call_handler);
 PG_FUNCTION_INFO_V1(plperl6u_call_handler);
 
+static Datum
+plperl6_func_handler(PG_FUNCTION_ARGS)
+{
+    Datum retval, procsrc_datum;
+    retval = PG_GETARG_DATUM(0);
+    return retval;
+}
 static Datum
 plparrotu_func_handler(PG_FUNCTION_ARGS)
 {
@@ -351,6 +359,21 @@ Datum
 plperl6_call_handler(PG_FUNCTION_ARGS)
 {
     Datum retval = 0;
+    TriggerData *tdata;
+    PG_TRY();
+    {
+        if (CALLED_AS_TRIGGER(fcinfo)) {
+            tdata = (TriggerData *) fcinfo->context;
+            /* TODO: we need a trigger handler */
+        } else {
+            retval = plperl6_func_handler(fcinfo);
+        }
+    }
+    PG_CATCH();
+    {
+        PG_RE_THROW();
+    }
+    PG_END_TRY();
     return retval;
 }
 
