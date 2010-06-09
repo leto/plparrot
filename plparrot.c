@@ -180,6 +180,15 @@ static Datum
 plperl6_func_handler(PG_FUNCTION_ARGS)
 {
     Datum retval, procsrc_datum;
+    char *proc_src, *errmsg, *tmp;
+    char *perl6_src;
+    char perl6_begin[7] = "sub r {";
+    char perl6_end[1]    = "}";
+    int numargs, rc, i, length;
+
+    if ((rc = SPI_connect()) != SPI_OK_CONNECT)
+        elog(ERROR, "SPI_connect failed: %s", SPI_result_code_string(rc));
+
     retval = PG_GETARG_DATUM(0);
     return retval;
 }
