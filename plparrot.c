@@ -188,8 +188,6 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     if ((rc = SPI_connect()) != SPI_OK_CONNECT)
         elog(ERROR, "SPI_connect failed: %s", SPI_result_code_string(rc));
 
-    retval = PG_GETARG_DATUM(0);
-
     proctup = SearchSysCache(PROCOID, ObjectIdGetDatum(fcinfo->flinfo->fn_oid), 0, 0, 0);
     if (!HeapTupleIsValid(proctup))
         elog(ERROR, "Failed to look up procedure with OID %u", fcinfo->flinfo->fn_oid);
@@ -197,7 +195,6 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     returntype = procstruct->prorettype;
     procsrc_datum = SysCacheGetAttr(PROCOID, proctup, Anum_pg_proc_prosrc, &isnull);
     numargs = get_func_arg_info(proctup, &argtypes, &argnames, &argmodes);
-
 
     if (isnull)
         elog(ERROR, "Couldn't load function source for function with OID %u", fcinfo->flinfo->fn_oid);
@@ -247,14 +244,13 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
 
     if (Parrot_PMC_get_bool(interp,result)) {
         tmp_pmc = Parrot_PMC_pop_pmc(interp, result);
-        retval = plparrot_make_sausage(interp,tmp_pmc,fcinfo);
+        return plparrot_make_sausage(interp,tmp_pmc,fcinfo);
     } else {
         /* We got an empty array of return values, so we should return void */
         PG_RETURN_VOID();
     }
-
-    return retval;
 }
+
 void
 plparrot_push_pgdatatype_pmc(Parrot_PMC func_args, FunctionCallInfo fcinfo, int i)
 {
