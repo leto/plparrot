@@ -186,9 +186,6 @@ plperl6_func_handler(PG_FUNCTION_ARGS)
     char perl6_end[1]    = "}";
     int numargs, rc, i, length;
 
-    if ((rc = SPI_connect()) != SPI_OK_CONNECT)
-        elog(ERROR, "SPI_connect failed: %s", SPI_result_code_string(rc));
-
     retval = PG_GETARG_DATUM(0);
     return retval;
 }
