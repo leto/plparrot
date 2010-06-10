@@ -179,6 +179,8 @@ PG_FUNCTION_INFO_V1(plperl6u_call_handler);
 static Datum
 plperl6_func_handler(PG_FUNCTION_ARGS)
 {
+    Parrot_PMC func_pmc, func_args, result, tmp_pmc;
+    Parrot_String err;
     Datum retval, procsrc_datum;
     Form_pg_proc procstruct;
     HeapTuple proctup;
@@ -218,6 +220,20 @@ plperl6_func_handler(PG_FUNCTION_ARGS)
     strncat(perl6_src, perl6_end, 1);
 
     elog(NOTICE,"perl6_src = %s", perl6_src );
+
+    Parrot_compreg(interp,create_string_const("perl6"));
+    elog(NOTICE,"registered compiler");
+    func_pmc  = Parrot_compile_string(interp, create_string_const("perl6"), perl6_src, &err);
+    elog(NOTICE,"compiled a perl6 string");
+    if (!Parrot_str_is_null(interp, err)) {
+        tmp = Parrot_str_to_cstring(interp, err);
+        errmsg = pstrdup(tmp);
+        Parrot_str_free_cstring(tmp);
+        elog(ERROR, "Error compiling perl6 function: %s", errmsg);
+    }
+
+    free(perl6_src);
+
 
     return retval;
 }
@@ -398,6 +414,8 @@ plperl6_call_handler(PG_FUNCTION_ARGS)
 {
     Datum retval = 0;
     TriggerData *tdata;
+
+    interp = p6_interp;
     PG_TRY();
     {
         if (CALLED_AS_TRIGGER(fcinfo)) {
@@ -412,6 +430,7 @@ plperl6_call_handler(PG_FUNCTION_ARGS)
         PG_RE_THROW();
     }
     PG_END_TRY();
+    interp = trusted_interp;
     return retval;
 }
 
