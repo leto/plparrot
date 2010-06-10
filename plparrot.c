@@ -180,13 +180,37 @@ static Datum
 plperl6_func_handler(PG_FUNCTION_ARGS)
 {
     Datum retval, procsrc_datum;
+    Form_pg_proc procstruct;
+    HeapTuple proctup;
+    Oid returntype, *argtypes;
+
     char *proc_src, *errmsg, *tmp;
     char *perl6_src;
     char perl6_begin[7] = "sub r {";
     char perl6_end[1]    = "}";
     int numargs, rc, i, length;
+    char **argnames, *argmodes;
+    bool isnull;
+
 
     retval = PG_GETARG_DATUM(0);
+
+    proctup = SearchSysCache(PROCOID, ObjectIdGetDatum(fcinfo->flinfo->fn_oid), 0, 0, 0);
+    if (!HeapTupleIsValid(proctup))
+        elog(ERROR, "Failed to look up procedure with OID %u", fcinfo->flinfo->fn_oid);
+    procstruct = (Form_pg_proc) GETSTRUCT(proctup);
+    returntype = procstruct->prorettype;
+    procsrc_datum = SysCacheGetAttr(PROCOID, proctup, Anum_pg_proc_prosrc, &isnull);
+    numargs = get_func_arg_info(proctup, &argtypes, &argnames, &argmodes);
+
+
+    if (isnull)
+        elog(ERROR, "Couldn't load function source for function with OID %u", fcinfo->flinfo->fn_oid);
+    ReleaseSysCache(proctup);
+    proc_src = TextDatum2String(procsrc_datum);
+    length   = strlen(proc_src);
+    elog(NOTICE,"proc_src = %s", proc_src );
+
     return retval;
 }
 static Datum
