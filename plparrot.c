@@ -211,6 +211,14 @@ plperl6_func_handler(PG_FUNCTION_ARGS)
     length   = strlen(proc_src);
     elog(NOTICE,"proc_src = %s", proc_src );
 
+    perl6_src = malloc( 7 + length + 1 );
+    memcpy(perl6_src, perl6_begin, 7);
+    /* This should have a sane default and be configurable */
+    strncat(perl6_src, proc_src, MAX_SUBROUTINE_LENGTH);
+    strncat(perl6_src, perl6_end, 1);
+
+    elog(NOTICE,"perl6_src = %s", perl6_src );
+
     return retval;
 }
 static Datum
