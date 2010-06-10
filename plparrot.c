@@ -1,4 +1,5 @@
 #include "plparrot.h"
+#include "plperl6.h"
 #include "config.h"
 
 /* Parrot header files */
@@ -90,6 +91,7 @@ Parrot_String create_string_const(const char *name);
 Parrot_PMC create_pmc(const char *name);
 Datum       plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fcinfo);
 void plparrot_secure(Parrot_Interp interp);
+void plperl6_setup(Parrot_Interp interp);
 
 void plparrot_push_pgdatatype_pmc(Parrot_PMC, FunctionCallInfo, int);
 
@@ -128,6 +130,7 @@ _PG_init(void)
     }
     interp = p6_interp;
     Parrot_load_bytecode(interp,create_string_const(PERL6PBC));
+    plperl6_setup(interp);
 #endif
 
     if (!trusted_interp) {
@@ -460,6 +463,15 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     current_call_data = save_call_data;
 
     return retval;
+}
+
+void plperl6_setup(Parrot_Interp interp)
+{
+    Parrot_PMC func_pmc;
+    Parrot_String err;
+
+    func_pmc  = Parrot_compile_string(interp, create_string_const("PIR"), PLPERL6, &err);
+    Parrot_ext_call(interp, func_pmc, "->");
 }
 
 void plparrot_secure(Parrot_Interp interp)

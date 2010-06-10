@@ -43,6 +43,7 @@ all: check_revision headers
 
 headers:
 	./bin/text2macro.pl plparrot_secure.pir > plparrot.h
+	./bin/text2macro.pl plperl6.pir > plperl6.h
 
 check_revision:
 ifeq ($(PARROT_IS_INSECURE),1)
