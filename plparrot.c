@@ -91,7 +91,7 @@ Parrot_String create_string_const(const char *name);
 Parrot_PMC create_pmc(const char *name);
 Datum       plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fcinfo);
 void plparrot_secure(Parrot_Interp interp);
-void plperl6_setup(Parrot_Interp interp);
+Parrot_PMC plperl6_run(Parrot_Interp interp, Parrot_String code);
 
 void plparrot_push_pgdatatype_pmc(Parrot_PMC, FunctionCallInfo, int);
 
@@ -130,7 +130,6 @@ _PG_init(void)
     }
     interp = p6_interp;
     Parrot_load_bytecode(interp,create_string_const(PERL6PBC));
-    plperl6_setup(interp);
 #endif
 
     if (!trusted_interp) {
@@ -224,18 +223,22 @@ plperl6_func_handler(PG_FUNCTION_ARGS)
 
     elog(NOTICE,"perl6_src = %s", perl6_src );
 
-    Parrot_compreg(interp,create_string_const("perl6"));
     elog(NOTICE,"registered compiler");
-    func_pmc  = Parrot_compile_string(interp, create_string_const("perl6"), perl6_src, &err);
-    elog(NOTICE,"compiled a perl6 string");
-    if (!Parrot_str_is_null(interp, err)) {
-        tmp = Parrot_str_to_cstring(interp, err);
-        errmsg = pstrdup(tmp);
-        Parrot_str_free_cstring(tmp);
-        elog(ERROR, "Error compiling perl6 function: %s", errmsg);
-    }
+
+    result = plperl6_run(interp, create_string(perl6_src) );
+
+    elog(NOTICE,"ran a perl6 string!");
 
     free(perl6_src);
+
+    if (Parrot_PMC_get_bool(interp,result)) {
+        tmp_pmc = Parrot_PMC_pop_pmc(interp, result);
+        retval = plparrot_make_sausage(interp,tmp_pmc,fcinfo);
+    } else {
+        elog(NOTICE,"returning void");
+        /* We got an empty array of return values, so we should return void */
+        PG_RETURN_VOID();
+    }
 
 
     return retval;
@@ -465,13 +468,22 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     return retval;
 }
 
-void plperl6_setup(Parrot_Interp interp)
+Parrot_PMC plperl6_run(Parrot_Interp interp, Parrot_String code)
 {
-    Parrot_PMC func_pmc;
+    char *tmp, *errmsg;
     Parrot_String err;
+    Parrot_PMC result   = create_pmc("ResizablePMCArray");
+    Parrot_PMC func_pmc = Parrot_compile_string(interp, create_string_const("PIR"), PLPERL6, &err);
+    Parrot_ext_call(interp, func_pmc, "S->P", code, &result);
 
-    func_pmc  = Parrot_compile_string(interp, create_string_const("PIR"), PLPERL6, &err);
-    Parrot_ext_call(interp, func_pmc, "->");
+    if (!Parrot_str_is_null(interp, err)) {
+        tmp = Parrot_str_to_cstring(interp, err);
+        errmsg = pstrdup(tmp);
+        Parrot_str_free_cstring(tmp);
+        elog(ERROR, "Error compiling perl6 function: %s", errmsg);
+    }
+    return result;
+
 }
 
 void plparrot_secure(Parrot_Interp interp)

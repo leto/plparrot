@@ -30,7 +30,7 @@ CREATE FUNCTION test_void_plperl6(integer) RETURNS void AS $$
 $$ LANGUAGE plperl6;
 
 CREATE FUNCTION test_int_plperl6(integer) RETURNS int AS $$
-    42
+    say "BORK BORK BORK"; return 42
 $$ LANGUAGE plperl6;
 
 CREATE FUNCTION test_void() RETURNS void AS $$
