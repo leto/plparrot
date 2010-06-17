@@ -213,11 +213,10 @@ plperl6_func_handler(PG_FUNCTION_ARGS)
     length   = strlen(proc_src);
     elog(NOTICE,"proc_src = %s", proc_src );
 
-    perl6_src = malloc( 7 + length + 5 );
-    memcpy(perl6_src, perl6_begin, 7 );
-    /* This should have a sane default and be configurable */
+    perl6_src = malloc( strlen(perl6_begin) + length + strlen(perl6_end) );
+    memcpy(perl6_src, perl6_begin, strlen(perl6_begin) );
     strncat(perl6_src, proc_src, MAX_SUBROUTINE_LENGTH);
-    strncat(perl6_src, perl6_end, 5 );
+    strncat(perl6_src, perl6_end, strlen(perl6_end) );
 
     elog(NOTICE,"perl6_src = %s", perl6_src );
 
