@@ -191,11 +191,10 @@ plperl6_func_handler(PG_FUNCTION_ARGS)
     char *proc_src, *errmsg, *tmp;
     char *perl6_src;
     char perl6_begin[7] = "sub r {";
-    char perl6_end[1]    = "}";
+    char perl6_end[5]    = "};r()";
     int numargs, rc, i, length;
     char **argnames, *argmodes;
     bool isnull;
-
 
     retval = PG_GETARG_DATUM(0);
 
@@ -207,7 +206,6 @@ plperl6_func_handler(PG_FUNCTION_ARGS)
     procsrc_datum = SysCacheGetAttr(PROCOID, proctup, Anum_pg_proc_prosrc, &isnull);
     numargs = get_func_arg_info(proctup, &argtypes, &argnames, &argmodes);
 
-
     if (isnull)
         elog(ERROR, "Couldn't load function source for function with OID %u", fcinfo->flinfo->fn_oid);
     ReleaseSysCache(proctup);
@@ -215,11 +213,11 @@ plperl6_func_handler(PG_FUNCTION_ARGS)
     length   = strlen(proc_src);
     elog(NOTICE,"proc_src = %s", proc_src );
 
-    perl6_src = malloc( 7 + length + 1 );
-    memcpy(perl6_src, perl6_begin, 7);
+    perl6_src = malloc( 7 + length + 5 );
+    memcpy(perl6_src, perl6_begin, 7 );
     /* This should have a sane default and be configurable */
     strncat(perl6_src, proc_src, MAX_SUBROUTINE_LENGTH);
-    strncat(perl6_src, perl6_end, 1);
+    strncat(perl6_src, perl6_end, 5 );
 
     elog(NOTICE,"perl6_src = %s", perl6_src );
 
@@ -232,6 +230,7 @@ plperl6_func_handler(PG_FUNCTION_ARGS)
     free(perl6_src);
 
     if (Parrot_PMC_get_bool(interp,result)) {
+        elog(NOTICE,"get_bool returned true");
         tmp_pmc = Parrot_PMC_pop_pmc(interp, result);
         retval = plparrot_make_sausage(interp,tmp_pmc,fcinfo);
     } else {
@@ -239,8 +238,6 @@ plperl6_func_handler(PG_FUNCTION_ARGS)
         /* We got an empty array of return values, so we should return void */
         PG_RETURN_VOID();
     }
-
-
     return retval;
 }
 static Datum
@@ -474,7 +471,7 @@ Parrot_PMC plperl6_run(Parrot_Interp interp, Parrot_String code)
     Parrot_String err;
     Parrot_PMC result   = create_pmc("ResizablePMCArray");
     Parrot_PMC func_pmc = Parrot_compile_string(interp, create_string_const("PIR"), PLPERL6, &err);
-    Parrot_ext_call(interp, func_pmc, "S->P", code, &result);
+    Parrot_ext_call(interp, func_pmc, "S->Pf", code, &result);
 
     if (!Parrot_str_is_null(interp, err)) {
         tmp = Parrot_str_to_cstring(interp, err);
