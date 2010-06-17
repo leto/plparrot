@@ -1,5 +1,9 @@
 .sub run
     .param string code
+    $S0 = "try { my $r = eval '"
+    $S1 = "'; return $r }; say 'error=' ~ $! "
+    code = $S0 . code
+    code .= $S1
     load_bytecode 'dumper.pbc'
     print "About to run: "
     say code

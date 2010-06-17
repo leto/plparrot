@@ -25,13 +25,9 @@ CREATE LANGUAGE plparrot;
 SELECT true;
 $$;
 
-CREATE FUNCTION test_void_plperl6(integer) RETURNS void AS $$
-    Nil
-$$ LANGUAGE plperl6;
+CREATE FUNCTION test_void_plperl6(integer) RETURNS void AS $$ Nil $$ LANGUAGE plperl6;
 
-CREATE FUNCTION test_int_plperl6(integer) RETURNS int AS $$
-    say "BORK BORK BORK"; return 42
-$$ LANGUAGE plperl6;
+CREATE FUNCTION test_int_plperl6(integer) RETURNS int AS $$ 42 $$ LANGUAGE plperl6;
 
 CREATE FUNCTION test_void() RETURNS void AS $$
     .return()
@@ -268,8 +264,9 @@ select is(test_timestamptz_out('1999-01-08 04:05:06+02'),'1999-01-08 04:05:06+02
 select is(test_time_in('04:05:06'),1,'We can pass a time in');
 select is(test_time_out('04:05:06'),'04:05:06','We can return a time');
 
-select is(test_void_plperl6(42)::text,''::text,'Return nothing from PL/Perl6');
 select is(test_int_plperl6(89),42,'Return an integer from PL/Perl6');
+select is(test_void_plperl6(42)::text,''::text,'Return nothing from PL/Perl6');
+
 
 -- not loading io opcodes, they are deprecated
 --select isnt(test_open_plparrotu(), 42, 'open opcode is not mocked in plperlu');

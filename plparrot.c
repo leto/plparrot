@@ -190,8 +190,6 @@ plperl6_func_handler(PG_FUNCTION_ARGS)
 
     char *proc_src, *errmsg, *tmp;
     char *perl6_src;
-    char perl6_begin[7] = "sub r {";
-    char perl6_end[5]    = "};r()";
     int numargs, rc, i, length;
     char **argnames, *argmodes;
     bool isnull;
@@ -213,16 +211,9 @@ plperl6_func_handler(PG_FUNCTION_ARGS)
     length   = strlen(proc_src);
     elog(NOTICE,"proc_src = %s", proc_src );
 
-    perl6_src = malloc( strlen(perl6_begin) + length + strlen(perl6_end) );
-    memcpy(perl6_src, perl6_begin, strlen(perl6_begin) );
-    strncat(perl6_src, proc_src, MAX_SUBROUTINE_LENGTH);
-    strncat(perl6_src, perl6_end, strlen(perl6_end) );
-
-    elog(NOTICE,"perl6_src = %s", perl6_src );
-
     elog(NOTICE,"registered compiler");
 
-    result = plperl6_run(interp, create_string(perl6_src) );
+    result = plperl6_run(interp, create_string(proc_src) );
 
     elog(NOTICE,"ran a perl6 string!");
 
