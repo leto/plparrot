@@ -31,8 +31,6 @@
 #include "utils/bytea.h"
 #endif
 
-
-
 #ifdef PG_MODULE_MAGIC
 PG_MODULE_MAGIC;
 #endif
@@ -43,6 +41,8 @@ PG_MODULE_MAGIC;
     /* For PostgreSQL versions 8.3 and prior */
 #define TextDatum2String(X) (pstrdup(DatumGetCString(DirectFunctionCall1(textout, (X)))))
 #endif
+
+#define DEBUG_MODE  1
 
 /**********************************************************************
  * The information we cache about loaded procedures
@@ -94,6 +94,7 @@ void plparrot_secure(Parrot_Interp interp);
 Parrot_PMC plperl6_run(Parrot_Interp interp, Parrot_String code);
 
 void plparrot_push_pgdatatype_pmc(Parrot_PMC, FunctionCallInfo, int);
+void debug(char *msg);
 
 /* this is saved and restored by plparrot_call_handler */
 static plparrot_call_data *current_call_data = NULL;
@@ -107,19 +108,22 @@ void _PG_fini(void);
 void
 _PG_init(void)
 {
-    elog(NOTICE,"_PG_init");
+    debug("_PG_init");
     if (inited)
         return;
 
     Parrot_set_config_hash();
-    elog(NOTICE,"set_config_hash");
+
+    debug("set_config_hash");
+
     untrusted_interp = Parrot_new(NULL);
+
+    debug("untrusted");
 
     /* Must use the first created interp as the parent of subsequently created interps */
     trusted_interp = Parrot_new(untrusted_interp);
+    debug("trusted");
 
-    //Parrot_set_trace(interp, PARROT_ALL_TRACE_FLAGS);
-#ifdef HAS_PERL6
     if (!trusted_interp) {
         elog(ERROR,"Could not create a trusted Parrot interpreter!\n");
         return;
@@ -129,6 +133,7 @@ _PG_init(void)
         return;
     }
 
+#ifdef HAS_PERL6
     p6_interp = Parrot_new(trusted_interp);
     p6u_interp = Parrot_new(untrusted_interp);
     if (!p6_interp) {
@@ -140,7 +145,10 @@ _PG_init(void)
         return;
     }
     interp = p6_interp;
+    debug("loading bytecode");
+    debug(PERL6PBC);
     Parrot_load_bytecode(interp,create_string_const(PERL6PBC));
+    debug("loaded bytecode");
 #endif
 
     interp = trusted_interp;
@@ -555,4 +563,8 @@ plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fci
         elog(NOTICE,"CANNOT MAKE SAUSAGE");
         return (Datum) 0;
     }
+}
+void debug(char *msg) {
+    if (DEBUG_MODE)
+        elog(NOTICE, msg);
 }
