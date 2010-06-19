@@ -107,10 +107,12 @@ void _PG_fini(void);
 void
 _PG_init(void)
 {
+    elog(NOTICE,"_PG_init");
     if (inited)
         return;
 
     Parrot_set_config_hash();
+    elog(NOTICE,"set_config_hash");
     untrusted_interp = Parrot_new(NULL);
 
     /* Must use the first created interp as the parent of subsequently created interps */
@@ -118,6 +120,15 @@ _PG_init(void)
 
     //Parrot_set_trace(interp, PARROT_ALL_TRACE_FLAGS);
 #ifdef HAS_PERL6
+    if (!trusted_interp) {
+        elog(ERROR,"Could not create a trusted Parrot interpreter!\n");
+        return;
+    }
+    if (!untrusted_interp) {
+        elog(ERROR,"Could not create an untrusted Parrot interpreter!\n");
+        return;
+    }
+
     p6_interp = Parrot_new(trusted_interp);
     p6u_interp = Parrot_new(untrusted_interp);
     if (!p6_interp) {
@@ -132,14 +143,6 @@ _PG_init(void)
     Parrot_load_bytecode(interp,create_string_const(PERL6PBC));
 #endif
 
-    if (!trusted_interp) {
-        elog(ERROR,"Could not create a trusted Parrot interpreter!\n");
-        return;
-    }
-    if (!untrusted_interp) {
-        elog(ERROR,"Could not create an untrusted Parrot interpreter!\n");
-        return;
-    }
     interp = trusted_interp;
     plparrot_secure(interp);
 
@@ -399,7 +402,7 @@ plperl6_call_handler(PG_FUNCTION_ARGS)
 {
     Datum retval = 0;
     TriggerData *tdata;
-
+    elog(NOTICE, "plperl6_call_handler");
     interp = p6_interp;
     if(!interp) {
         elog(ERROR,"Invalid Parrot interpreter!");
