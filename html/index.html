@@ -1,8 +1,53 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
-    <head>
-        <title>PL/Parrot - Parrot Virtual Machine embedded in PostgreSQL</title>
-    </head>
-    <body>
-        <img src="img/PLParrot.jpg"></img><p> The PL/Parrot website will live here soon. For now, check out <a href="http://github.com/leto/plparrot">Github</a>
-    </body>
+
+<head>
+  <title>PL/Parrot - Parrot Virtual Machine in PostgreSQL</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico">
+  <link rel="stylesheet" href="css/project-site.css" type="text/css">
+</head>
+
+<body>
+<div class="page">
+<div class="header">
+  <a href="index.html"><img class="logo" src="img/logo.png" alt=""></a>
+</div>
+
+<div class="bottom">
+<div class="sidebar">
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="docs.html">Documentation</a></li>
+    <li><a href="community.html">Community</a></li>
+    <li><a href="http://github.com/leto/plparrot/issues">Bugs/Issues</a></li>
+    <li><a href="http://wiki.github.com/leto/plparrot/">Wiki</a></li>
+  </ul>
+</div>
+
+<div class="content">
+<h1>What is PL/Parrot?</h1>
+<p><strong>PL/Parrot</strong> is the <a href="http://parrot.org">Parrot Virtual Machine,</a> embedded into the <a href="http://postgresql.org">PostgreSQL</a> relational database. This means
+that any Parrot language has the opportunity to become a PostgreSQL Procedural Language (PL). PL/Parrot, by default, comes
+with PL/PIR, which allows the creation of stored procedures in <a href="http://docs.parrot.org/parrot/latest/html/docs/pdds/pdd19_pir.pod.html">Parrot Intermediate Representation (PIR)</a>.
+
+<h1>Requirements</h1>
+<ul>
+    <li>Operating Systems: Linux, *BSD, or OS X. If you would like to help port PL/Parrot to other OS's, please let us know!
+    <li>Parrot: 2.5.0 or newer</li>
+    <li>PostgreSQL: 8.3 or newer</li>
+</ul>
+
+<h1>Goals</h1>
+<ul>
+    <li> Give developers the ability to write stored procedures in PIR, a fast and portable dynamic language.</li>
+    <li> Give developers the ability to write stored procedures in any language that runs on top of Parrot.</li>
+    <li> Ease the creation of new PLs by creating a framework for adding Parrot HLL's to PL/Parrot</li>
+</ul>
+</div>
+</div>
+</div>
+</body>
+
 </html>
+

@@ -1,0 +1,97 @@
+body {
+    margin: 0;
+    border: 0;
+    padding: 0;
+
+    font-size: 100%;
+    font-family: Helvetica;
+
+    background:url('/images/tile.gif') repeat scroll 0 0 #84856A;
+}
+
+html, body {
+    height: 100%;
+}
+
+.header {
+    background-color: lightgreen;
+    padding: 10px;
+    border-bottom: 20px solid #888;
+    height: auto;
+    background:url('/images/gradient.jpg') repeat scroll 0 0 lightgreen;
+}
+
+.logo {
+    border: 0px;
+    width: 145px;
+}
+
+.photo {
+    float: right;
+}
+
+.page {
+    height: 100%;
+    /*min-height: 400px;*/
+}
+
+.bottom {
+    height: 100%;
+    /*min-height: 400px;*/
+}
+
+.sidebar {
+    background-color: #444;
+    color: #fff;
+    width: 200px;
+    float: left;
+    height: 100%;
+    margin:0;
+    padding-top:20px;
+    padding-left:20px;
+    padding-bottom: 10px;
+    list-style-type: none;
+}
+
+.sidebar ul {
+    list-style-type: none;
+    padding: 0px;
+    margin: 0px;
+}
+
+.sidebar ul ul {
+    display: none;
+    padding-left: 20px;
+}
+
+.sidebar a, .sidebar a:visited {
+    color: #fff;
+    text-decoration: none;
+}
+
+.content {
+    width: 700px;
+    min-height: 100%;
+    float: left;
+    padding: 15px;
+    background-color: #fff;
+}
+
+.content a, .content a:visited {
+    color: #00f;
+    text-decoration: none;
+}
+
+.content p, h1, h2, h3 {
+    margin: 15px 5px;
+}
+
+.content pre {
+    margin-left: 20px;
+}
+
+.center {
+    margin-left: auto;
+    margin-right: auto;
+}
+
