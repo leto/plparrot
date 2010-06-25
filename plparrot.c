@@ -466,7 +466,6 @@ Parrot_PMC plperl6_run(Parrot_Interp interp, Parrot_String code)
     Parrot_String err;
     Parrot_PMC result   = create_pmc("ResizablePMCArray");
     Parrot_PMC func_pmc = Parrot_compile_string(interp, create_string_const("PIR"), PLPERL6, &err);
-    Parrot_ext_call(interp, func_pmc, "S->Pf", code, &result);
 
     if (!Parrot_str_is_null(interp, err)) {
         tmp = Parrot_str_to_cstring(interp, err);
@@ -474,6 +473,9 @@ Parrot_PMC plperl6_run(Parrot_Interp interp, Parrot_String code)
         Parrot_str_free_cstring(tmp);
         elog(ERROR, "Error compiling perl6 function: %s", errmsg);
     }
+
+    Parrot_ext_call(interp, func_pmc, "S->Pf", code, &result);
+
     return result;
 
 }
