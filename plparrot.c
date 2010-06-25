@@ -117,7 +117,7 @@ _PG_init(void)
     trusted_interp = Parrot_new(untrusted_interp);
 
     //Parrot_set_trace(interp, PARROT_ALL_TRACE_FLAGS);
-#ifdef PERL6PBC
+#if HAS_PERL6
     p6_interp = Parrot_new(trusted_interp);
     p6u_interp = Parrot_new(untrusted_interp);
     if (!p6_interp) {
