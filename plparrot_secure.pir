@@ -1,6 +1,4 @@
-.loadlib "io_ops"
-
-.sub _ :main
+.sub _ :main :load :anon
     .local pmc p6meta, interp, classes, classid
     p6meta = get_root_global ["parrot"], "P6metaclass"
     p6meta.'new_class'('PLParrot')

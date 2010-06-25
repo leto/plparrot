@@ -15,7 +15,7 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(33);
+SELECT plan(31);
 
 CREATE OR REPLACE FUNCTION create_plparrot()
 RETURNS BOOLEAN
@@ -208,7 +208,9 @@ $$ LANGUAGE plparrot;
 select is(test_load_pir_library(), 5, 'we can .include PIR libraries included with Parrot');
 select is(test_load_pbc_library(), 5, 'we can load_bytecode PBC libraries included with Parrot');
 
-select is(test_open(), 42, 'open opcode is mocked');
+
+-- io opcodes codes not loaded currently
+--select is(test_open(), 42, 'open opcode is mocked');
 select is(test_filehandle_open(), 42, 'FileHandle.open is mocked in PL/PIR');
 select is(test_filehandle_open_plpiru(), 1, 'FileHandle.open is not mocked in PL/PIRU');
 
@@ -258,7 +260,8 @@ select is(test_timestamptz_out('1999-01-08 04:05:06+02'),'1999-01-08 04:05:06+02
 select is(test_time_in('04:05:06'),1,'We can pass a time in');
 select is(test_time_out('04:05:06'),'04:05:06','We can return a time');
 
-select isnt(test_open_plparrotu(), 42, 'open opcode is not mocked in plperlu');
+-- not loading io opcodes, they are deprecated
+--select isnt(test_open_plparrotu(), 42, 'open opcode is not mocked in plperlu');
 
 -- Finish the tests and clean up.
 SELECT * FROM finish();

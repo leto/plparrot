@@ -1,10 +1,10 @@
 #include "plparrot.h"
+#include "plperl6.h"
 #include "config.h"
 
 /* Parrot header files */
 #include "parrot/embed.h"
 #include "parrot/extend.h"
-#include "parrot/imcc.h"
 #include "parrot/extend_vtable.h"
 #include "parrot/config.h"
 
@@ -80,7 +80,9 @@ typedef struct plparrot_call_data
     MemoryContext tmp_cxt;
 } plparrot_call_data;
 
-Parrot_Interp interp, untrusted_interp, trusted_interp;
+/* TODO: Refactor into struct */
+Parrot_Interp interp, untrusted_interp, trusted_interp,
+              p6_interp, p6u_interp;
 
 /* Helper functions */
 Parrot_String create_string(const char *name);
@@ -89,6 +91,7 @@ Parrot_String create_string_const(const char *name);
 Parrot_PMC create_pmc(const char *name);
 Datum       plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fcinfo);
 void plparrot_secure(Parrot_Interp interp);
+Parrot_PMC plperl6_run(Parrot_Interp interp, Parrot_String code);
 
 void plparrot_push_pgdatatype_pmc(Parrot_PMC, FunctionCallInfo, int);
 
@@ -112,6 +115,22 @@ _PG_init(void)
 
     /* Must use the first created interp as the parent of subsequently created interps */
     trusted_interp = Parrot_new(untrusted_interp);
+
+    //Parrot_set_trace(interp, PARROT_ALL_TRACE_FLAGS);
+#ifdef HAS_PERL6
+    p6_interp = Parrot_new(trusted_interp);
+    p6u_interp = Parrot_new(untrusted_interp);
+    if (!p6_interp) {
+        elog(ERROR,"Could not create a PL/Perl6 interpreter!\n");
+        return;
+    }
+    if (!p6u_interp) {
+        elog(ERROR,"Could not create a PL/Perl6U interpreter!\n");
+        return;
+    }
+    interp = p6_interp;
+    Parrot_load_bytecode(interp,create_string_const(PERL6PBC));
+#endif
 
     if (!trusted_interp) {
         elog(ERROR,"Could not create a trusted Parrot interpreter!\n");
@@ -141,9 +160,14 @@ _PG_fini(void)
     inited = false;
 }
 
+/* Call handlers */
 Datum plparrot_call_handler(PG_FUNCTION_ARGS);
 Datum plparrotu_call_handler(PG_FUNCTION_ARGS);
+Datum plperl6_call_handler(PG_FUNCTION_ARGS);
+Datum plperl6u_call_handler(PG_FUNCTION_ARGS);
+
 static Datum plparrot_func_handler(PG_FUNCTION_ARGS);
+static Datum plperl6_func_handler(PG_FUNCTION_ARGS);
 static Datum plparrotu_func_handler(PG_FUNCTION_ARGS);
 
  /* The PostgreSQL function+trigger managers call this function for execution
@@ -151,7 +175,61 @@ static Datum plparrotu_func_handler(PG_FUNCTION_ARGS);
 
 PG_FUNCTION_INFO_V1(plparrot_call_handler);
 PG_FUNCTION_INFO_V1(plparrotu_call_handler);
+PG_FUNCTION_INFO_V1(plperl6_call_handler);
+PG_FUNCTION_INFO_V1(plperl6u_call_handler);
 
+static Datum
+plperl6_func_handler(PG_FUNCTION_ARGS)
+{
+    Parrot_PMC func_pmc, func_args, result, tmp_pmc;
+    Parrot_String err;
+    Datum retval, procsrc_datum;
+    Form_pg_proc procstruct;
+    HeapTuple proctup;
+    Oid returntype, *argtypes;
+
+    char *proc_src, *errmsg, *tmp;
+    char *perl6_src;
+    int numargs, rc, i, length;
+    char **argnames, *argmodes;
+    bool isnull;
+
+    retval = PG_GETARG_DATUM(0);
+
+    proctup = SearchSysCache(PROCOID, ObjectIdGetDatum(fcinfo->flinfo->fn_oid), 0, 0, 0);
+    if (!HeapTupleIsValid(proctup))
+        elog(ERROR, "Failed to look up procedure with OID %u", fcinfo->flinfo->fn_oid);
+    procstruct = (Form_pg_proc) GETSTRUCT(proctup);
+    returntype = procstruct->prorettype;
+    procsrc_datum = SysCacheGetAttr(PROCOID, proctup, Anum_pg_proc_prosrc, &isnull);
+    numargs = get_func_arg_info(proctup, &argtypes, &argnames, &argmodes);
+
+    if (isnull)
+        elog(ERROR, "Couldn't load function source for function with OID %u", fcinfo->flinfo->fn_oid);
+    ReleaseSysCache(proctup);
+    proc_src = TextDatum2String(procsrc_datum);
+    length   = strlen(proc_src);
+    elog(NOTICE,"proc_src = %s", proc_src );
+
+    elog(NOTICE,"registered compiler");
+
+    result = plperl6_run(interp, create_string(proc_src) );
+
+    elog(NOTICE,"ran a perl6 string!");
+
+    free(perl6_src);
+
+    if (Parrot_PMC_get_bool(interp,result)) {
+        elog(NOTICE,"get_bool returned true");
+        tmp_pmc = Parrot_PMC_pop_pmc(interp, result);
+        retval = plparrot_make_sausage(interp,tmp_pmc,fcinfo);
+    } else {
+        elog(NOTICE,"returning void");
+        /* We got an empty array of return values, so we should return void */
+        PG_RETURN_VOID();
+    }
+    return retval;
+}
 static Datum
 plparrotu_func_handler(PG_FUNCTION_ARGS)
 {
@@ -311,6 +389,47 @@ plparrotu_call_handler(PG_FUNCTION_ARGS)
 }
 
 Datum
+plperl6u_call_handler(PG_FUNCTION_ARGS)
+{
+    Datum retval;
+    interp = p6_interp;
+    if(!interp) {
+        elog(ERROR,"Invalid Parrot interpreter!");
+    }
+    retval = plperl6_call_handler(fcinfo);
+    interp = trusted_interp;
+    return retval;
+}
+
+Datum
+plperl6_call_handler(PG_FUNCTION_ARGS)
+{
+    Datum retval = 0;
+    TriggerData *tdata;
+
+    interp = p6_interp;
+    if(!interp) {
+        elog(ERROR,"Invalid Parrot interpreter!");
+    }
+    PG_TRY();
+    {
+        if (CALLED_AS_TRIGGER(fcinfo)) {
+            tdata = (TriggerData *) fcinfo->context;
+            /* TODO: we need a trigger handler */
+        } else {
+            retval = plperl6_func_handler(fcinfo);
+        }
+    }
+    PG_CATCH();
+    {
+        PG_RE_THROW();
+    }
+    PG_END_TRY();
+    interp = trusted_interp;
+    return retval;
+}
+
+Datum
 plparrot_call_handler(PG_FUNCTION_ARGS)
 {
     Datum retval = 0;
@@ -336,6 +455,24 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     current_call_data = save_call_data;
 
     return retval;
+}
+
+Parrot_PMC plperl6_run(Parrot_Interp interp, Parrot_String code)
+{
+    char *tmp, *errmsg;
+    Parrot_String err;
+    Parrot_PMC result   = create_pmc("ResizablePMCArray");
+    Parrot_PMC func_pmc = Parrot_compile_string(interp, create_string_const("PIR"), PLPERL6, &err);
+    Parrot_ext_call(interp, func_pmc, "S->Pf", code, &result);
+
+    if (!Parrot_str_is_null(interp, err)) {
+        tmp = Parrot_str_to_cstring(interp, err);
+        errmsg = pstrdup(tmp);
+        Parrot_str_free_cstring(tmp);
+        elog(ERROR, "Error compiling perl6 function: %s", errmsg);
+    }
+    return result;
+
 }
 
 void plparrot_secure(Parrot_Interp interp)

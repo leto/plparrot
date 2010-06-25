@@ -3,7 +3,8 @@ MODULE_big = plparrot
 OBJS= plparrot.o
 DATA_built = plparrot.sql
 REGRESS_OPTS = --dbname=$(PL_TESTDB) --load-language=plpgsql
-TESTS = $(wildcard t/sql/*.sql)
+TESTS = t/sql/test.sql
+PLPERL6_TESTS = t/sql/plperl6.sql
 REGRESS = $(patsubst t/sql/%.sql,%,$(TESTS))
 
 EXTRA_CLEAN =
@@ -34,15 +35,20 @@ PARROT_IS_INSECURE = $(shell expr $(PARROTREVISION) \< $(MINPARROTREVISION))
 # PGVER_MINOR = $(shell echo $(VERSION) | awk -F. '{ print ($$2 + 0) }')
 # PGVER_PATCH = $(shell echo $(VERSION) | awk -F. '{ print ($$3 + 0) }')
 
+
 override CPPFLAGS := -I$(PARROTINC) -I$(srcdir) $(CPPFLAGS)
 override CFLAGS   := $(PARROTLDFLAGS) $(PARROTLINKFLAGS) $(CFLAGS)
 
 # It would be nice if this ran before we compiled
 all: check_revision headers
+ifneq ($(PERL6PBC),)
+override CFLAGS := $(CFLAGS) -DHAS_PERL6 -D'PERL6PBC="$(PERL6PBC)"'
+endif
 	@echo "\n\n\tHappy Hacking with PL/Parrot!\n\n"
 
 headers:
 	./bin/text2macro.pl plparrot_secure.pir > plparrot.h
+	./bin/text2macro.pl plperl6.pir > plperl6.h
 
 check_revision:
 ifeq ($(PARROT_IS_INSECURE),1)
@@ -55,3 +61,6 @@ endif
 
 test: all
 	psql -AX -f $(TESTS)
+
+test_plperl6: all
+	psql -AX -f $(PLPERL6_TESTS)
