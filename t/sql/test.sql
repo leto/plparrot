@@ -15,7 +15,7 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(33);
+SELECT plan(31);
 
 CREATE OR REPLACE FUNCTION create_plparrot()
 RETURNS BOOLEAN
@@ -24,12 +24,6 @@ AS $$
 CREATE LANGUAGE plparrot;
 SELECT true;
 $$;
-
-CREATE FUNCTION test_void_plperl6(integer) RETURNS void AS $$ Nil $$ LANGUAGE plperl6;
-
-CREATE FUNCTION test_int_plperl6(integer) RETURNS int AS $$ 42 $$ LANGUAGE plperl6;
-
-CREATE FUNCTION test_float_plperl6(integer) RETURNS float AS $$ 5.0 $$ LANGUAGE plperl6;
 
 CREATE FUNCTION test_void() RETURNS void AS $$
     .return()
@@ -265,11 +259,6 @@ select is(test_timestamptz_out('1999-01-08 04:05:06+02'),'1999-01-08 04:05:06+02
 -- These do not test the fact that the time datatype cannot be used from PIR
 select is(test_time_in('04:05:06'),1,'We can pass a time in');
 select is(test_time_out('04:05:06'),'04:05:06','We can return a time');
-
-select is(test_int_plperl6(89),42,'Return an integer from PL/Perl6');
-select is(test_void_plperl6(42)::text,''::text,'Return nothing from PL/Perl6');
-select is(test_float_plperl6(2),5.0::float,'Return a float from PL/Perl6');
-
 
 -- not loading io opcodes, they are deprecated
 --select isnt(test_open_plparrotu(), 42, 'open opcode is not mocked in plperlu');

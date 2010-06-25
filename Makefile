@@ -3,7 +3,8 @@ MODULE_big = plparrot
 OBJS= plparrot.o
 DATA_built = plparrot.sql
 REGRESS_OPTS = --dbname=$(PL_TESTDB) --load-language=plpgsql
-TESTS = $(wildcard t/sql/*.sql)
+TESTS = t/sql/test.sql
+PLPERL6_TESTS = t/sql/plperl6.sql
 REGRESS = $(patsubst t/sql/%.sql,%,$(TESTS))
 
 EXTRA_CLEAN =
@@ -60,3 +61,6 @@ endif
 
 test: all
 	psql -AX -f $(TESTS)
+
+test_plperl6: all
+	psql -AX -f $(PLPERL6_TESTS)

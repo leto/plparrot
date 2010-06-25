@@ -397,6 +397,9 @@ plperl6u_call_handler(PG_FUNCTION_ARGS)
 {
     Datum retval;
     interp = p6_interp;
+    if(!interp) {
+        elog(ERROR,"Invalid Parrot interpreter!");
+    }
     retval = plperl6_call_handler(fcinfo);
     interp = trusted_interp;
     return retval;
@@ -409,6 +412,9 @@ plperl6_call_handler(PG_FUNCTION_ARGS)
     TriggerData *tdata;
 
     interp = p6_interp;
+    if(!interp) {
+        elog(ERROR,"Invalid Parrot interpreter!");
+    }
     PG_TRY();
     {
         if (CALLED_AS_TRIGGER(fcinfo)) {
