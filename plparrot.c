@@ -181,16 +181,15 @@ PG_FUNCTION_INFO_V1(plperl6u_call_handler);
 static Datum
 plperl6_func_handler(PG_FUNCTION_ARGS)
 {
-    Parrot_PMC func_pmc, func_args, result, tmp_pmc;
-    Parrot_String err;
+    Parrot_PMC result, tmp_pmc;
     Datum retval, procsrc_datum;
     Form_pg_proc procstruct;
     HeapTuple proctup;
     Oid returntype, *argtypes;
 
-    char *proc_src, *errmsg, *tmp;
+    char *proc_src;
     char *perl6_src;
-    int numargs, rc, i, length;
+    int numargs, length;
     char **argnames, *argmodes;
     bool isnull;
 
@@ -250,7 +249,7 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
 {
     Parrot_PMC func_pmc, func_args, result, tmp_pmc;
     Parrot_String err;
-    Datum retval, procsrc_datum;
+    Datum procsrc_datum;
     Form_pg_proc procstruct;
     HeapTuple proctup;
     Oid returntype, *argtypes;
