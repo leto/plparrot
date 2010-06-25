@@ -198,13 +198,16 @@ plperl6_func_handler(PG_FUNCTION_ARGS)
     proctup = SearchSysCache(PROCOID, ObjectIdGetDatum(fcinfo->flinfo->fn_oid), 0, 0, 0);
     if (!HeapTupleIsValid(proctup))
         elog(ERROR, "Failed to look up procedure with OID %u", fcinfo->flinfo->fn_oid);
+
     procstruct = (Form_pg_proc) GETSTRUCT(proctup);
     returntype = procstruct->prorettype;
     procsrc_datum = SysCacheGetAttr(PROCOID, proctup, Anum_pg_proc_prosrc, &isnull);
-    numargs = get_func_arg_info(proctup, &argtypes, &argnames, &argmodes);
 
     if (isnull)
         elog(ERROR, "Couldn't load function source for function with OID %u", fcinfo->flinfo->fn_oid);
+
+    numargs = get_func_arg_info(proctup, &argtypes, &argnames, &argmodes);
+
     ReleaseSysCache(proctup);
     proc_src = TextDatum2String(procsrc_datum);
     length   = strlen(proc_src);
@@ -271,10 +274,11 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     procstruct = (Form_pg_proc) GETSTRUCT(proctup);
     returntype = procstruct->prorettype;
     procsrc_datum = SysCacheGetAttr(PROCOID, proctup, Anum_pg_proc_prosrc, &isnull);
-    numargs = get_func_arg_info(proctup, &argtypes, &argnames, &argmodes);
 
     if (isnull)
         elog(ERROR, "Couldn't load function source for function with OID %u", fcinfo->flinfo->fn_oid);
+
+    numargs = get_func_arg_info(proctup, &argtypes, &argnames, &argmodes);
 
     /* procstruct probably isn't valid after this ReleaseSysCache call, so don't use it anymore */
     ReleaseSysCache(proctup);
