@@ -545,6 +545,9 @@ plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fci
         return Float8GetDatum(Parrot_PMC_get_number(interp,pmc));
     } else if (Parrot_PMC_isa(interp,pmc,create_string_const("Rat"))) {
         return Float8GetDatum(Parrot_PMC_get_number(interp,pmc));
+    } else if (Parrot_PMC_isa(interp,pmc,create_string_const("Parcel"))) {
+        /* XXX TODO: Should check for an empty Parcel, but this works for now */
+        return (Datum) 0;
     } else {
         elog(NOTICE,"CANNOT MAKE SAUSAGE");
         return (Datum) 0;
