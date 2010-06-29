@@ -26,7 +26,7 @@ CREATE FUNCTION test_float_plperl6(integer) RETURNS float AS $$ 5.0 $$ LANGUAGE 
 
 select is(test_int_plperl6(89),42,'Return an integer from PL/Perl6');
 select is(test_void_plperl6(42)::text,''::text,'Return nothing from PL/Perl6');
-select is(test_float_plperl6(2),5.0::float,'Return a float from PL/Perl6');
+select is(test_float_plperl6(2), 5.0::float,'Return a float from PL/Perl6');
 
 -- Finish the tests and clean up.
 SELECT * FROM finish();

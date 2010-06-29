@@ -208,23 +208,15 @@ plperl6_func_handler(PG_FUNCTION_ARGS)
     numargs = get_func_arg_info(proctup, &argtypes, &argnames, &argmodes);
 
     ReleaseSysCache(proctup);
+
     proc_src = TextDatum2String(procsrc_datum);
     length   = strlen(proc_src);
-    elog(NOTICE,"proc_src = %s", proc_src );
-
-    elog(NOTICE,"registered compiler");
-
-    result = plperl6_run(interp, create_string(proc_src) );
-
-    elog(NOTICE,"ran a perl6 string!");
-
+    result   = plperl6_run(interp, create_string(proc_src) );
 
     if (Parrot_PMC_get_bool(interp,result)) {
-        elog(NOTICE,"get_bool returned true");
         tmp_pmc = Parrot_PMC_pop_pmc(interp, result);
         retval = plparrot_make_sausage(interp,tmp_pmc,fcinfo);
     } else {
-        elog(NOTICE,"returning void");
         /* We got an empty array of return values, so we should return void */
         PG_RETURN_VOID();
     }
@@ -550,6 +542,8 @@ plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fci
         return InputFunctionCall(&prodesc->result_in_func, pgstr, prodesc->result_typioparam, -1);
 
     } else if (Parrot_PMC_isa(interp,pmc,create_string_const("Float"))) {
+        return Float8GetDatum(Parrot_PMC_get_number(interp,pmc));
+    } else if (Parrot_PMC_isa(interp,pmc,create_string_const("Rat"))) {
         return Float8GetDatum(Parrot_PMC_get_number(interp,pmc));
     } else {
         elog(NOTICE,"CANNOT MAKE SAUSAGE");
