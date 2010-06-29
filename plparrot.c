@@ -188,7 +188,6 @@ plperl6_func_handler(PG_FUNCTION_ARGS)
     Oid returntype, *argtypes;
 
     char *proc_src;
-    char *perl6_src;
     int numargs, length;
     char **argnames, *argmodes;
     bool isnull;
@@ -219,7 +218,6 @@ plperl6_func_handler(PG_FUNCTION_ARGS)
 
     elog(NOTICE,"ran a perl6 string!");
 
-    free(perl6_src);
 
     if (Parrot_PMC_get_bool(interp,result)) {
         elog(NOTICE,"get_bool returned true");
