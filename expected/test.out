@@ -1,7 +1,33 @@
 \unset ECHO
-1..5
-ok 1 - We can return void
-ok 2 - We can return an int
-ok 3 - We can return an int that was passed as an arg
-ok 4 - We can return a float
-ok 5 - We can return a varchar
+1..31
+ok 1 - we can .include PIR libraries included with Parrot
+ok 2 - we can load_bytecode PBC libraries included with Parrot
+ok 3 - FileHandle.open is mocked in PL/PIR
+ok 4 - FileHandle.open is not mocked in PL/PIRU
+ok 5 - File.open is mocked
+ok 6 - We can pass a text in
+ok 7 - We can return a text
+ok 8 - We can pass a varchar in
+ok 9 - We can return a varchar
+ok 10 - We can concat and return a varchar
+ok 11 - We can pass an int and float as arguments
+ok 12 - We can pass a char in
+ok 13 - We can return a char
+ok 14 - We can pass in an int
+ok 15 - We can return an int
+ok 16 - plpir is an alias for plparrot
+ok 17 - plpiru can return values
+ok 18 - plparrotu can return values
+ok 19 - Immutable works
+ok 20 - Strict works
+ok 21 - We can increment an int and return it
+ok 22 - We can return an int
+ok 23 - We can return void
+ok 24 - We can return a float
+ok 25 - We can add to a float and return it
+ok 26 - We can pass a timestamp in
+ok 27 - We can return a timestamp
+ok 28 - We can pass a timestamptz in
+ok 29 - We can return a timestamptz
+ok 30 - We can pass a time in
+ok 31 - We can return a time
