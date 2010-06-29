@@ -15,11 +15,13 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(6);
+SELECT plan(7);
 
 CREATE FUNCTION test_void_plperl6(integer) RETURNS void AS $$ Nil $$ LANGUAGE plperl6;
 
 CREATE FUNCTION test_int_plperl6(integer) RETURNS int AS $$ 42 $$ LANGUAGE plperl6;
+
+CREATE FUNCTION test_arguments_plperl6(integer) RETURNS int AS $$ @_[0] $$ LANGUAGE plperl6;
 
 CREATE FUNCTION test_fibonacci_plperl6(integer) RETURNS int AS $$
 [+] (1, 1, *+* ... 100)
@@ -38,6 +40,8 @@ select is(test_string_plperl6(), 'rakudo','Return a varchar from PL/Perl6');
 select is(test_singlequote_plperl6(), 'rakudo*','Use a single quote in a PL/Perl6 procedure');
 
 select is(test_fibonacci_plperl6(1),232,'Calculate the sum of all Fibonacci numbers <= 100');
+select is(test_arguments_plperl6(5),5,'We can return an argument unchanged');
+
 
 -- Finish the tests and clean up.
 SELECT * FROM finish();
