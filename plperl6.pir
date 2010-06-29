@@ -1,7 +1,7 @@
 .sub run
     .param string code
-    $S0 = "try { my $r = eval '"
-    $S1 = "'; return $r }; say 'error=' ~ $! "
+    $S0 = "my $r = eval 'sub {"
+    $S1 = "}'; $r.()"
     code = $S0 . code
     code .= $S1
     load_bytecode 'dumper.pbc'
