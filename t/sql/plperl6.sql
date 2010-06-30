@@ -15,7 +15,7 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(8);
+SELECT plan(9);
 
 CREATE FUNCTION test_void_plperl6(integer) RETURNS void LANGUAGE plperl6 AS $$
 Nil
@@ -27,6 +27,10 @@ $$;
 
 CREATE FUNCTION test_arguments_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
 @_[0]
+$$;
+
+CREATE FUNCTION test_defined_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
+@_[0].defined
 $$;
 
 CREATE FUNCTION test_2arguments_plperl6(integer,integer) RETURNS int LANGUAGE plperl6 AS $$
@@ -51,6 +55,7 @@ select is(test_singlequote_plperl6(), 'rakudo*','Use a single quote in a PL/Perl
 
 select is(test_fibonacci_plperl6(1),232,'Calculate the sum of all Fibonacci numbers <= 100');
 select is(test_arguments_plperl6(5),5,'We can return an argument unchanged');
+select is(test_defined_plperl6(100),1,'@_[0] is defined when an argument is passed in');
 select is(test_2arguments_plperl6(4,9),2,'PL/Perl sees multiple arguments');
 
 
