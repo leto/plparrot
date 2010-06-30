@@ -15,17 +15,27 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(7);
+SELECT plan(8);
 
-CREATE FUNCTION test_void_plperl6(integer) RETURNS void AS $$ Nil $$ LANGUAGE plperl6;
+CREATE FUNCTION test_void_plperl6(integer) RETURNS void LANGUAGE plperl6 AS $$
+Nil
+$$;
 
-CREATE FUNCTION test_int_plperl6(integer) RETURNS int AS $$ 42 $$ LANGUAGE plperl6;
+CREATE FUNCTION test_int_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
+42
+$$;
 
-CREATE FUNCTION test_arguments_plperl6(integer) RETURNS int AS $$ @_[0] $$ LANGUAGE plperl6;
+CREATE FUNCTION test_arguments_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
+@_[0]
+$$;
 
-CREATE FUNCTION test_fibonacci_plperl6(integer) RETURNS int AS $$
+CREATE FUNCTION test_2arguments_plperl6(integer,integer) RETURNS int LANGUAGE plperl6 AS $$
+@_.elems
+$$;
+
+CREATE FUNCTION test_fibonacci_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
 [+] (1, 1, *+* ... 100)
-$$ LANGUAGE plperl6;
+$$;
 
 CREATE FUNCTION test_float_plperl6(integer) RETURNS float AS $$ 5.0 $$ LANGUAGE plperl6;
 
@@ -41,6 +51,7 @@ select is(test_singlequote_plperl6(), 'rakudo*','Use a single quote in a PL/Perl
 
 select is(test_fibonacci_plperl6(1),232,'Calculate the sum of all Fibonacci numbers <= 100');
 select is(test_arguments_plperl6(5),5,'We can return an argument unchanged');
+select is(test_2arguments_plperl6(4,9),2,'PL/Perl sees multiple arguments');
 
 
 -- Finish the tests and clean up.
