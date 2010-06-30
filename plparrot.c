@@ -91,7 +91,8 @@ Parrot_String create_string_const(const char *name);
 Parrot_PMC create_pmc(const char *name);
 Datum       plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fcinfo);
 void plparrot_secure(Parrot_Interp interp);
-Parrot_PMC plperl6_run(Parrot_Interp interp, Parrot_String code);
+Parrot_PMC plperl6_run(Parrot_Interp interp, Parrot_String code,
+FunctionCallInfo fcinfo, int numargs);
 
 void plparrot_push_pgdatatype_pmc(Parrot_PMC, FunctionCallInfo, int);
 
@@ -211,7 +212,7 @@ plperl6_func_handler(PG_FUNCTION_ARGS)
 
     proc_src = TextDatum2String(procsrc_datum);
     length   = strlen(proc_src);
-    result   = plperl6_run(interp, create_string(proc_src) );
+    result   = plperl6_run(interp, create_string(proc_src), fcinfo, numargs );
 
     if (Parrot_PMC_get_bool(interp,result)) {
         tmp_pmc = Parrot_PMC_pop_pmc(interp, result);
@@ -450,12 +451,15 @@ plparrot_call_handler(PG_FUNCTION_ARGS)
     return retval;
 }
 
-Parrot_PMC plperl6_run(Parrot_Interp interp, Parrot_String code)
+Parrot_PMC plperl6_run(Parrot_Interp interp, Parrot_String code,
+FunctionCallInfo fcinfo, int numargs)
 {
     char *tmp, *errmsg;
     Parrot_String err;
     Parrot_PMC result   = create_pmc("ResizablePMCArray");
     Parrot_PMC func_pmc = Parrot_compile_string(interp, create_string_const("PIR"), PLPERL6, &err);
+    Parrot_PMC func_args = create_pmc("ResizablePMCArray");
+    int i;
 
     if (!Parrot_str_is_null(interp, err)) {
         tmp = Parrot_str_to_cstring(interp, err);
@@ -464,7 +468,11 @@ Parrot_PMC plperl6_run(Parrot_Interp interp, Parrot_String code)
         elog(ERROR, "Error compiling perl6 function: %s", errmsg);
     }
 
-    Parrot_ext_call(interp, func_pmc, "S->Pf", code, &result);
+    for (i = 0; i < numargs; i++) {
+        plparrot_push_pgdatatype_pmc(func_args, fcinfo, i);
+    }
+
+    Parrot_ext_call(interp, func_pmc, "SPf->Pf", code, func_args, &result);
 
     return result;
 
