@@ -31,7 +31,7 @@
 #include "utils/bytea.h"
 #endif
 
-
+#define PMC_ISA(x,y) (Parrot_PMC_isa(interp,x,create_string_const(y)))
 
 #ifdef PG_MODULE_MAGIC
 PG_MODULE_MAGIC;
@@ -514,7 +514,7 @@ plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fci
     Form_pg_type typeStruct;
 
     /* elog(NOTICE, "starting sausage machine"); */
-    if (Parrot_PMC_isa(interp,pmc,create_string_const("Integer"))) {
+    if (PMC_ISA(pmc,"Integer")) {
         return Int32GetDatum(Parrot_PMC_get_integer(interp,pmc));
     } else if (Parrot_PMC_isa(interp,pmc,create_string_const("String"))) {
         str   = Parrot_str_to_cstring(interp, Parrot_PMC_get_string(interp,pmc));
@@ -541,11 +541,11 @@ plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fci
 
         return InputFunctionCall(&prodesc->result_in_func, pgstr, prodesc->result_typioparam, -1);
 
-    } else if (Parrot_PMC_isa(interp,pmc,create_string_const("Float"))) {
+    } else if (PMC_ISA(pmc,"Float")) {
         return Float8GetDatum(Parrot_PMC_get_number(interp,pmc));
-    } else if (Parrot_PMC_isa(interp,pmc,create_string_const("Rat"))) {
+    } else if (PMC_ISA(pmc,"Rat")) {
         return Float8GetDatum(Parrot_PMC_get_number(interp,pmc));
-    } else if (Parrot_PMC_isa(interp,pmc,create_string_const("Parcel"))) {
+    } else if (PMC_ISA(pmc,"Parcel")) {
         /* XXX TODO: Should check for an empty Parcel, but this works for now */
         return (Datum) 0;
     } else {
@@ -553,3 +553,4 @@ plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fci
         return (Datum) 0;
     }
 }
+
