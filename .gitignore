@@ -18,5 +18,6 @@ regression.out
 results/
 plparrotu.sql
 plparrot.sql
-plparrot.h
+plparrot_secure.h
+plparrot_spi.h
 plperl6.h

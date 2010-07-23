@@ -1,4 +1,5 @@
-#include "plparrot.h"
+#include "plparrot_secure.h"
+#include "plparrot_spi.h"
 #include "plperl6.h"
 #include "config.h"
 
@@ -7,6 +8,7 @@
 #include "parrot/extend.h"
 #include "parrot/extend_vtable.h"
 #include "parrot/config.h"
+#include "parrot/string_funcs.h"
 
 /* Postgres header files */
 #include "postgres.h"
@@ -91,6 +93,7 @@ Parrot_String create_string_const(const char *name);
 Parrot_PMC create_pmc(const char *name);
 Datum       plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fcinfo);
 void plparrot_secure(Parrot_Interp interp);
+void plparrot_spi(Parrot_Interp interp);
 Parrot_PMC plperl6_run(Parrot_Interp interp, Parrot_String code);
 
 void plparrot_push_pgdatatype_pmc(Parrot_PMC, FunctionCallInfo, int);
@@ -153,6 +156,10 @@ _PG_init(void)
 
     interp = trusted_interp;
     plparrot_secure(interp);
+
+    // load SPI into both
+    plparrot_spi(trusted_interp);
+    plparrot_spi(untrusted_interp);
 
     inited = true;
 }
@@ -479,6 +486,15 @@ Parrot_PMC plperl6_run(Parrot_Interp interp, Parrot_String code)
 
     return result;
 
+}
+
+void plparrot_spi(Parrot_Interp interp)
+{
+    Parrot_PMC func_pmc;
+    Parrot_String err;
+
+    func_pmc  = Parrot_compile_string(interp, create_string_const("PIR"), PLPARROT_SPI, &err);
+    Parrot_ext_call(interp, func_pmc, "->");
 }
 
 void plparrot_secure(Parrot_Interp interp)

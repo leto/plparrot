@@ -47,7 +47,8 @@ endif
 	@echo "\n\n\tHappy Hacking with PL/Parrot!\n\n"
 
 headers:
-	./bin/text2macro.pl plparrot_secure.pir > plparrot.h
+	./bin/text2macro.pl plparrot_secure.pir > plparrot_secure.h
+	./bin/text2macro.pl plparrot_spi.pir > plparrot_spi.h
 	./bin/text2macro.pl plperl6.pir > plperl6.h
 
 check_revision:
