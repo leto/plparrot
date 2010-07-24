@@ -1,6 +1,6 @@
 NAME = plparrot
 MODULE_big = plparrot
-OBJS= plparrot.o
+OBJS= plparrot.o plparrot_spi_support.o
 DATA_built = plparrot.sql
 REGRESS_OPTS = --dbname=$(PL_TESTDB) --load-language=plpgsql
 TESTS = t/sql/test.sql

@@ -95,3 +95,64 @@
     dlfunc $P2, $P1, 'elog_finish', 'vit'
     set_global 'elog_finish', $P2
 .end
+
+######################
+## Public interface ##
+######################
+
+# We're going to mimic the pl/perl SPI interface for now:
+#    http://www.postgresql.org/docs/8.4/static/plperl-database.html
+#
+# This interface isn't actually very nice, and something more DBI-ish
+# would be much better, but this is good for a first iteration, and
+# is compatible and familiar to people already using pl/perl
+
+# spi_exec_query(query [, max-rows])
+.sub spi_exec_query
+.end
+
+# spi_query(command)
+.sub spi_query
+.end
+
+# spi_fetchrow(cursor)
+.sub spi_fetchrow
+.end
+
+# spi_cursor_close(cursor)
+.sub spi_cursor_close
+.end
+
+# spi_prepare(command, argument types)
+.sub spi_prepare
+.end
+
+# spi_query_prepared(plan, arguments)
+.sub spi_query_prepared
+.end
+
+# spi_exec_prepared(plan [, attributes], arguments)
+.sub spi_exec_prepared
+.end
+
+# spi_freeplan(plan)
+.sub spi_freeplan
+.end
+
+# elog(level, msg)
+.sub elog
+    .param int level
+    .param string msg
+
+    .local pmc elog_start, elog_finish
+    elog_start = get_global 'elog_start'
+    elog_finish = get_global 'elog_finish'
+
+    # Ideally we'd want this data from the caller, if we can get it (file, line, func)
+    elog_start('plparrot_spi.pir', 117, 'elog')
+    elog_finish(level, msg)
+
+    # plperl does some fiddly stuff with MemoryContextSwitchTo, CopyErrorData,
+    # and FlushErrorState if there's an error trying to elog.  We should probably
+    # consider doing it here too
+.end
