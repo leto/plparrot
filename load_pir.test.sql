@@ -4,6 +4,7 @@ CREATE OR REPLACE FUNCTION plparrot_call_handler ()
 RETURNS language_handler AS '$libdir/plparrot' LANGUAGE C;
 
 -- language
+DROP LANGUAGE IF EXISTS plparrot CASCADE;
 CREATE LANGUAGE plparrot HANDLER plparrot_call_handler;
 
 create or replace function plp_test() RETURNS VOID language plparrot as $$
