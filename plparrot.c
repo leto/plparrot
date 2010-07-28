@@ -401,7 +401,7 @@ plperl6u_call_handler(PG_FUNCTION_ARGS)
     Datum retval;
     interp = p6_interp;
     if(!interp) {
-        elog(ERROR,"Invalid Parrot interpreter!");
+        elog(ERROR,"Invalid Parrot interpreter for PL/Perl6u!");
     }
     retval = plperl6_call_handler(fcinfo);
     interp = trusted_interp;
@@ -416,7 +416,7 @@ plperl6_call_handler(PG_FUNCTION_ARGS)
     elog(NOTICE, "plperl6_call_handler");
     interp = p6_interp;
     if(!interp) {
-        elog(ERROR,"Invalid Parrot interpreter!");
+        elog(ERROR,"Invalid Parrot interpreter for PL/Perl6!");
     }
     PG_TRY();
     {
