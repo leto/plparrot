@@ -29,7 +29,15 @@
 <h1>What is PL/Parrot?</h1>
 <p><strong>PL/Parrot</strong> is the <a href="http://parrot.org">Parrot Virtual Machine,</a> embedded into the <a href="http://postgresql.org">PostgreSQL</a> relational database. This means
 that any Parrot language has the opportunity to become a PostgreSQL Procedural Language (PL). PL/Parrot, by default, comes
-with PL/PIR, which allows the creation of stored procedures in <a href="http://docs.parrot.org/parrot/latest/html/docs/pdds/pdd19_pir.pod.html">Parrot Intermediate Representation (PIR)</a>.
+with PL/PIR, which allows the creation of stored procedures in the
+following languages:
+<ul>
+    <li><a href="http://docs.parrot.org/parrot/latest/html/docs/pdds/pdd19_pir.pod.html">Parrot Intermediate Representation (PIR)</a></li>
+    <li><a href="http://rakudo.org">Rakudo</a> <a href="http://perl6.org/">Perl 6</a>, thanks to efforts by
+    Moritz (moritz++) Lenz, of http://perlgeek.de/ fame, who helped
+    make input arguments work correctly.</li>
+</ul>
+
 
 <h1>Requirements</h1>
 <ul>
