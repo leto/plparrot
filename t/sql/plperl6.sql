@@ -38,7 +38,8 @@ CREATE FUNCTION test_2arguments_plperl6(integer,integer) RETURNS int LANGUAGE pl
 $$;
 
 CREATE FUNCTION test_fibonacci_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
-[+] (1, 1, *+* ... 100)
+my $limit = @_[0];
+[+] (1, 1, *+* ... $limit)
 $$;
 
 CREATE FUNCTION test_float_plperl6(integer) RETURNS float AS $$ 5.0 $$ LANGUAGE plperl6;
@@ -53,7 +54,7 @@ select is(test_float_plperl6(2), 5.0::float,'Return a float from PL/Perl6');
 select is(test_string_plperl6(), 'rakudo','Return a varchar from PL/Perl6');
 select is(test_singlequote_plperl6(), 'rakudo*','Use a single quote in a PL/Perl6 procedure');
 
-select is(test_fibonacci_plperl6(1),232,'Calculate the sum of all Fibonacci numbers <= 100');
+select is(test_fibonacci_plperl6(100),232,'Calculate the sum of all Fibonacci numbers <= 100');
 select is(test_arguments_plperl6(5),5,'We can return an argument unchanged');
 select is(test_defined_plperl6(100),1,'@_[0] is defined when an argument is passed in');
 select is(test_2arguments_plperl6(4,9),2,'PL/Perl sees multiple arguments');
