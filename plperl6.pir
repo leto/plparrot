@@ -2,8 +2,8 @@
     .param string code
     .param pmc args :slurpy
     args = convert_to_perl6_array(args)
-    $S0 = "my $r = eval q<<< sub {"
-    $S1 = "} >>>; $r.()"
+    $S0 = "eval q<<< sub (@_) {"
+    $S1 = "} >>>"
     code = $S0 . code
     code .= $S1
     load_bytecode 'dumper.pbc'
@@ -13,11 +13,12 @@
     $P1 = $P0.'compile'(code)
     say "args="
     _dumper(args)
-    $P2 = $P1(args)
+    $P2 = $P1()
+    $P3 = $P2(args)
     print "code returned: "
-    _dumper($P2)
+    _dumper($P3)
     say "=============="
-    .return($P2)
+    .return($P3)
 .end
 
 .sub convert_to_perl6_array
