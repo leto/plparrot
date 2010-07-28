@@ -17,36 +17,36 @@ BEGIN;
 -- Plan the tests.
 SELECT plan(9);
 
-CREATE FUNCTION test_void_plperl6(integer) RETURNS void LANGUAGE plperl6 AS $$
+CREATE OR REPLACE FUNCTION test_void_plperl6(integer) RETURNS void LANGUAGE plperl6 AS $$
 Nil
 $$;
 
-CREATE FUNCTION test_int_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
+CREATE OR REPLACE FUNCTION test_int_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
 42
 $$;
 
-CREATE FUNCTION test_arguments_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
+CREATE OR REPLACE FUNCTION test_arguments_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
 @_[0]
 $$;
 
-CREATE FUNCTION test_defined_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
+CREATE OR REPLACE FUNCTION test_defined_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
 @_[0].defined
 $$;
 
-CREATE FUNCTION test_2arguments_plperl6(integer,integer) RETURNS int LANGUAGE plperl6 AS $$
+CREATE OR REPLACE FUNCTION test_2arguments_plperl6(integer,integer) RETURNS int LANGUAGE plperl6 AS $$
 @_.elems
 $$;
 
-CREATE FUNCTION test_fibonacci_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
+CREATE OR REPLACE FUNCTION test_fibonacci_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
 my $limit = @_[0];
 [+] (1, 1, *+* ... $limit)
 $$;
 
-CREATE FUNCTION test_float_plperl6(integer) RETURNS float AS $$ 5.0 $$ LANGUAGE plperl6;
+CREATE OR REPLACE FUNCTION test_float_plperl6(integer) RETURNS float AS $$ 5.0 $$ LANGUAGE plperl6;
 
-CREATE FUNCTION test_string_plperl6() RETURNS varchar AS $$ "rakudo" $$ LANGUAGE plperl6;
+CREATE OR REPLACE FUNCTION test_string_plperl6() RETURNS varchar AS $$ "rakudo" $$ LANGUAGE plperl6;
 
-CREATE FUNCTION test_singlequote_plperl6() RETURNS varchar AS $$ 'rakudo*' $$ LANGUAGE plperl6;
+CREATE OR REPLACE FUNCTION test_singlequote_plperl6() RETURNS varchar AS $$ 'rakudo*' $$ LANGUAGE plperl6;
 
 select is(test_int_plperl6(89),42,'Return an integer from PL/Perl6');
 select is(test_void_plperl6(42)::text,''::text,'Return nothing from PL/Perl6');

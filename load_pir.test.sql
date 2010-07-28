@@ -1,6 +1,6 @@
 begin;
 -- handler function
-CREATE FUNCTION plparrot_call_handler ()
+CREATE OR REPLACE FUNCTION plparrot_call_handler ()
 RETURNS language_handler AS '$libdir/plparrot' LANGUAGE C;
 
 -- language

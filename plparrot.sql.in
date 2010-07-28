@@ -1,17 +1,17 @@
 -- handler function for PL/ParrotU a.k.a PL/PIRU
-CREATE FUNCTION plparrotu_call_handler ()
+CREATE OR REPLACE FUNCTION plparrotu_call_handler ()
 RETURNS language_handler AS 'MODULE_PATHNAME' LANGUAGE C;
 
 -- handler function for PL/Parrot a.k.a. PL/PIR
-CREATE FUNCTION plparrot_call_handler ()
+CREATE OR REPLACE FUNCTION plparrot_call_handler ()
 RETURNS language_handler AS 'MODULE_PATHNAME' LANGUAGE C;
 
 -- handler function for PL/Perl6
-CREATE FUNCTION plperl6_call_handler ()
+CREATE OR REPLACE FUNCTION plperl6_call_handler ()
 RETURNS language_handler AS 'MODULE_PATHNAME' LANGUAGE C;
 
 -- handler function for PL/Perl6U
-CREATE FUNCTION plperl6u_call_handler ()
+CREATE OR REPLACE FUNCTION plperl6u_call_handler ()
 RETURNS language_handler AS 'MODULE_PATHNAME' LANGUAGE C;
 
 -- language

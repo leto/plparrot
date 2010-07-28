@@ -25,146 +25,146 @@ CREATE LANGUAGE plparrot;
 SELECT true;
 $$;
 
-CREATE FUNCTION test_void() RETURNS void AS $$
+CREATE OR REPLACE FUNCTION test_void() RETURNS void AS $$
     .return()
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_int() RETURNS int AS $$
+CREATE OR REPLACE FUNCTION test_int() RETURNS int AS $$
     .return(1)
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_int_in(int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION test_int_in(int) RETURNS int AS $$
     .param int x
     .return(1)
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_plpir(int) RETURNS int LANGUAGE plpir AS $$
+CREATE OR REPLACE FUNCTION test_plpir(int) RETURNS int LANGUAGE plpir AS $$
     .param int x
     .return(1)
 $$;
 
-CREATE FUNCTION test_plpiru(int) RETURNS int LANGUAGE plpiru AS $$
+CREATE OR REPLACE FUNCTION test_plpiru(int) RETURNS int LANGUAGE plpiru AS $$
     .param int x
     .return(42)
 $$;
 
-CREATE FUNCTION test_plparrotu(int) RETURNS int LANGUAGE plparrotu AS $$
+CREATE OR REPLACE FUNCTION test_plparrotu(int) RETURNS int LANGUAGE plparrotu AS $$
     .param int x
     .return(42)
 $$;
 
-CREATE FUNCTION test_immutable(int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION test_immutable(int) RETURNS int AS $$
     .param int x
     .return(1)
 $$ LANGUAGE plparrot IMMUTABLE;
 
-CREATE FUNCTION test_int_out(int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION test_int_out(int) RETURNS int AS $$
     .param int x
     .return(42)
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_increment_int_int(int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION test_increment_int_int(int) RETURNS int AS $$
     .param int x
     inc x
     .return(x)
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_strict(int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION test_strict(int) RETURNS int AS $$
     .param int x
     inc x
     .return(x)
 $$ LANGUAGE plparrot STRICT;
 
-CREATE FUNCTION test_float() RETURNS float AS $$
+CREATE OR REPLACE FUNCTION test_float() RETURNS float AS $$
     $N0 = 1.0
     .return($N0)
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_float_add(float) RETURNS float AS $$
+CREATE OR REPLACE FUNCTION test_float_add(float) RETURNS float AS $$
     .param num x
     x += 5
     .return(x)
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_text_in(text) RETURNS text AS $$
+CREATE OR REPLACE FUNCTION test_text_in(text) RETURNS text AS $$
     .param string s
     .return(s)
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_text_out(text) RETURNS text AS $$
+CREATE OR REPLACE FUNCTION test_text_out(text) RETURNS text AS $$
     $S1 = 'blue'
     .return($S1)
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_varchar_in(varchar) RETURNS varchar AS $$
+CREATE OR REPLACE FUNCTION test_varchar_in(varchar) RETURNS varchar AS $$
     .param string s
     .return(s)
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_varchar_out(varchar) RETURNS varchar AS $$
+CREATE OR REPLACE FUNCTION test_varchar_out(varchar) RETURNS varchar AS $$
     $S1 = 'blue'
     .return($S1)
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_varchar_out_concat(varchar) RETURNS varchar AS $$
+CREATE OR REPLACE FUNCTION test_varchar_out_concat(varchar) RETURNS varchar AS $$
     $S1 = 'red'
     $S2 = 'fish'
     $S3 = $S1 . $S2
     .return($S3)
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_char_in(char) RETURNS char AS $$
+CREATE OR REPLACE FUNCTION test_char_in(char) RETURNS char AS $$
     .param string s
     .return(s)
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_char_out(char) RETURNS char AS $$
+CREATE OR REPLACE FUNCTION test_char_out(char) RETURNS char AS $$
     $S1 = 'b'
     .return($S1)
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_int_float(int, float) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION test_int_float(int, float) RETURNS int AS $$
     .param int x
     .param num y
     .return(1)
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_timestamp_in(timestamp) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION test_timestamp_in(timestamp) RETURNS int AS $$
     .param num x
     .return(1)
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_timestamp_out(timestamp) RETURNS timestamp AS $$
+CREATE OR REPLACE FUNCTION test_timestamp_out(timestamp) RETURNS timestamp AS $$
     .param num x
     .return(x)
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_timestamptz_in(timestamp with time zone) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION test_timestamptz_in(timestamp with time zone) RETURNS int AS $$
     .param num x
     .return(1)
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_timestamptz_out(timestamp with time zone) RETURNS timestamp with time zone AS $$
+CREATE OR REPLACE FUNCTION test_timestamptz_out(timestamp with time zone) RETURNS timestamp with time zone AS $$
     .param num x
     .return(x)
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_time_in(time) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION test_time_in(time) RETURNS int AS $$
     .param num x
     .return(1)
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_time_out(time) RETURNS time AS $$
+CREATE OR REPLACE FUNCTION test_time_out(time) RETURNS time AS $$
     .param num x
     .return(x)
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_open() RETURNS int AS $$
+CREATE OR REPLACE FUNCTION test_open() RETURNS int AS $$
     $P0 = open "zanzibar", 'r'
     .return($P0)
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_open_plparrotu() RETURNS int AS $$
+CREATE OR REPLACE FUNCTION test_open_plparrotu() RETURNS int AS $$
     push_eh got_error
     $P0 = open "somejunkthatdoesntexist", 'r'
     pop_eh
@@ -173,13 +173,13 @@ CREATE FUNCTION test_open_plparrotu() RETURNS int AS $$
     .return(-1)
 $$ LANGUAGE plparrotu;
 
-CREATE FUNCTION test_filehandle_open() RETURNS int AS $$
+CREATE OR REPLACE FUNCTION test_filehandle_open() RETURNS int AS $$
     $P1 = new 'FileHandle'
     $P0 = $P1.'open'("stuff", 'r')
     .return($P0)
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_filehandle_open_plpiru() RETURNS int AS $$
+CREATE OR REPLACE FUNCTION test_filehandle_open_plpiru() RETURNS int AS $$
     $P1 = new 'FileHandle'
     push_eh throws_error
     $P0 = $P1.'open'("thisstuffisnthere", 'r')
@@ -189,18 +189,18 @@ CREATE FUNCTION test_filehandle_open_plpiru() RETURNS int AS $$
     .return(1)
 $$ LANGUAGE plpiru;
 
-CREATE FUNCTION test_file_open() RETURNS int AS $$
+CREATE OR REPLACE FUNCTION test_file_open() RETURNS int AS $$
     $P1 = new 'File'
     $P0 = $P1.'open'("blah", 'r')
     .return($P0)
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_load_pir_library() RETURNS int AS $$
+CREATE OR REPLACE FUNCTION test_load_pir_library() RETURNS int AS $$
     .include 'test_more.pir'
     .return(5)
 $$ LANGUAGE plparrot;
 
-CREATE FUNCTION test_load_pbc_library() RETURNS int AS $$
+CREATE OR REPLACE FUNCTION test_load_pbc_library() RETURNS int AS $$
     load_bytecode 'config.pbc'
     .return(5)
 $$ LANGUAGE plparrot;
