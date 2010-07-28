@@ -26,6 +26,7 @@ CREATE FUNCTION test_int_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
 $$;
 
 CREATE FUNCTION test_arguments_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
+say '@_ = ', @_;
 @_[0]
 $$;
 
