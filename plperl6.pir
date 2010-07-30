@@ -1,7 +1,7 @@
 .sub run
     .param string code
     .param pmc args :slurpy
-    args = convert_to_perl6_array(args)
+    args = convert_to_perl6_parcel(args)
     $S0 = "eval q<<< sub (@_) {"
     $S1 = "} >>>"
     code = $S0 . code
@@ -21,13 +21,17 @@
     .return($P3)
 .end
 
-.sub convert_to_perl6_array
+.sub convert_to_perl6_parcel
     .param pmc parrot_array
-    .local pmc arrayizer
+    .local pmc arrayizer, perl6_parcel
+
+    # the infix comma operator, which creates Parcels from scalars
     arrayizer = get_root_global ['perl6'], '&infix:<,>'
     unless arrayizer goto error
-    $P0 = arrayizer(parrot_array :flat)
-    .return($P0)
+
+    # pass a flattened array to the comma operator
+    perl6_parcel = arrayizer(parrot_array :flat)
+    .return(perl6_parcel)
   error:
-    die "Could not turn Parrot array into a Perl 6 array!"
+    die "Could not turn Parrot array into a Perl 6 Parcel!"
 .end

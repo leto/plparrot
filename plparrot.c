@@ -413,7 +413,7 @@ plperl6_call_handler(PG_FUNCTION_ARGS)
 {
     Datum retval = 0;
     TriggerData *tdata;
-    elog(NOTICE, "plperl6_call_handler");
+    //debug("plperl6_call_handler");
     interp = p6_interp;
     if(!interp) {
         elog(ERROR,"Invalid Parrot interpreter for PL/Perl6!");
