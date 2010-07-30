@@ -290,7 +290,7 @@ plparrot_func_handler(PG_FUNCTION_ARGS)
     length   = strlen(proc_src);
     pir_src = malloc( 13 + length + 4 );
     memcpy(pir_src, pir_begin, 13);
-    /* This should have a sane default and be configurable */
+
     strncat(pir_src, proc_src, MAX_SUBROUTINE_LENGTH);
     strncat(pir_src, pir_end, 4);
 
@@ -537,7 +537,7 @@ plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fci
     /* elog(NOTICE, "starting sausage machine"); */
     if (PMC_ISA(pmc,"Integer")) {
         return Int32GetDatum(Parrot_PMC_get_integer(interp,pmc));
-    } else if (Parrot_PMC_isa(interp,pmc,create_string_const("String"))) {
+    } else if (PMC_ISA(pmc,"String")) {
         str   = Parrot_str_to_cstring(interp, Parrot_PMC_get_string(interp,pmc));
         pgstr = pstrdup(str);
         Parrot_str_free_cstring(str);
@@ -575,7 +575,7 @@ plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fci
     {
         return (Datum) 0;
     } else {
-        elog(NOTICE,"CANNOT MAKE SAUSAGE");
+        elog(ERROR,"CANNOT MAKE SAUSAGE");
         return (Datum) 0;
     }
 }
