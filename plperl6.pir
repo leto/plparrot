@@ -1,20 +1,31 @@
 .sub run
     .param string code
     .param pmc args :slurpy
+
     args = convert_to_perl6_parcel(args)
-    $S0 = "eval q<<< sub (@_) {"
-    $S1 = "} >>>"
-    code = $S0 . code
-    code .= $S1
+    .local string wrap_start, wrap_end
+    wrap_start = "eval q<<< sub (@_) {"
+    wrap_end   = "} >>>"
+    code = wrap_start . code
+    code .= wrap_end
     load_bytecode 'dumper.pbc'
     print "About to run: "
     say code
-    $P0 = compreg "perl6"
-    $P1 = $P0.'compile'(code)
+
+    .local pmc compiler, function, output
+    compiler = compreg "perl6"
+    function = compiler.'compile'(code)
     say "args="
     _dumper(args)
-    $P2 = $P1()
-    $P3 = $P2(args)
+    output = function()
+    $P3 = output(args)
+    $I0 = isa $P3, "Block"
+    unless $I0 goto done
+    # the output of running the function returned a Block,
+    # such as a pointy block -> $a, $b { }, so let's go ahead
+    # and execute that
+    $P3 = $P3(args)
+  done:
     print "code returned: "
     _dumper($P3)
     say "=============="

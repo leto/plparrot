@@ -42,6 +42,12 @@ my $limit = @_[0];
 [+] (1, 1, *+* ... $limit)
 $$;
 
+CREATE OR REPLACE FUNCTION test_named_pointy(integer, integer, integer) RETURNS int LANGUAGE plperl6 AS $$
+-> $a, $b, $c {
+    return [*], $a, $b, $c;
+};
+$$;
+
 CREATE OR REPLACE FUNCTION test_float_plperl6(integer) RETURNS float AS $$ 5.0 $$ LANGUAGE plperl6;
 
 CREATE OR REPLACE FUNCTION test_string_plperl6() RETURNS varchar AS $$ "rakudo" $$ LANGUAGE plperl6;
@@ -59,6 +65,7 @@ select is(test_arguments_plperl6(5),5,'We can return an argument unchanged');
 select is(test_defined_plperl6(100),1,'@_[0] is defined when an argument is passed in');
 select is(test_2arguments_plperl6(4,9),2,'PL/Perl sees multiple arguments');
 
+select is(test_named_pointy(10,20,30), 6000, 'Pointy blocks with named parameters work');
 
 -- Finish the tests and clean up.
 SELECT * FROM finish();
