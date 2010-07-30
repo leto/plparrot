@@ -27,13 +27,28 @@
 
 <div class="content">
 
-    <h1>Rakudo Perl 6</h1>
-    Jonathan (dukeleto) Leto got <a href="http://rakudo.org/">Rakudo</a> <a
+<h1>Rakudo Perl 6</h1>
+<p>
+    <a href="http://leto.net">Jonathan "Duke" Leto</a> got <a href="http://rakudo.org/">Rakudo</a> <a
     href="http://perl6.org/">Perl 6</a> working thanks in part to to
 efforts by Moritz (moritz++) Lenz, of <a
     href="http://perlgeek.de/">http://perlgeek.de/</a> fame, who
 helped make input arguments work correctly.
-<br/>
+</p>
+<p>
+Here is an example stored procedure written in PL/Perl 6, from our test suite:
+
+<pre>
+CREATE OR REPLACE FUNCTION test_fibonacci_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
+my $limit = @_[0];
+[+] (1, 1, *+* ... $limit)
+$$;
+</pre>
+</p>
+<p>
+The first line is SQL, and everything between the $$ symbols is Perl 6! This stored procedure takes a single integer N and returns the sum of the first N Fibonacci numbers.
+</p>
+
 </div>
 </div>
 </div>
