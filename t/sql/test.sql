@@ -206,6 +206,14 @@ CREATE OR REPLACE FUNCTION test_load_pbc_library() RETURNS int AS $$
     .return(5)
 $$ LANGUAGE plparrot;
 
+CREATE OR REPLACE FUNCTION test_return_setof() RETURNS setof int AS $$
+    .local pmc foo 
+    foo = new 'ResizablePMCArray'
+    foo[0] = 2
+    foo[1] = 5
+    .return(foo)
+$$ LANGUAGE plparrot;
+
 select is(test_load_pir_library(), 5, 'we can .include PIR libraries included with Parrot');
 select is(test_load_pbc_library(), 5, 'we can load_bytecode PBC libraries included with Parrot');
 
@@ -260,6 +268,9 @@ select is(test_timestamptz_out('1999-01-08 04:05:06+02'),'1999-01-08 04:05:06+02
 -- These do not test the fact that the time datatype cannot be used from PIR
 select is(test_time_in('04:05:06'),1,'We can pass a time in');
 select is(test_time_out('04:05:06'),'04:05:06','We can return a time');
+
+-- how do we test SETOF?
+select is(test_return_setof(),5,'We can return a SETOF');
 
 -- not loading io opcodes, they are deprecated
 --select isnt(test_open_plparrotu(), 42, 'open opcode is not mocked in plperlu');
