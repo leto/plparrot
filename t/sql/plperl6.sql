@@ -15,7 +15,7 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(9);
+SELECT plan(10);
 
 CREATE OR REPLACE FUNCTION test_void_plperl6(integer) RETURNS void LANGUAGE plperl6 AS $$
 Nil
@@ -44,8 +44,8 @@ $$;
 
 CREATE OR REPLACE FUNCTION test_named_pointy(integer, integer, integer) RETURNS int LANGUAGE plperl6 AS $$
 -> $a, $b, $c {
-    return [*], $a, $b, $c;
-};
+    return $a * $b * $c;
+}(|@_);
 $$;
 
 CREATE OR REPLACE FUNCTION test_float_plperl6(integer) RETURNS float AS $$ 5.0 $$ LANGUAGE plperl6;
