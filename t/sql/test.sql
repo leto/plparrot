@@ -205,6 +205,14 @@ CREATE FUNCTION test_load_pbc_library() RETURNS int AS $$
     .return(5)
 $$ LANGUAGE plparrot;
 
+CREATE FUNCTION test_spi_elog() RETURNS void AS $$
+    .local pmc elog
+    elog = get_global [ 'PLParrot'; 'SPI' ], 'elog'
+    elog(18, 'elog works!') # no constants yet, 18 == NOTICE
+$$ LANGUAGE plparrot;
+
+
+
 select is(test_load_pir_library(), 5, 'we can .include PIR libraries included with Parrot');
 select is(test_load_pbc_library(), 5, 'we can load_bytecode PBC libraries included with Parrot');
 
@@ -262,6 +270,8 @@ select is(test_time_out('04:05:06'),'04:05:06','We can return a time');
 
 -- not loading io opcodes, they are deprecated
 --select isnt(test_open_plparrotu(), 42, 'open opcode is not mocked in plperlu');
+
+select is(test_spi_elog()::text, ''::text, 'SPI: elog');
 
 -- Finish the tests and clean up.
 SELECT * FROM finish();
