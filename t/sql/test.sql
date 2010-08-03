@@ -15,7 +15,7 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(31);
+SELECT plan(33);
 
 CREATE OR REPLACE FUNCTION create_plparrot()
 RETURNS BOOLEAN
@@ -211,6 +211,13 @@ CREATE FUNCTION test_spi_elog() RETURNS void AS $$
     elog(18, 'elog works!') # no constants yet, 18 == NOTICE
 $$ LANGUAGE plparrot;
 
+CREATE or replace FUNCTION test_spi_exec() RETURNS char AS $$
+    .local pmc exec, res
+    exec = get_root_global ['parrot';'PLParrot';'SPI'], 'SPI_execute'
+    res = exec('insert into foo(a) values (1)', 0, 1)
+    .return('ok')
+$$ LANGUAGE plparrot;
+
 
 
 select is(test_load_pir_library(), 5, 'we can .include PIR libraries included with Parrot');
@@ -271,6 +278,7 @@ select is(test_time_out('04:05:06'),'04:05:06','We can return a time');
 -- not loading io opcodes, they are deprecated
 --select isnt(test_open_plparrotu(), 42, 'open opcode is not mocked in plperlu');
 
+select is(test_spi_exec(), 'ok', 'SPI: basic spi_exec');
 select is(test_spi_elog()::text, ''::text, 'SPI: elog');
 
 -- Finish the tests and clean up.
