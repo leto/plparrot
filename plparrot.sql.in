@@ -16,7 +16,7 @@ RETURNS language_handler AS 'MODULE_PATHNAME' LANGUAGE C;
 
 -- language
 DROP LANGUAGE IF EXISTS plparrot CASCADE;
-CREATE LANGUAGE plparrot HANDLER plparrot_call_handler;
+CREATE trusted LANGUAGE plparrot HANDLER plparrot_call_handler;
 
 -- language
 DROP LANGUAGE IF EXISTS plparrotu CASCADE;
@@ -24,14 +24,14 @@ CREATE LANGUAGE plparrotu HANDLER plparrotu_call_handler;
 
 -- plpir is an alias for plparrot
 DROP LANGUAGE IF EXISTS plpir CASCADE;
-CREATE LANGUAGE plpir HANDLER plparrot_call_handler;
+CREATE trusted LANGUAGE plpir HANDLER plparrot_call_handler;
 
 -- plpiru is an alias for plparrotu
 DROP LANGUAGE IF EXISTS plpiru CASCADE;
 CREATE LANGUAGE plpiru HANDLER plparrotu_call_handler;
 
 DROP LANGUAGE IF EXISTS plperl6 CASCADE;
-CREATE LANGUAGE plperl6 HANDLER plperl6_call_handler;
+CREATE trusted LANGUAGE plperl6 HANDLER plperl6_call_handler;
 
 DROP LANGUAGE IF EXISTS plperl6u CASCADE;
 CREATE LANGUAGE plperl6u HANDLER plperl6u_call_handler;

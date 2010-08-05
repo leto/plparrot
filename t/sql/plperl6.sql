@@ -15,7 +15,7 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(12);
+SELECT plan(13);
 
 CREATE OR REPLACE FUNCTION test_void_plperl6(integer) RETURNS void LANGUAGE plperl6 AS $$
 Nil
@@ -78,6 +78,8 @@ select is(test_defined_plperl6(),0,'@_[0] is not defined when an argument is not
 select is(test_2arguments_plperl6(4,9),2,'PL/Perl sees multiple arguments');
 
 select is(test_named_pointy(10,20,30), 6000, 'Pointy blocks with named parameters work');
+
+SELECT language_is_trusted( 'plperl6', 'PL/Perl6 should be trusted' );
 
 -- Finish the tests and clean up.
 SELECT * FROM finish();

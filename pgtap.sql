@@ -1514,3 +1514,22 @@ CREATE OR REPLACE FUNCTION isa_ok( anyelement, regtype )
 RETURNS TEXT AS $$
     SELECT isa_ok($1, $2, 'the value');
 $$ LANGUAGE sql;
+
+CREATE OR REPLACE FUNCTION _is_trusted( NAME )
+RETURNS BOOLEAN AS $$
+    SELECT lanpltrusted FROM pg_catalog.pg_language WHERE lanname = $1;
+$$ LANGUAGE SQL;
+
+-- language_is_trusted( language, description )
+CREATE OR REPLACE FUNCTION language_is_trusted( NAME, TEXT )
+RETURNS TEXT AS $$
+DECLARE
+    is_trusted boolean := _is_trusted($1);
+BEGIN
+    IF is_trusted IS NULL THEN
+        RETURN fail( $2 ) || E'\n' || diag( '    Procedural language ' || quote_ident($1) || ' does not exist') ;
+    END IF;
+    RETURN ok( is_trusted, $2 );
+END;
+$$ LANGUAGE plpgsql;
+

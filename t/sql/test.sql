@@ -7,6 +7,7 @@
 \pset pager
 -- Revert all changes on failure.
 \set ON_ERROR_ROLLBACK 1
+
 \set ON_ERROR_STOP true
 
 -- Load the TAP functions.
@@ -15,16 +16,7 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(31);
-
-CREATE OR REPLACE FUNCTION create_plparrot()
-RETURNS BOOLEAN
-LANGUAGE SQL
-AS $$
-DROP LANGUAGE IF EXISTS plparrot CASCADE;
-CREATE LANGUAGE plparrot;
-SELECT true;
-$$;
+SELECT plan(33);
 
 CREATE OR REPLACE FUNCTION test_void() RETURNS void AS $$
     .return()
@@ -263,6 +255,9 @@ select is(test_time_out('04:05:06'),'04:05:06','We can return a time');
 
 -- not loading io opcodes, they are deprecated
 --select isnt(test_open_plparrotu(), 42, 'open opcode is not mocked in plperlu');
+
+SELECT language_is_trusted( 'plparrot', 'PL/Parrot should be trusted' );
+SELECT language_is_trusted( 'plpir', 'PL/PIR should be trusted' );
 
 -- Finish the tests and clean up.
 SELECT * FROM finish();
