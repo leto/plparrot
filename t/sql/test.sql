@@ -269,8 +269,7 @@ select is(test_timestamptz_out('1999-01-08 04:05:06+02'),'1999-01-08 04:05:06+02
 select is(test_time_in('04:05:06'),1,'We can pass a time in');
 select is(test_time_out('04:05:06'),'04:05:06','We can return a time');
 
--- how do we test SETOF?
-select is(test_return_setof(),5,'We can return a SETOF');
+select set_eq('select * from test_return_setof()',ARRAY[2,5] ,'We can return a SETOF');
 
 -- not loading io opcodes, they are deprecated
 --select isnt(test_open_plparrotu(), 42, 'open opcode is not mocked in plperlu');
