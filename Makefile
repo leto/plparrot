@@ -17,8 +17,10 @@ O 				 = $(shell parrot_config o)
 PARROTINCLUDEDIR = $(shell parrot_config includedir)
 PARROTVERSIONDIR = $(shell parrot_config versiondir)
 PARROTLIBDIR     = $(shell parrot_config libdir)
-PARROTINC        = "$(PARROTINCLUDEDIR)$(PARROTVERSIONDIR)"
+PARROTINC        = $(PARROTINCLUDEDIR)$(PARROTVERSIONDIR)
 PARROTCONFIG     = $(PARROTLIBDIR)/$(PARROTVERSIONDIR)/parrot_config
+PARROTLANGDIR	 = $(PARROTLIBDIR)$(PARROTVERSIONDIR)/languages
+PERL6PBC		 = $(PARROTLANGDIR)/perl6/perl6.pbc
 PARROTLDFLAGS    = $(shell parrot_config ldflags)
 PARROTLINKFLAGS  = $(shell parrot_config inst_libparrot_linkflags) $(PARROTCONFIG)$O
 PARROTREVISION   = $(shell parrot_config revision)
@@ -41,7 +43,7 @@ override CFLAGS   := $(PARROTLDFLAGS) $(PARROTLINKFLAGS) $(CFLAGS)
 
 # It would be nice if this ran before we compiled
 all: check_revision headers
-ifneq ($(PERL6PBC),)
+ifneq ( $(strip $(wildcard $PERL6PBC)),)
 override CFLAGS := $(CFLAGS) -DHAS_PERL6 -D'PERL6PBC="$(PERL6PBC)"'
 endif
 	@echo "\n\n\tHappy Hacking with PL/Parrot!\n\n"
@@ -55,9 +57,8 @@ ifeq ($(PARROT_IS_INSECURE),1)
 	@echo "***************** SECURITY WARNING ************"
 	@echo "This version of Parrot (r$(PARROTREVISION)) does not support the security features that PL/Parrot needs to prevent filesystem access"
 	@echo "***********************************************"
-else
-	@echo "Found a sufficiently new version of Parrot r$(PARROTREVISION)"
 endif
+	@echo "Found a sufficiently new version of Parrot r$(PARROTREVISION)"
 
 test: all
 	psql -AX -f $(TESTS)
