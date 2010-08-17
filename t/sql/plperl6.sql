@@ -17,11 +17,11 @@ BEGIN;
 -- Plan the tests.
 SELECT plan(13);
 
-CREATE OR REPLACE FUNCTION test_void_plperl6(integer) RETURNS void LANGUAGE plperl6 AS $$
+CREATE OR REPLACE FUNCTION test_void_plperl6() RETURNS void LANGUAGE plperl6 AS $$
 Nil
 $$;
 
-CREATE OR REPLACE FUNCTION test_int_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
+CREATE OR REPLACE FUNCTION test_int_plperl6() RETURNS int LANGUAGE plperl6 AS $$
 42
 $$;
 
@@ -58,15 +58,15 @@ CREATE OR REPLACE FUNCTION test_named_pointy(integer, integer, integer) RETURNS 
 }(|@_);
 $$;
 
-CREATE OR REPLACE FUNCTION test_float_plperl6(integer) RETURNS float AS $$ 5.0 $$ LANGUAGE plperl6;
+CREATE OR REPLACE FUNCTION test_float_plperl6() RETURNS float AS $$ 5.0 $$ LANGUAGE plperl6;
 
 CREATE OR REPLACE FUNCTION test_string_plperl6() RETURNS varchar AS $$ "rakudo" $$ LANGUAGE plperl6;
 
 CREATE OR REPLACE FUNCTION test_singlequote_plperl6() RETURNS varchar AS $$ 'rakudo*' $$ LANGUAGE plperl6;
 
-select is(test_int_plperl6(89),42,'Return an integer from PL/Perl6');
-select is(test_void_plperl6(42)::text,''::text,'Return nothing from PL/Perl6');
-select is(test_float_plperl6(2), 5.0::float,'Return a float from PL/Perl6');
+select is(test_int_plperl6(),42,'Return an integer from PL/Perl6');
+select is(test_void_plperl6()::text,''::text,'Return nothing from PL/Perl6');
+select is(test_float_plperl6(), 5.0::float,'Return a float from PL/Perl6');
 select is(test_string_plperl6(), 'rakudo','Return a varchar from PL/Perl6');
 select is(test_singlequote_plperl6(), 'rakudo*','Use a single quote in a PL/Perl6 procedure');
 
