@@ -22,16 +22,20 @@
     .local int nullargs
     nullargs = isnull perl6_args
     if nullargs goto call_with_empty_args
+    say "calling with args"
     $P3 = output(perl6_args)
- call_with_empty_args:
-    $P3 = output()
     $I0 = isa $P3, "Block"
     unless $I0 goto done
     # the output of running the function returned a Block,
     # such as a pointy block -> $a, $b { }, so let's go ahead
     # and execute that
     $P3 = $P3(perl6_args)
-  done:
+    goto done
+ call_with_empty_args:
+    say "calling with null args"
+    $P3 = output()
+
+ done:
     print "code returned: "
     _dumper($P3)
     say "=============="

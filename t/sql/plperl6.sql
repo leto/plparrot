@@ -42,22 +42,25 @@ CREATE OR REPLACE FUNCTION test_2arguments_plperl6(integer,integer) RETURNS int 
 $$;
 
 CREATE OR REPLACE FUNCTION test_fibonacci_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
-{
+(@_) {
     my $limit = @_[0];
     [+] (1, 1, *+* ... $limit)
 }
 $$;
 
 CREATE OR REPLACE FUNCTION test_pointy_fibonacci_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
--> $limit {
+($limit) {
     [+] (1, 1, *+* ... $limit)
-}(|@_);
+}
 $$;
 
+
 CREATE OR REPLACE FUNCTION test_named_pointy(integer, integer, integer) RETURNS int LANGUAGE plperl6 AS $$
--> $a, $b, $c {
-    return $a * $b * $c;
-}(|@_);
+{
+    -> $a, $b, $c {
+        return $a * $b * $c;
+    }(|@_);
+}
 $$;
 
 CREATE OR REPLACE FUNCTION test_float_plperl6() RETURNS float AS $$ 
@@ -84,6 +87,7 @@ select is(test_defined_plperl6(),0,'@_[0] is not defined when an argument is not
 select is(test_2arguments_plperl6(4,9),2,'PL/Perl sees multiple arguments');
 
 select is(test_named_pointy(10,20,30), 6000, 'Pointy blocks with named parameters work');
+
 
 SELECT language_is_trusted( 'plperl6', 'PL/Perl6 should be trusted' );
 
