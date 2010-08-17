@@ -15,7 +15,7 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(14);
+SELECT plan(15);
 
 CREATE OR REPLACE FUNCTION test_void_plperl6() RETURNS void LANGUAGE plperl6 AS $$
 { Nil }
@@ -51,6 +51,12 @@ $$;
 CREATE OR REPLACE FUNCTION test_named_fibonacci_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
 ($limit) {
     [+] (1, 1, *+* ... $limit)
+}
+$$;
+
+CREATE OR REPLACE FUNCTION test_placeholder_fibonacci_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
+{
+    [+] (1, 1, *+* ... $^limit)
 }
 $$;
 
@@ -94,6 +100,7 @@ select is(test_named_pointy(10,20,30), 6000, 'Pointy blocks with named parameter
 
 select is(test_named_fibonacci_plperl6(100),232,'Calculate the sum of all Fibonacci numbers <= 100 (named variable in signature)');
 select is(test_fibonacci_plperl6(100),232,'Calculate the sum of all Fibonacci numbers <= 100');
+select is(test_placeholder_fibonacci_plperl6(100),232,'Calculate the sum of all Fibonacci numbers <= 100 (placeholder variable)');
 
 SELECT language_is_trusted( 'plperl6', 'PL/Perl6 should be trusted' );
 
