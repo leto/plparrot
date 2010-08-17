@@ -50,6 +50,16 @@ $$;
 The first line is SQL, and everything between the $$ symbols is Perl 6! This stored procedure takes a single integer N and returns the sum of the first N Fibonacci numbers.
 </p>
 <p> The syntax <b>$^limit</b> is called a "placeholder variable." </p>
+You can also specifically name your input arguments like this:
+<pre>
+CREATE OR REPLACE FUNCTION test_input_3_args(integer, integer, integer)
+RETURNS int LANGUAGE plperl6 AS $$
+($a, $b, $c) {
+    $a - $b + $c
+}
+$$;
+</pre>
+This stored procedure is very simple, but shows how you can directly tell PL/Perl6 the "signature" of your procedure. The signature is the ($a,$b,$c), which tells Rakudo Perl 6 that there are three named arguments. The function body (the parts between the { and the } ) simply takes the difference of the first two arguments and adds the third.
 
 </div>
 </div>
