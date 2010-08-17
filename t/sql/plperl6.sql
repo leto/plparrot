@@ -15,7 +15,7 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(13);
+SELECT plan(14);
 
 CREATE OR REPLACE FUNCTION test_void_plperl6(integer) RETURNS void LANGUAGE plperl6 AS $$
 Nil
@@ -39,6 +39,10 @@ $$;
 
 CREATE OR REPLACE FUNCTION test_2arguments_plperl6(integer,integer) RETURNS int LANGUAGE plperl6 AS $$
 @_.elems
+$$;
+
+CREATE OR REPLACE FUNCTION test_fibonacci_plperl6_placeholder(integer) RETURNS int LANGUAGE plperl6 AS $$
+[+] (1, 1, *+* ... $^limit)
 $$;
 
 CREATE OR REPLACE FUNCTION test_fibonacci_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
@@ -71,6 +75,7 @@ select is(test_string_plperl6(), 'rakudo','Return a varchar from PL/Perl6');
 select is(test_singlequote_plperl6(), 'rakudo*','Use a single quote in a PL/Perl6 procedure');
 
 select is(test_fibonacci_plperl6(100),232,'Calculate the sum of all Fibonacci numbers <= 100');
+select is(test_fibonacci_plperl6_placeholder(100),232,'Calculate the sum of all Fibonacci numbers <= 100 (using placeholder variables)');
 select is(test_pointy_fibonacci_plperl6(100),232,'Calculate the sum of all Fibonacci numbers <= 100 (pointy block)');
 select is(test_arguments_plperl6(5),5,'We can return an argument unchanged');
 select is(test_defined_plperl6(100),1,'@_[0] is defined when an argument is passed in');
