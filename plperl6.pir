@@ -23,7 +23,7 @@
     nullargs = isnull perl6_args
     if nullargs goto call_with_empty_args
     say "calling with args"
-    $P3 = output(perl6_args)
+    $P3 = output(perl6_args :flat)
     $I0 = isa $P3, "Block"
     unless $I0 goto done
     # the output of running the function returned a Block,
@@ -58,6 +58,5 @@
   error:
     die "Could not turn Parrot array into a Perl 6 Parcel!"
   empty:
-    say "EMTPY!"
     .return()
 .end
