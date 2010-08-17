@@ -40,25 +40,16 @@ Here is an example stored procedure written in PL/Perl 6, from our test suite:
 
 <pre>
 CREATE OR REPLACE FUNCTION test_fibonacci_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
-my $limit = @_[0];
-[+] (1, 1, *+* ... $limit)
+{
+    [+] (1, 1, *+* ... $^limit)
+}
 $$;
 </pre>
 </p>
 <p>
 The first line is SQL, and everything between the $$ symbols is Perl 6! This stored procedure takes a single integer N and returns the sum of the first N Fibonacci numbers.
 </p>
-<p>
-You will notice that the above stored procedure uses <b>@_</b>, and you may ask : Doesn't Perl 6 have named function arguments? Why are we still using <b>@_</b> ?
-The answer is that, by default, you get access to <b>@_</b> inside a stored procedure, but if you want named function arguments, then you use a "pointy block", like so:
-<pre>
-CREATE OR REPLACE FUNCTION pointy_fibonacci(integer) RETURNS int LANGUAGE plperl6 AS $$
--> $limit {
-    [+] (1, 1, *+* ... $limit)
-}(|@_);
-$$;
-</pre>
-The arrow begins the "pointy block", followed by the named parameters.
+<p> The syntax <b>$^limit</b> is called a "placeholder variable." </p>
 
 </div>
 </div>
