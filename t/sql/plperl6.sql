@@ -18,32 +18,34 @@ BEGIN;
 SELECT plan(13);
 
 CREATE OR REPLACE FUNCTION test_void_plperl6() RETURNS void LANGUAGE plperl6 AS $$
-Nil
+() { Nil }
 $$;
 
 CREATE OR REPLACE FUNCTION test_int_plperl6() RETURNS int LANGUAGE plperl6 AS $$
-42
+() { 42 }
 $$;
 
 CREATE OR REPLACE FUNCTION test_arguments_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
-@_[0]
+{ @_[0] }
 $$;
 
 CREATE OR REPLACE FUNCTION test_defined_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
-@_[0].defined
+{ @_[0].defined }
 $$;
 
 CREATE OR REPLACE FUNCTION test_defined_plperl6() RETURNS int LANGUAGE plperl6 AS $$
-@_[0].defined
+{ @_[0].defined }
 $$;
 
 CREATE OR REPLACE FUNCTION test_2arguments_plperl6(integer,integer) RETURNS int LANGUAGE plperl6 AS $$
-@_.elems
+{ @_.elems }
 $$;
 
 CREATE OR REPLACE FUNCTION test_fibonacci_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
-my $limit = @_[0];
-[+] (1, 1, *+* ... $limit)
+{
+    my $limit = @_[0];
+    [+] (1, 1, *+* ... $limit)
+}
 $$;
 
 CREATE OR REPLACE FUNCTION test_pointy_fibonacci_plperl6(integer) RETURNS int LANGUAGE plperl6 AS $$
@@ -58,11 +60,15 @@ CREATE OR REPLACE FUNCTION test_named_pointy(integer, integer, integer) RETURNS 
 }(|@_);
 $$;
 
-CREATE OR REPLACE FUNCTION test_float_plperl6() RETURNS float AS $$ 5.0 $$ LANGUAGE plperl6;
+CREATE OR REPLACE FUNCTION test_float_plperl6() RETURNS float AS $$ 
+{ 5.0 }
+$$ LANGUAGE plperl6;
 
-CREATE OR REPLACE FUNCTION test_string_plperl6() RETURNS varchar AS $$ "rakudo" $$ LANGUAGE plperl6;
+CREATE OR REPLACE FUNCTION test_string_plperl6() RETURNS varchar AS $$ 
+{ "rakudo" } $$ LANGUAGE plperl6;
 
-CREATE OR REPLACE FUNCTION test_singlequote_plperl6() RETURNS varchar AS $$ 'rakudo*' $$ LANGUAGE plperl6;
+CREATE OR REPLACE FUNCTION test_singlequote_plperl6() RETURNS varchar AS $$ 
+{ 'rakudo*' } $$ LANGUAGE plperl6;
 
 select is(test_int_plperl6(),42,'Return an integer from PL/Perl6');
 select is(test_void_plperl6()::text,''::text,'Return nothing from PL/Perl6');
