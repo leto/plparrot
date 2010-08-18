@@ -15,7 +15,7 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(18);
+SELECT plan(22);
 
 CREATE OR REPLACE FUNCTION test_void_plperl6() RETURNS void LANGUAGE plperl6 AS $$
 { Nil }
@@ -93,6 +93,27 @@ CREATE OR REPLACE FUNCTION test_regex(varchar) RETURNS varchar LANGUAGE plperl6 
     }
 }
 $$;
+-- This grammar example is taken from http://perl6advent.wordpress.com/2009/12/10/day-10-a-regex-story/
+
+CREATE OR REPLACE FUNCTION test_grammar(text) RETURNS integer LANGUAGE plperl6 AS $q$
+($item) {
+    my grammar Inventory {
+        regex product { \d+ }
+        regex quantity { \d+ }
+        regex color { \S+ }
+        regex description { \N* }
+        regex TOP { ^^ <product> \s+ <quantity>  \s+
+                    [
+                    | <description> \s+ '(' \s* <color> \s*  ')'
+                    | <color> \s+ <description>
+                    ]
+                    $$
+        }
+    }
+    return 1 if Inventory.parse($item);
+    return 0;
+}
+$q$;
 
 CREATE OR REPLACE FUNCTION test_string_plperl6() RETURNS varchar AS $$ 
 { "rakudo" } $$ LANGUAGE plperl6;
@@ -121,6 +142,11 @@ select is(test_input_3_args(10,20,30), 20, 'Input 3 named args');
 
 select is(test_regex('PL/Parrot'), 'MATCHED', 'match a regex');
 select is(test_regex('PL/Pluto'), 'NO_MATCH', 'do not match a regex');
+
+select is(test_grammar('some junk'), 0, 'test a string that does not parse in the Inventory grammar');
+select is(test_grammar('123 456 red balloon'), 1, 'test a string that parses in the Inventory grammar');
+select is(test_grammar('123 456 balloons (red)'), 1, 'test a string that parses in the Inventory grammar');
+select is(test_grammar(''), 0, 'empty string should not parse in the Inventory grammar');
 
 SELECT language_is_trusted( 'plperl6', 'PL/Perl6 should be trusted' );
 
