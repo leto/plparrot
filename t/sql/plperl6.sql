@@ -15,7 +15,7 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(16);
+SELECT plan(18);
 
 CREATE OR REPLACE FUNCTION test_void_plperl6() RETURNS void LANGUAGE plperl6 AS $$
 { Nil }
@@ -84,6 +84,16 @@ CREATE OR REPLACE FUNCTION test_float_plperl6() RETURNS float AS $$
 { 5.0 }
 $$ LANGUAGE plperl6;
 
+CREATE OR REPLACE FUNCTION test_regex(varchar) RETURNS varchar LANGUAGE plperl6 AS $$
+($text) {
+    if $text ~~ m/ PL.Parrot / {
+        return "MATCHED";
+    } else {
+        return "NO_MATCH";
+    }
+}
+$$;
+
 CREATE OR REPLACE FUNCTION test_string_plperl6() RETURNS varchar AS $$ 
 { "rakudo" } $$ LANGUAGE plperl6;
 
@@ -108,6 +118,9 @@ select is(test_named_fibonacci_plperl6(100),232,'Calculate the sum of all Fibona
 select is(test_fibonacci_plperl6(100),232,'Calculate the sum of all Fibonacci numbers <= 100');
 select is(test_placeholder_fibonacci_plperl6(100),232,'Calculate the sum of all Fibonacci numbers <= 100 (placeholder variable)');
 select is(test_input_3_args(10,20,30), 20, 'Input 3 named args');
+
+select is(test_regex('PL/Parrot'), 'MATCHED', 'match a regex');
+select is(test_regex('PL/Pluto'), 'NO_MATCH', 'do not match a regex');
 
 SELECT language_is_trusted( 'plperl6', 'PL/Perl6 should be trusted' );
 
