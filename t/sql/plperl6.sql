@@ -97,6 +97,7 @@ $$;
 
 CREATE OR REPLACE FUNCTION test_grammar(text) RETURNS integer LANGUAGE plperl6 AS $q$
 ($item) {
+    # This grammar needs a 'my' because the default is 'our' i.e. package scope
     my grammar Inventory {
         regex product { \d+ }
         regex quantity { \d+ }
@@ -110,8 +111,7 @@ CREATE OR REPLACE FUNCTION test_grammar(text) RETURNS integer LANGUAGE plperl6 A
                     $$
         }
     }
-    return 1 if Inventory.parse($item);
-    return 0;
+    return ?Inventory.parse($item);
 }
 $q$;
 
