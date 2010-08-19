@@ -16,7 +16,7 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(33);
+SELECT plan(34);
 
 CREATE OR REPLACE FUNCTION test_void() RETURNS void AS $$
     .return()
@@ -106,6 +106,13 @@ CREATE OR REPLACE FUNCTION test_varchar_out_concat(varchar) RETURNS varchar AS $
     .return($S3)
 $$ LANGUAGE plparrot;
 
+CREATE OR REPLACE FUNCTION test_concat_input(text,text) RETURNS varchar AS $$
+    .param string s1
+    .param string s2
+    $S1 = s1 . s2
+    .return($S1)
+$$ LANGUAGE plparrot;
+
 CREATE OR REPLACE FUNCTION test_char_in(char) RETURNS char AS $$
     .param string s
     .return(s)
@@ -175,7 +182,7 @@ $$ LANGUAGE plparrot;
 CREATE OR REPLACE FUNCTION test_filehandle_open_plpiru() RETURNS int AS $$
     $P1 = new 'FileHandle'
     push_eh throws_error
-    $P0 = $P1.'open'("thisstuffisnthere", 'r')
+    $P0 = $P1.'open'("thisstuffinsthere", 'r')
     pop_eh
     .return($P0)
  throws_error:
@@ -218,6 +225,8 @@ select is(test_varchar_out('cheese'), 'blue', 'We can return a varchar');
 
 select is(test_varchar_out_concat('stuff'), 'redfish', 'We can concat and return a varchar');
 
+select is(test_concat_input('red','fish'), 'redfish', 'We can concat input args');
+
 select is(test_int_float(42,6.9), 1, 'We can pass an int and float as arguments');
 
 select is(test_char_in('c'), 'c', 'We can pass a char in');
@@ -228,7 +237,6 @@ select is(test_int_out(1),42,'We can return an int');
 
 select is(test_plpir(1),1,'plpir is an alias for plparrot');
 
--- Why does this fail? What happens to the return value?
 select is(test_plpiru(1),42,'plpiru can return values');
 select is(test_plparrotu(1),42,'plparrotu can return values');
 
