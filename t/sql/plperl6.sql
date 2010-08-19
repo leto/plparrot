@@ -103,10 +103,10 @@ CREATE OR REPLACE FUNCTION test_grammar(text) RETURNS integer LANGUAGE plperl6 A
         regex quantity { \d+ }
         regex color { \S+ }
         regex description { \N* }
-        regex TOP { ^^ <product> \s+ <quantity>  \s+
+        rule TOP { ^^ <product> <quantity>
                     [
-                    | <description> \s+ '(' \s* <color> \s*  ')'
-                    | <color> \s+ <description>
+                    | <description> '(' \s* <color> \s*  ')'
+                    | <color> <description>
                     ]
                     $$
         }
