@@ -16,7 +16,7 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(34);
+SELECT plan(37);
 
 CREATE OR REPLACE FUNCTION test_void() RETURNS void AS $$
     .return()
@@ -112,6 +112,20 @@ CREATE OR REPLACE FUNCTION test_concat_input(text,text) RETURNS varchar AS $$
     $S1 = s1 . s2
     .return($S1)
 $$ LANGUAGE plparrot;
+
+CREATE OR REPLACE FUNCTION test_concat_conditional(text,text,float)
+RETURNS varchar LANGUAGE plparrot AS $$
+    .param string s1
+    .param string s2
+    .param num x
+ if x < 0 goto backward
+    $S1 = s1 . s2
+    goto done
+ backward:
+    $S1 = s2 . s1
+ done:
+    .return($S1)
+$$;
 
 CREATE OR REPLACE FUNCTION test_char_in(char) RETURNS char AS $$
     .param string s
@@ -226,6 +240,12 @@ select is(test_varchar_out('cheese'), 'blue', 'We can return a varchar');
 select is(test_varchar_out_concat('stuff'), 'redfish', 'We can concat and return a varchar');
 
 select is(test_concat_input('red','fish'), 'redfish', 'We can concat input args');
+
+select is(test_concat_conditional('red','fish', 1), 'redfish', 'We can concat input args conditionally');
+
+select is(test_concat_conditional('red','fish', 0), 'redfish', 'We can concat input args conditionally');
+
+select is(test_concat_conditional('red','fish', -1), 'fishred', 'We can concat input args conditionally');
 
 select is(test_int_float(42,6.9), 1, 'We can pass an int and float as arguments');
 
