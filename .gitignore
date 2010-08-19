@@ -20,3 +20,4 @@ plparrotu.sql
 plparrot.sql
 plparrot.h
 plperl6.h
+plparrot_secure.h
