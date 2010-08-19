@@ -44,7 +44,7 @@ PG_MODULE_MAGIC;
 #define TextDatum2String(X) (pstrdup(DatumGetCString(DirectFunctionCall1(textout, (X)))))
 #endif
 
-#define DEBUG_MODE  1
+#define DEBUG_MODE  0
 
 /**********************************************************************
  * The information we cache about loaded procedures
@@ -583,6 +583,7 @@ plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fci
 }
 
 void debug(char *msg) {
-    if (DEBUG_MODE)
+    if (DEBUG_MODE) {
         elog(NOTICE, msg);
+    }
 }

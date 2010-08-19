@@ -1,5 +1,11 @@
 \unset ECHO
-1..31
+psql:plparrot.sql:18: NOTICE:  language "plparrot" does not exist, skipping
+psql:plparrot.sql:22: NOTICE:  language "plparrotu" does not exist, skipping
+psql:plparrot.sql:26: NOTICE:  language "plpir" does not exist, skipping
+psql:plparrot.sql:30: NOTICE:  language "plpiru" does not exist, skipping
+psql:plparrot.sql:33: NOTICE:  language "plperl6" does not exist, skipping
+psql:plparrot.sql:36: NOTICE:  language "plperl6u" does not exist, skipping
+1..33
 ok 1 - we can .include PIR libraries included with Parrot
 ok 2 - we can load_bytecode PBC libraries included with Parrot
 ok 3 - FileHandle.open is mocked in PL/PIR
@@ -31,3 +37,5 @@ ok 28 - We can pass a timestamptz in
 ok 29 - We can return a timestamptz
 ok 30 - We can pass a time in
 ok 31 - We can return a time
+ok 32 - PL/Parrot should be trusted
+ok 33 - PL/PIR should be trusted
