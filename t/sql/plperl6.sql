@@ -115,6 +115,30 @@ CREATE OR REPLACE FUNCTION test_grammar(text) RETURNS integer LANGUAGE plperl6 A
 }
 $q$;
 
+CREATE OR REPLACE FUNCTION test_global_grammar(text) RETURNS integer LANGUAGE plperl6 AS $q$
+($item) {
+    return ?Inventory.parse($item);
+}
+$q$;
+
+CREATE OR REPLACE FUNCTION load_global_grammar() RETURNS void LANGUAGE plperl6 AS $q$
+{
+    grammar Inventory {
+        regex product { \d+ }
+        regex quantity { \d+ }
+        regex color { \S+ }
+        regex description { \N* }
+        rule TOP { ^^ <product> <quantity>
+                    [
+                    | <description> '(' \s* <color> \s*  ')'
+                    | <color> <description>
+                    ]
+                    $$
+        }
+    }
+}
+$q$;
+
 CREATE OR REPLACE FUNCTION test_string_plperl6() RETURNS varchar AS $$ 
 { "rakudo" } $$ LANGUAGE plperl6;
 
@@ -143,10 +167,19 @@ select is(test_input_3_args(10,20,30), 20, 'Input 3 named args');
 select is(test_regex('PL/Parrot'), 'MATCHED', 'match a regex');
 select is(test_regex('PL/Pluto'), 'NO_MATCH', 'do not match a regex');
 
+-- these tests must come before load_global_grammar()
 select is(test_grammar('some junk'), 0, 'test a string that does not parse in the Inventory grammar');
 select is(test_grammar('123 456 red balloon'), 1, 'test a string that parses in the Inventory grammar');
 select is(test_grammar('123 456 balloons (red)'), 1, 'test a string that parses in the Inventory grammar');
 select is(test_grammar(''), 0, 'empty string should not parse in the Inventory grammar');
+
+-- load the Inventory grammar into package scope
+select load_global_grammar();
+
+select is(test_global_grammar('some junk'), 0, 'test a string that does not parse in the global Inventory grammar');
+select is(test_global_grammar('123 456 red balloon'), 1, 'test a string that parses in the global Inventory grammar');
+select is(test_global_grammar('123 456 balloons (red)'), 1, 'test a string that parses in the global Inventory grammar');
+select is(test_global_grammar(''), 0, 'empty string should not parse in the global Inventory grammar');
 
 SELECT language_is_trusted( 'plperl6', 'PL/Perl6 should be trusted' );
 
