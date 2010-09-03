@@ -15,7 +15,7 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(22);
+SELECT plan(26);
 
 CREATE OR REPLACE FUNCTION test_void_plperl6() RETURNS void LANGUAGE plperl6 AS $$
 { Nil }
@@ -135,7 +135,10 @@ CREATE OR REPLACE FUNCTION load_global_grammar() RETURNS void LANGUAGE plperl6 A
                     ]
                     $$
         }
-    }
+    };
+    # This is needed becaues PL/Parrot does not know how to 
+    # cope with a grammar as a return value
+    return 1;
 }
 $q$;
 
