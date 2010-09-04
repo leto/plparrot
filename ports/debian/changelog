@@ -1,0 +1,5 @@
+plparrot (0.02-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- Duke Leto <leto@unknown>  Sat, 04 Sep 2010 09:55:37 -0700

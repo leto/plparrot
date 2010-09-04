@@ -1,0 +1,21 @@
+Source: plparrot
+Priority: extra
+Maintainer: Duke Leto <leto@unknown>
+Build-Depends: debhelper (>= 7)
+Standards-Version: 3.8.3
+Section: libs
+Homepage: http://pl.parrot.org
+
+Package: plparrot-dev
+Section: libdevel
+Architecture: any
+Depends: plparrotBROKEN (= ${binary:Version})
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: plparrot-lib
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
