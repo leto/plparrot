@@ -15,7 +15,7 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(26);
+SELECT plan(28);
 
 CREATE OR REPLACE FUNCTION test_void_plperl6() RETURNS void LANGUAGE plperl6 AS $$
 { Nil }
@@ -121,7 +121,7 @@ CREATE OR REPLACE FUNCTION test_global_grammar(text) RETURNS integer LANGUAGE pl
 }
 $q$;
 
-CREATE OR REPLACE FUNCTION load_global_grammar() RETURNS void LANGUAGE plperl6 AS $q$
+CREATE OR REPLACE FUNCTION load_global_grammar() RETURNS integer LANGUAGE plperl6 AS $q$
 {
     grammar Inventory {
         regex product { \d+ }
@@ -136,11 +136,14 @@ CREATE OR REPLACE FUNCTION load_global_grammar() RETURNS void LANGUAGE plperl6 A
                     $$
         }
     };
-    # This is needed becaues PL/Parrot does not know how to 
-    # cope with a grammar as a return value
-    return 1;
 }
 $q$;
+
+CREATE OR REPLACE FUNCTION test_return_grammar() RETURNS integer LANGUAGE plperl6 AS $$
+{
+    return Grammar;
+}
+$$;
 
 CREATE OR REPLACE FUNCTION test_string_plperl6() RETURNS varchar AS $$ 
 { "rakudo" } $$ LANGUAGE plperl6;
@@ -176,8 +179,10 @@ select is(test_grammar('123 456 red balloon'), 1, 'test a string that parses in 
 select is(test_grammar('123 456 balloons (red)'), 1, 'test a string that parses in the Inventory grammar');
 select is(test_grammar(''), 0, 'empty string should not parse in the Inventory grammar');
 
+select is(test_return_grammar(), 1, 'returning an empty Grammar works');
+
 -- load the Inventory grammar into package scope
-select load_global_grammar();
+select is(load_global_grammar(), 1, 'loading a grammar returns 1');
 
 select is(test_global_grammar('some junk'), 0, 'test a string that does not parse in the global Inventory grammar');
 select is(test_global_grammar('123 456 red balloon'), 1, 'test a string that parses in the global Inventory grammar');

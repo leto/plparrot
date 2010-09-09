@@ -566,6 +566,16 @@ plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fci
         return Float8GetDatum(Parrot_PMC_get_number(interp,pmc));
     } else if (PMC_ISA(pmc,"Rat")) {
         return Float8GetDatum(Parrot_PMC_get_number(interp,pmc));
+    /* Rakudo currently has a bug where a grammar returns Code for .WHAT */
+    /* Somehow this becomes a Sub */
+    } else if (PMC_ISA(pmc,"Grammar")
+        || PMC_ISA(pmc,"Code") || PMC_ISA(pmc,"Sub") ) {
+        /*
+            Converting a grammar to a Datum doesn't make sense, just return a true value.
+            This happens when we define a grammar in a stored procedure and it ends up
+            being the return value
+        */
+        return (Datum) 1;
     } else if (PMC_ISA(pmc,"Nil")
         /* XXX: TODO should check for an empty Parcel */
         /* This should only have to check Any, but Rakudo
@@ -578,7 +588,6 @@ plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fci
         elog(ERROR, "CANNOT MAKE Parcel INTO SAUSAGE");
     } else {
         elog(ERROR,"CANNOT MAKE SAUSAGE");
-        return (Datum) 0;
     }
 }
 
