@@ -15,7 +15,7 @@ BEGIN;
 \i plparrot.sql
 
 -- Plan the tests.
-SELECT plan(29);
+SELECT plan(31);
 
 CREATE OR REPLACE FUNCTION test_void_plperl6() RETURNS void LANGUAGE plperl6 AS $$
 { Nil }
@@ -27,6 +27,10 @@ $$;
 
 CREATE OR REPLACE FUNCTION test_return_failure() RETURNS void LANGUAGE plperl6 AS $$
 { Failure }
+$$;
+
+CREATE OR REPLACE FUNCTION test_return_exception() RETURNS text LANGUAGE plperl6 AS $$
+{ Exception }
 $$;
 
 CREATE OR REPLACE FUNCTION test_int_plperl6() RETURNS int LANGUAGE plperl6 AS $$
@@ -201,6 +205,7 @@ select is(test_global_grammar(''), 0, 'empty string should not parse in the glob
 SELECT language_is_trusted( 'plperl6', 'PL/Perl6 should be trusted' );
 
 select is(test_return_failure()::text,'', 'Return Failure from PL/Perl6');
+select is(test_return_exception()::text,'', 'Return Exception from PL/Perl6');
 
 -- Finish the tests and clean up.
 SELECT * FROM finish();
