@@ -29,6 +29,10 @@ CREATE OR REPLACE FUNCTION test_return_failure() RETURNS void LANGUAGE plperl6 A
 { Failure }
 $$;
 
+CREATE OR REPLACE FUNCTION test_return_regex() RETURNS text LANGUAGE plperl6 AS $$
+{ /42/ }
+$$;
+
 CREATE OR REPLACE FUNCTION test_int_plperl6() RETURNS int LANGUAGE plperl6 AS $$
 () { 42 }
 $$;
@@ -201,6 +205,7 @@ select is(test_global_grammar(''), 0, 'empty string should not parse in the glob
 SELECT language_is_trusted( 'plperl6', 'PL/Perl6 should be trusted' );
 
 select is(test_return_failure()::text,'', 'Return Failure from PL/Perl6');
+select is(test_return_regex()::text,'/42/', 'Return Regex from PL/Perl6');
 
 -- Finish the tests and clean up.
 SELECT * FROM finish();

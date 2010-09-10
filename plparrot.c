@@ -580,6 +580,9 @@ plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fci
         return (Datum) 0;
     } else if (PMC_ISA(pmc,"Parcel")) {
         elog(ERROR, "CANNOT MAKE Parcel INTO SAUSAGE");
+    } else if (PMC_ISA(pmc,"Regex")) {
+        /* TODO: This should return the Regex.perl */
+        return (Datum) 0;
     } else {
         elog(ERROR,"CANNOT MAKE SAUSAGE");
     }
