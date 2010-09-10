@@ -25,7 +25,7 @@ CREATE OR REPLACE FUNCTION test_mu() RETURNS void LANGUAGE plperl6 AS $$
 { Mu }
 $$;
 
-CREATE OR REPLACE FUNCTION test_return_failure() RETURNS void LANGUAGE plperl6 AS $$
+CREATE OR REPLACE FUNCTION test_return_failure() RETURNS text LANGUAGE plperl6 AS $$
 { Failure }
 $$;
 
