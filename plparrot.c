@@ -576,13 +576,7 @@ plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fci
             being the return value
         */
         return (Datum) 1;
-    } else if (PMC_ISA(pmc,"Nil")
-        /* XXX: TODO should check for an empty Parcel */
-        /* This should only have to check Any, but Rakudo
-        has a bug where @_[0].WHAT returns "Proxy" */
-        || PMC_ISA(pmc,"Proxy") || PMC_ISA(pmc,"Any")
-        )
-    {
+    } else if (PMC_ISA(pmc,"Nil") || PMC_ISA(pmc,"Mu")) {
         return (Datum) 0;
     } else if (PMC_ISA(pmc,"Parcel")) {
         elog(ERROR, "CANNOT MAKE Parcel INTO SAUSAGE");
