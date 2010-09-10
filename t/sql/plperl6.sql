@@ -25,10 +25,6 @@ CREATE OR REPLACE FUNCTION test_mu() RETURNS void LANGUAGE plperl6 AS $$
 { Mu }
 $$;
 
-CREATE OR REPLACE FUNCTION test_return_failure() RETURNS void LANGUAGE plperl6 AS $$
-{ Failure }
-$$;
-
 CREATE OR REPLACE FUNCTION test_int_plperl6() RETURNS int LANGUAGE plperl6 AS $$
 () { 42 }
 $$;
@@ -199,8 +195,6 @@ select is(test_global_grammar('123 456 balloons (red)'), 1, 'test a string that 
 select is(test_global_grammar(''), 0, 'empty string should not parse in the global Inventory grammar');
 
 SELECT language_is_trusted( 'plperl6', 'PL/Perl6 should be trusted' );
-
-select is(test_return_failure()::text,'', 'Return Failure from PL/Perl6');
 
 -- Finish the tests and clean up.
 SELECT * FROM finish();
