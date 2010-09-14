@@ -1,5 +1,5 @@
 Name:		plparrot
-Version:	0.02
+Version:	0.03
 Release:	1%{?dist}
 Summary:	A PostgreSQL procedural language for the Parrot virtual machine
 
@@ -10,8 +10,8 @@ Source0:	http://github.com/downloads/leto/%{name}/%{name}-%{version}.tar.gz
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 BuildRequires:	postgresql-server, postgresql-devel
-BuildRequires:	parrot-devel, parrot-tools
-#Requires:	postgresql-server
+BuildRequires:	parrot, parrot-devel, parrot-tools
+Requires:	postgresql-server
 
 %description
 PL/Parrot is the Parrot Virtual Machine, embedded into the PostgreSQL relational database. This means that any Parrot language has the opportunity to become a PostgreSQL Procedural Language (PL).
