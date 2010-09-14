@@ -46,7 +46,11 @@ all: check_revision headers
 ifneq ( $(strip $(wildcard $PERL6PBC)),)
 override CFLAGS := $(CFLAGS) -DHAS_PERL6 -D'PERL6PBC="$(PERL6PBC)"'
 endif
-	@echo "\n\n\tHappy Hacking with PL/Parrot!\n\n"
+	@echo
+	@echo
+	@echo "Happy Hacking with PL/Parrot!"
+	@echo
+	@echo
 
 headers:
 	./bin/text2macro.pl plparrot_secure.pir > plparrot.h
