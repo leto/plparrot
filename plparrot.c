@@ -580,9 +580,14 @@ plparrot_make_sausage(Parrot_Interp interp, Parrot_PMC pmc, FunctionCallInfo fci
         return (Datum) 0;
     } else if (PMC_ISA(pmc,"Parcel")) {
         elog(ERROR, "CANNOT MAKE Parcel INTO SAUSAGE");
-    } else {
-        elog(ERROR,"CANNOT MAKE SAUSAGE");
     }
+
+    elog(ERROR,"CANNOT MAKE SAUSAGE");
+    /*
+       Squash warnings about control reaching the end of a non-void function. 
+       Not actually reachable.
+    */
+    return (Datum) 0;
 }
 
 void debug(char *msg) {
