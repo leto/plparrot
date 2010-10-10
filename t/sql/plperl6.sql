@@ -170,9 +170,6 @@ select is(test_2arguments_plperl6(4,9),2,'PL/Perl sees multiple arguments');
 
 select is(test_named_pointy(10,20,30), 6000, 'Pointy blocks with named parameters work');
 
-select is(test_named_fibonacci_plperl6(100),232,'Calculate the sum of all Fibonacci numbers <= 100 (named variable in signature)');
-select is(test_fibonacci_plperl6(100),232,'Calculate the sum of all Fibonacci numbers <= 100');
-select is(test_placeholder_fibonacci_plperl6(100),232,'Calculate the sum of all Fibonacci numbers <= 100 (placeholder variable)');
 select is(test_input_3_args(10,20,30), 20, 'Input 3 named args');
 
 select is(test_regex('PL/Parrot'), 'MATCHED', 'match a regex');
@@ -195,6 +192,10 @@ select is(test_global_grammar('123 456 balloons (red)'), 1, 'test a string that 
 select is(test_global_grammar(''), 0, 'empty string should not parse in the global Inventory grammar');
 
 SELECT language_is_trusted( 'plperl6', 'PL/Perl6 should be trusted' );
+
+select is(test_fibonacci_plperl6(100),232,'Calculate the sum of all Fibonacci numbers <= 100');
+select is(test_named_fibonacci_plperl6(100),232,'Calculate the sum of all Fibonacci numbers <= 100 (named variable in signature)');
+select is(test_placeholder_fibonacci_plperl6(100),232,'Calculate the sum of all Fibonacci numbers <= 100 (placeholder variable)');
 
 -- Finish the tests and clean up.
 SELECT * FROM finish();
