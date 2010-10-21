@@ -1,3 +1,6 @@
+#      PL/Parrot is copyright Jonathan "Duke" Leto and friends 2009-2010
+# This code is released under the Artistic 2.0 License, see LICENSE for details.
+
 .sub _ :main :load :anon
     .local pmc p6meta, interp, classes, classid
     p6meta = get_root_global ["parrot"], "P6metaclass"
