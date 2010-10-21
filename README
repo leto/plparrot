@@ -1,7 +1,13 @@
-PL/Parrot 0.03
+PL/Parrot 0.04
 ==============
 
 PL/Parrot is a PostgreSQL procedural language for the Parrot virtual machine.
+
+LICENSE INFORMATION
+===================
+
+This code is distributed under the terms of the Artistic License 2.0.
+For more details, see the full text of the license in the file LICENSE.
 
 Installation
 ============
