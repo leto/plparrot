@@ -1,3 +1,7 @@
+--    PL/Parrot is copyright Jonathan "Duke" Leto and friends 2009-2010
+-- This code is released under the Artistic 2.0 License, see LICENSE for
+-- details.
+
 -- This could be called pgTAP Lite, it is a subset of pgTAP proper,
 -- with all schema-related functions removed
 

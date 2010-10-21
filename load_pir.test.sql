@@ -1,4 +1,8 @@
 begin;
+--    PL/Parrot is copyright Jonathan "Duke" Leto and friends 2009-2010
+-- This code is released under the Artistic 2.0 License, see LICENSE for
+-- details.
+
 -- handler function
 CREATE OR REPLACE FUNCTION plparrot_call_handler ()
 RETURNS language_handler AS '$libdir/plparrot' LANGUAGE C;
