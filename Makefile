@@ -80,3 +80,7 @@ test: all
 
 test_plperl6: all
 	psql -AX -f $(PLPERL6_TESTS)
+
+release:
+	[ -d plparrot-$(VERSION) ] || ln -s . plparrot-$(VERSION)
+	git ls-files | grep -v .gitignore | perl -lane 'print "plparrot-$(VERSION)/$$F[0]"' | tar -zcv -T - -f plparrot-$(VERSION).tar.gz
