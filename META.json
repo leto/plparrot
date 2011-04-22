@@ -1,0 +1,12 @@
+{
+   "name": "PL/Parrot",
+   "abstract": "Parrot Virtual Machine as a PostgreSQL procedural language",
+   "version": "0.04",
+   "maintainer": "Jonathan \"Duke\" Leto <jonathan@leto.net>",
+   "license": "artistic2",
+   "meta-spec": {
+      "version": "1.0.0",
+      "url": "http://pgxn.org/meta/spec.txt"
+   },
+}
+
