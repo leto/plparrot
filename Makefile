@@ -26,14 +26,8 @@ PARROTLINKFLAGS  = $(shell parrot_config inst_libparrot_linkflags) $(PARROTCONFI
 PARROTREVISION   = $(shell parrot_config revision)
 MINPARROTREVISION= 45961
 
-# This will only work on unixy boxens
-# Which OS's does PL/Parrot want to support?
 
-PARROT_IS_INSECURE = $(shell expr $(PARROTREVISION) \< $(MINPARROTREVISION))
-ifeq ($(PARROTREVISION),0)
-    PARROT_IS_INSECURE = 0
-    PARROT_VERSION = $(shell parrot_config VERSION)
-endif
+PARROT_VERSION = $(shell parrot_config VERSION)
 
 # We may need to do various things with various versions of PostgreSQL.
 # VERSION     = $(shell $(PG_CONFIG) --version | awk '{print $$2}')
@@ -50,7 +44,7 @@ override CFLAGS := $(CFLAGS) -DHAS_PERL6 -D'PERL6PBC="$(PERL6PBC)"'
 endif
 
 # It would be nice if this ran before we compiled
-all: check_revision headers
+all: check_version headers
 	@echo
 	@echo
 	@echo "Happy Hacking with PL/Parrot!"
@@ -61,19 +55,10 @@ headers:
 	./bin/text2macro.pl plparrot_secure.pir > plparrot.h
 	./bin/text2macro.pl plperl6.pir > plperl6.h
 
-check_revision:
-ifeq ($(PARROT_IS_INSECURE),1)
-	@echo "***************** SECURITY WARNING ************"
-	@echo "This version of Parrot (r$(PARROTREVISION)) does not support the security features that PL/Parrot needs to prevent filesystem access"
-	@echo "***********************************************"
-endif
-ifneq ($(PARROTREVISION),0)
-	@echo "Found a sufficiently new version of Parrot r$(PARROTREVISION)"
-else
+check_version:
 	@echo
-	@echo "Found the Parrot version $(PARROT_VERSION)"
+	@echo "Found Parrot Virtual Machine $(PARROT_VERSION)"
 	@echo
-endif
 
 test: all
 	psql -AX -f $(TESTS)
