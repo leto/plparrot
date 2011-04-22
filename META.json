@@ -2,11 +2,23 @@
    "name": "PL/Parrot",
    "abstract": "Parrot Virtual Machine as a PostgreSQL procedural language",
    "version": "0.4.0",
-   "maintainer": "Jonathan \"Duke\" Leto <jonathan@leto.net>",
+   "maintainer": [
+        "Jonathan \"Duke\" Leto <jonathan@leto.net>",
+   ],
    "license": "artistic2",
    "meta-spec": {
       "version": "1.0.0",
       "url": "http://pgxn.org/meta/spec.txt"
+   },
+   "resources": {
+      "bugtracker": {
+         "web": "http://github.com/leto/plparrot/issues/"
+      },
+      "repository": {
+        "url": "git://github.com/leto/plparrot.git",
+        "web": "http://github.com/leto/plparrot/",
+        "type": "git"
+      }
    },
 }
 
