@@ -1,6 +1,7 @@
 {
    "name": "PL/Parrot",
    "abstract": "Parrot Virtual Machine as a PostgreSQL procedural language",
+   "description": "PL/Parrot embeds Parrot in PostgreSQL and also comes with PL/Perl6 if Perl 6 is available",
    "version": "0.4.0",
    "maintainer": [
         "Jonathan \"Duke\" Leto <jonathan@leto.net>",
@@ -10,13 +11,25 @@
       "version": "1.0.0",
       "url": "http://pgxn.org/meta/spec.txt"
    },
+   "tags": [ "parrot", "perl6" ],
+   ],
+   "provides": {
+        "plparrot": {
+            "file": "plparrot.sql",
+            "version": "0.4.0",
+        },
+        "plperl6": {
+            "file": "plparrot.sql",
+            "version": "0.4.0",
+        }
+   },
    "resources": {
       "bugtracker": {
          "web": "http://github.com/leto/plparrot/issues/"
       },
       "repository": {
         "url": "git://github.com/leto/plparrot.git",
-        "web": "http://github.com/leto/plparrot/",
+        "web": "https://github.com/leto/plparrot/",
         "type": "git"
       }
    },
