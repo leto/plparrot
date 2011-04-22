@@ -1,7 +1,7 @@
 {
    "name": "PL/Parrot",
    "abstract": "Parrot Virtual Machine as a PostgreSQL procedural language",
-   "version": "0.04",
+   "version": "0.4.0",
    "maintainer": "Jonathan \"Duke\" Leto <jonathan@leto.net>",
    "license": "artistic2",
    "meta-spec": {
