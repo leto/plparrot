@@ -5,6 +5,7 @@
 #include "config.h"
 
 /* Parrot header files */
+#include "parrot/api.h"
 #include "parrot/embed.h"
 #include "parrot/extend.h"
 #include "parrot/extend_vtable.h"
@@ -32,6 +33,8 @@
 #if PG_VERSION_NUM >= 80500
 #include "utils/bytea.h"
 #endif
+
+int Parrot_set_config_hash(Parrot_PMC interp_pmc);
 
 #define PMC_ISA(x,y) (Parrot_PMC_isa(interp,x,create_string_const(y)))
 
@@ -117,11 +120,12 @@ _PG_init(void)
     if (inited)
         return;
 
-    Parrot_set_config_hash();
-
-    debug("set_config_hash");
 
     untrusted_interp = Parrot_new(NULL);
+
+    Parrot_set_config_hash(untrusted_interp);
+
+    debug("set_config_hash");
 
     debug("untrusted");
 
