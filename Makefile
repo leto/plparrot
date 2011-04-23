@@ -23,8 +23,7 @@ PARROTLANGDIR	 = $(PARROTLIBDIR)$(PARROTVERSIONDIR)/languages
 PERL6PBC		 = $(PARROTLANGDIR)/perl6/perl6.pbc
 PARROTLDFLAGS    = $(shell parrot_config ldflags)
 PARROTLINKFLAGS  = $(shell parrot_config inst_libparrot_linkflags) $(PARROTCONFIG)$O
-PARROTREVISION   = $(shell parrot_config revision)
-MINPARROTREVISION= 45961
+PARROTSHA1       = $(shell parrot_config sha1)
 
 
 PARROT_VERSION = $(shell parrot_config VERSION)
@@ -57,7 +56,7 @@ headers:
 
 check_version:
 	@echo
-	@echo "Found Parrot Virtual Machine $(PARROT_VERSION)"
+	@echo "Found Parrot Virtual Machine $(PARROT_VERSION) $(PARROTSHA1)"
 	@echo
 
 test: all
