@@ -6,7 +6,7 @@
    "maintainer": [
         "Jonathan \"Duke\" Leto <jonathan@leto.net>"
    ],
-   "license": "artistic2",
+   "license": "artistic_2",
    "meta-spec": {
       "version": "1.0.0",
       "url": "http://pgxn.org/meta/spec.txt"
