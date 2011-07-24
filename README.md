@@ -1,16 +1,9 @@
-PL/Parrot 0.04
-==============
+# PL/Parrot 0.04
 
 PL/Parrot is a PostgreSQL procedural language for the Parrot virtual machine.
 
-LICENSE INFORMATION
-===================
 
-This code is distributed under the terms of the Artistic License 2.0.
-For more details, see the full text of the license in the file LICENSE.
-
-Installation
-============
+# Installation
 
 For the impatient, to install PL/Parrot into a PostgreSQL database, just do this:
 
@@ -74,8 +67,7 @@ You need to run the test suite using a super user, such as the default
 
     make installcheck PGUSER=postgres
 
-Testing PL/Parrot with PL/Parrot
-------------------------
+# Testing PL/Parrot with PL/Parrot
 
 In addition to the PostgreSQL-standard `installcheck` target, the `test`
 target uses the `pg_prove` Perl program to do its testing, which requires
@@ -98,8 +90,7 @@ You can use it to run the test suite as a database super user like so:
 Of course, if you're running the tests from the `contrib/` directory, you
 should add the `NO_PGXS` variable.
 
-Adding PL/Parrot to a Database
---------------------------
+# Adding PL/Parrot to a Database
 
 Once PL/Parrot has been built and tested, you can install it into a
 PL/pgSQL-enabled database:
@@ -116,3 +107,8 @@ under the directory output by `pg_config --sharedir`. So you can always do
 this:
 
     psql -d template1 -f `pg_config --sharedir`/contrib/plparrot.sql
+
+# License
+
+This code is distributed under the terms of the Artistic License 2.0.
+For more details, see the full text of the license in the file LICENSE.
