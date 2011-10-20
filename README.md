@@ -1,4 +1,4 @@
-# PL/Parrot 0.04
+# PL/Parrot 0.05
 
 PL/Parrot is a PostgreSQL procedural language for the Parrot virtual machine.
 
