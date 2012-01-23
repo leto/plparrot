@@ -6,9 +6,7 @@
 
 /* Parrot header files */
 #include "parrot/api.h"
-#include "parrot/embed.h"
 #include "parrot/extend.h"
-#include "parrot/extend_vtable.h"
 #include "parrot/config.h"
 
 /* Postgres header files */
