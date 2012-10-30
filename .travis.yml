@@ -1,0 +1,24 @@
+# Currently we test against Parrot 4.9.0
+before_script:
+    - wget https://nodeload.github.com/parrot/parrot/zipball/RELEASE_4_9_0
+    - unzip RELEASE_4_9_0
+    - cd parrot-parrot*
+    - pwd
+    - perl Configure.pl --prefix="/tmp/installed_parrot" && make install
+    - export PATH=/tmp/installed_parrot/bin/:$PATH
+    - cd ..
+
+before_install:
+
+script: "make && make check"
+
+# branches:
+#   only:
+#     - master
+notifications:
+  recipients:
+    - duke@leto.net
+  email:
+    on_success: change
+    on_failure: always
+#env:
