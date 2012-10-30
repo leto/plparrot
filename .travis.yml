@@ -9,6 +9,7 @@ before_script:
     - cd ..
 
 before_install:
+    - pg_config --version
 
 script: "make && make check"
 
