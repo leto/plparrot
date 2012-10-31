@@ -1,4 +1,4 @@
-language: "perl"
+language: "c"
 # Currently we test against Parrot 4.9.0
 before_script:
     - wget https://nodeload.github.com/parrot/parrot/zipball/RELEASE_4_9_0
@@ -11,6 +11,7 @@ before_script:
 
 before_install:
     - pg_config --version
+    - perl --version|head -n2
 
 script: "make && make check"
 
@@ -24,3 +25,7 @@ notifications:
     on_success: change
     on_failure: always
 #env:
+
+compiler:
+  - clang
+  - gcc
