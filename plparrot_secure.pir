@@ -1,4 +1,4 @@
-#      PL/Parrot is copyright Jonathan "Duke" Leto and friends 2009-2010
+#      PL/Parrot is copyright Jonathan "Duke" Leto and friends 2009-2011
 # This code is released under the Artistic 2.0 License, see LICENSE for details.
 
 .sub _ :main :load :anon

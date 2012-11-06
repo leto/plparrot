@@ -1,4 +1,4 @@
-/* PL/Parrot is copyright Jonathan "Duke" Leto and friends 2009-2010             */
+/* PL/Parrot is copyright Jonathan "Duke" Leto and friends 2009-2011             */
 /* This code is released under the Artistic 2.0 License, see LICENSE for details */
 #include "plparrot.h"
 #include "plperl6.h"
@@ -14,6 +14,7 @@
 #include "access/heapam.h"
 #include "catalog/pg_proc.h"
 #include "catalog/pg_type.h"
+#include "plannodes.h"
 #include "executor/spi.h"
 #include "commands/trigger.h"
 #include "funcapi.h"
