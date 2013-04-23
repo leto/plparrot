@@ -1,6 +1,6 @@
-# PL/Parrot 0.05
+# PL/Parrot
 
-PL/Parrot is a PostgreSQL procedural language for the Parrot virtual machine.
+PL/Parrot is a PostgreSQL procedural language for the Parrot Virtual Machine.
 
 
 # Installation
