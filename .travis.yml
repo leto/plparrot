@@ -1,15 +1,15 @@
 language: "c"
-# Currently we test against Parrot 4.9.0
 before_script:
-    - wget https://github.com/parrot/parrot/zipball/RELEASE_4_9_0
-    - unzip RELEASE_4_9_0
-    - cd parrot-parrot*
+    - wget https://github.com/parrot/parrot/archive/RELEASE_5_3_0.zip
+    - unzip RELEASE*
+    - cd parrot-RELEASE*
     - pwd
     - perl Configure.pl --prefix="/tmp/installed_parrot" && make install
     - export PATH=/tmp/installed_parrot/bin/:$PATH
     - cd ..
 
 before_install:
+    - git submodule update --init --recursive
     - pg_config --version
     - perl --version|head -n2
 
