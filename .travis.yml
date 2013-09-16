@@ -1,6 +1,6 @@
 language: "c"
 before_script:
-    - wget https://github.com/parrot/parrot/archive/RELEASE_5_3_0.zip
+    - wget https://github.com/parrot/parrot/archive/RELEASE_5_7_0.zip
     - unzip RELEASE*
     - cd parrot-RELEASE*
     - pwd
